@@ -11,7 +11,7 @@ export function LoginForm({ error }: { error?: string }) {
 
   return (
     <form action={action} className="form">
-      {error && <div className="message error">E-mail ou senha inválidos. Tente novamente.</div>}
+      {error && <div className="message error">{error === 'credenciais' ? 'E-mail ou senha inválidos. Tente novamente.' : decodeURIComponent(error)}</div>}
       <div className="field">
         <label htmlFor="email">E-mail</label>
         <input id="email" name="email" type="email" autoComplete="email" required placeholder="voce@exemplo.com" />
