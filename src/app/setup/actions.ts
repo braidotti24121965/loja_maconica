@@ -19,7 +19,7 @@ export async function setupFirstTenant(data: FormData) {
   if (!userData?.user) redirect("/login");
 
   const name = data.get("tenant_name") as string;
-  if (!name) return { error: "Nome inválido" };
+  if (!name) throw new Error("Nome inválido");
 
   const slug = generateSlug(name) + "-" + Math.floor(Math.random() * 1000);
 
@@ -32,7 +32,7 @@ export async function setupFirstTenant(data: FormData) {
 
   if (tenantError || !tenant) {
     console.error(tenantError);
-    return { error: "Erro ao criar organização" };
+    throw new Error("Erro ao criar organização");
   }
 
   // Vincular Usuário como Owner
