@@ -1,13 +1,15 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { updateBrother, deleteBrother, addDependent, deleteDependent } from "./actions";
-import { Trash } from "lucide-react";
+import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent } from "./actions";
+import { Trash, Pencil } from "lucide-react";
 
 export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: any }) {
   const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
     return await updateBrother(data);
   }, null);
+
+  const [editingDep, setEditingDep] = useState<any>(null);
 
   const dependents = brother.dependents || [];
 
@@ -97,14 +99,21 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
                 <strong>{dep.name}</strong> <span className="badge" style={{ marginLeft: 8 }}>{dep.relationship}</span>
                 {dep.birthdate && <div className="subtle" style={{ fontSize: 12, marginTop: 4 }}>Nascimento: {new Date(dep.birthdate).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</div>}
               </div>
-              <form action={deleteDependent}>
-                <input type="hidden" name="id" value={dep.id} />
-                <button type="submit" style={{ background: "transparent", border: "none", color: "var(--destructive)", cursor: "pointer", padding: 4 }} title="Remover" onClick={(e) => {
-                  if (!confirm("Remover familiar?")) e.preventDefault();
-                }}>
-                  <Trash size={16} />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="button" onClick={() => setEditingDep(dep)} style={{ background: "transparent", border: "none", color: "var(--brand)", cursor: "pointer", padding: 4 }} title="Editar">
+                  <Pencil size={16} />
                 </button>
-              </form>
+                <form action={deleteDependent}>
+                  <input type="hidden" name="id" value={dep.id} />
+                  <input type="hidden" name="store_id" value={storeId} />
+                  <input type="hidden" name="brother_id" value={brother.id} />
+                  <button type="submit" style={{ background: "transparent", border: "none", color: "var(--destructive)", cursor: "pointer", padding: 4 }} title="Remover" onClick={(e) => {
+                    if (!confirm("Remover familiar?")) e.preventDefault();
+                  }}>
+                    <Trash size={16} />
+                  </button>
+                </form>
+              </div>
             </li>
           ))}
         </ul>
@@ -112,16 +121,37 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         <p className="subtle" style={{ fontSize: 14, marginBottom: 24 }}>Nenhum familiar cadastrado.</p>
       )}
 
-      <form action={addDependent} className="form" style={{ background: "var(--background-alt)", padding: 16, borderRadius: 6, border: "1px solid var(--border)" }}>
-        <h4 style={{ margin: "0 0 16px 0", fontSize: 14 }}>Adicionar Familiar</h4>
+      <form 
+        action={async (formData) => {
+          if (editingDep) {
+            await editDependent(formData);
+            setEditingDep(null);
+          } else {
+            await addDependent(formData);
+          }
+        }} 
+        className="form" 
+        style={{ background: editingDep ? "#fffbe6" : "var(--background-alt)", padding: 16, borderRadius: 6, border: "1px solid var(--border)" }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h4 style={{ margin: 0, fontSize: 14 }}>{editingDep ? "Editar Familiar" : "Adicionar Familiar"}</h4>
+          {editingDep && (
+            <button type="button" onClick={() => setEditingDep(null)} className="subtle" style={{ background: "none", border: "none", textDecoration: "underline", cursor: "pointer", fontSize: 13 }}>
+              Cancelar Edição
+            </button>
+          )}
+        </div>
+        
+        {editingDep && <input type="hidden" name="id" value={editingDep.id} />}
         <input type="hidden" name="brother_id" value={brother.id} />
+        <input type="hidden" name="store_id" value={storeId} />
         
         <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "flex-start" }}>
           <div className="field" style={{ flex: 2, marginBottom: 0 }}>
-            <input name="name" type="text" required placeholder="Nome do familiar" style={{ height: 38 }} />
+            <input name="name" type="text" required placeholder="Nome do familiar" defaultValue={editingDep?.name || ""} style={{ height: 38 }} key={editingDep?.id || "new-name"} />
           </div>
           <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-            <select name="relationship" required style={{ width: "100%", height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
+            <select name="relationship" required defaultValue={editingDep?.relationship || "Esposa"} style={{ width: "100%", height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }} key={editingDep?.id || "new-rel"}>
               <option value="Esposa">Esposa</option>
               <option value="Filho(a)">Filho(a)</option>
               <option value="Pai">Pai</option>
@@ -134,9 +164,11 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-            <input name="birthdate" type="date" placeholder="Nascimento" style={{ height: 38 }} />
+            <input name="birthdate" type="date" placeholder="Nascimento" defaultValue={editingDep?.birthdate || ""} style={{ height: 38 }} key={editingDep?.id || "new-date"} />
           </div>
-          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>Adicionar</button>
+          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>
+            {editingDep ? "Salvar" : "Adicionar"}
+          </button>
         </div>
       </form>
     </div>

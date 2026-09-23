@@ -71,6 +71,7 @@ export async function deleteBrother(data: FormData) {
 export async function addDependent(formData: FormData) {
   const supabase = await createClient();
   const brotherId = formData.get("brother_id") as string;
+  const storeId = formData.get("store_id") as string;
   const name = formData.get("name") as string;
   const relationship = formData.get("relationship") as string;
   const birthdateStr = formData.get("birthdate") as string;
@@ -94,11 +95,17 @@ export async function addDependent(formData: FormData) {
     console.error("Erro ao adicionar dependente:", error);
     throw new Error("Não foi possível adicionar o dependente.");
   }
+  
+  if (storeId) {
+    revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
+  }
 }
 
 export async function deleteDependent(formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
+  const storeId = formData.get("store_id") as string;
+  const brotherId = formData.get("brother_id") as string;
   
   const { error } = await supabase
     .from("dependents")
@@ -108,5 +115,39 @@ export async function deleteDependent(formData: FormData) {
   if (error) {
     console.error("Erro ao excluir dependente:", error);
     throw new Error("Não foi possível excluir o dependente.");
+  }
+  
+  if (storeId && brotherId) {
+    revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
+  }
+}
+
+export async function editDependent(formData: FormData) {
+  const supabase = await createClient();
+  const id = formData.get("id") as string;
+  const storeId = formData.get("store_id") as string;
+  const brotherId = formData.get("brother_id") as string;
+  const name = formData.get("name") as string;
+  const relationship = formData.get("relationship") as string;
+  const birthdateStr = formData.get("birthdate") as string;
+  
+  const birthdate = birthdateStr ? birthdateStr : null;
+
+  if (!name || !relationship || !id) {
+    throw new Error("Dados obrigatórios faltando");
+  }
+
+  const { error } = await supabase
+    .from("dependents")
+    .update({ name, relationship, birthdate })
+    .eq("id", id);
+    
+  if (error) {
+    console.error("Erro ao editar dependente:", error);
+    throw new Error("Não foi possível editar o dependente.");
+  }
+  
+  if (storeId && brotherId) {
+    revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
   }
 }
