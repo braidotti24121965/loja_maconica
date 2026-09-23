@@ -24,7 +24,7 @@ export default async function EditarMembroPage({ params }: { params: Promise<{ i
 
   const { data: brother } = await supabase
     .from("brothers")
-    .select("*")
+    .select("*, dependents(*)")
     .eq("id", brotherId)
     .single();
 
