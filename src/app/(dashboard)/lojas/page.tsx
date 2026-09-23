@@ -4,24 +4,28 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function LojasPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+    if (userError) throw new Error("Auth Error: " + userError.message);
+    if (!user) redirect("/login");
 
-  // Fetch stores the user belongs to
-  const { data: stores, error } = await supabase
-    .from("stores")
-    .select("id, name, city, state, active, store_memberships(role)");
+    const { data: stores, error: storesError } = await supabase
+      .from("stores")
+      .select("id, name, city, state, active, store_memberships(role)");
 
-  // Checking if the user is a tenant admin (so they can see the 'Nova Loja' button)
-  const { data: tenantMemberships } = await supabase
-    .from("tenant_memberships")
-    .select("role")
-    .eq("user_id", user.id)
-    .in("role", ["owner", "admin"]);
-    
-  const canCreate = tenantMemberships && tenantMemberships.length > 0;
+    if (storesError) throw new Error("Stores Error: " + storesError.message);
+
+    const { data: tenantMemberships, error: tenantError } = await supabase
+      .from("tenant_memberships")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["owner", "admin"]);
+      
+    if (tenantError) throw new Error("Tenant Error: " + tenantError.message);
+
+    const canCreate = tenantMemberships && tenantMemberships.length > 0;
 
   return (
     <div>
@@ -75,4 +79,14 @@ export default async function LojasPage() {
       )}
     </div>
   );
+  } catch (err: any) {
+    return (
+      <div className="card">
+        <h3>Erro no Servidor</h3>
+        <p className="subtle" style={{ color: "var(--destructive)" }}>
+          {err.message}
+        </p>
+      </div>
+    );
+  }
 }
