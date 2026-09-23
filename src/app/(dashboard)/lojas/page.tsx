@@ -8,6 +8,11 @@ export default async function LojasPage() {
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
+    // If there is no session, redirect instead of throwing
+    if (userError && userError.message === "Auth session missing!") {
+      redirect("/login");
+    }
+    
     if (userError) throw new Error("Auth Error: " + userError.message);
     if (!user) redirect("/login");
 
