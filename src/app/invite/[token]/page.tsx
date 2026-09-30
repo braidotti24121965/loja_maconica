@@ -21,8 +21,8 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
           <div className="login-card" style={{ textAlign: "center" }}>
             <span className="eyebrow">Você foi convidado!</span>
             <h2>Aceitar Convite</h2>
-            <p className="subtle" style={{ marginBottom: 24 }}>Para entrar na Loja, você precisa se autenticar primeiro.</p>
-            <Link href={`/login?redirect=/invite/${token}`} className="button" style={{ display: "block" }}>Fazer Login ou Cadastro</Link>
+            <p className="subtle" style={{ marginBottom: 24 }}>Para entrar na Loja, autentique-se com o mesmo e-mail que recebeu o convite.</p>
+            <Link href={`/login?redirect=/invite/${token}`} className="button" style={{ display: "block" }}>Fazer Login</Link>
           </div>
         </section>
       </main>

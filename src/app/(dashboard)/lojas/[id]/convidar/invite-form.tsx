@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { generateInvite } from "./actions";
 import { Copy, Check } from "lucide-react";
 
-export function InviteForm({ storeId }: { storeId: string }) {
+export function InviteForm({ storeId, actorRole }: { storeId: string; actorRole: string }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await generateInvite(data);
   }, null);
@@ -60,10 +60,10 @@ export function InviteForm({ storeId }: { storeId: string }) {
           <div className="field">
             <label htmlFor="role">Papel do Convidado</label>
             <select id="role" name="role" required defaultValue="member" style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid var(--border)", marginBottom: 24, background: "#fff" }}>
-              <option value="admin">Venerável Mestre (Admin)</option>
+              {actorRole === "admin" && <option value="admin">Venerável Mestre (Admin)</option>}
               <option value="member">Membro (Padrão)</option>
               <option value="treasurer">Tesoureiro</option>
-              <option value="secretary">Secretário</option>
+              {actorRole === "admin" && <option value="secretary">Secretário</option>}
               <option value="viewer">Apenas Visualização</option>
             </select>
           </div>

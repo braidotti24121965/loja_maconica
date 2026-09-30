@@ -34,13 +34,11 @@ export default async function ConvidarPage({ params }: { params: Promise<{ id: s
 
   const storeName = (membership.stores as { name?: string })?.name || "Loja";
 
-  // Fetch pending invites (excluding token to prevent leak in UI)
+  // O token nunca é retornado nesta listagem administrativa.
   const { data: invites } = await supabase
     .from("store_invites")
-    .select("id, email, role, expires_at, created_at")
+    .select("id, email, role, expires_at, created_at, used_at, revoked_at")
     .eq("store_id", storeId)
-    .is("used_at", null)
-    .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
 
   return (
@@ -53,27 +51,38 @@ export default async function ConvidarPage({ params }: { params: Promise<{ id: s
       <p className="subtle" style={{ marginBottom: 32 }}>Crie um link seguro para convidar um novo membro para a <strong>{storeName}</strong>.</p>
       
       <div className="card" style={{ marginBottom: 32 }}>
-        <InviteForm storeId={storeId} />
+        <InviteForm storeId={storeId} actorRole={membership.role} />
       </div>
 
-      <h2 style={{ fontSize: 20, marginBottom: 16 }}>Convites Pendentes</h2>
+      <h2 style={{ fontSize: 20, marginBottom: 16 }}>Histórico de Convites</h2>
       {invites && invites.length > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {invites.map((inv) => (
-            <div key={inv.id} className="card" style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <strong style={{ display: "block", marginBottom: 4 }}>{inv.email || "Sem e-mail"}</strong>
-                <div style={{ fontSize: 13, display: "flex", gap: 12, color: "var(--subtle)" }}>
-                  <span className="badge">{inv.role}</span>
-                  <span>Expira em: {format(new Date(inv.expires_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+          {invites.map((inv) => {
+            const status = inv.used_at
+              ? "Utilizado"
+              : inv.revoked_at
+                ? "Revogado"
+                : new Date(inv.expires_at) <= new Date()
+                  ? "Expirado"
+                  : "Pendente";
+
+            return (
+              <div key={inv.id} className="card" style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <strong style={{ display: "block", marginBottom: 4 }}>{inv.email || "Convite legado sem e-mail"}</strong>
+                  <div style={{ fontSize: 13, display: "flex", gap: 12, color: "var(--subtle)" }}>
+                    <span className="badge">{inv.role}</span>
+                    <span>{status}</span>
+                    <span>Expira em: {format(new Date(inv.expires_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                  </div>
                 </div>
+                {status === "Pendente" && <RevokeButton storeId={storeId} inviteId={inv.id} />}
               </div>
-              <RevokeButton storeId={storeId} inviteId={inv.id} />
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
-        <p className="subtle" style={{ fontSize: 14 }}>Não há convites pendentes no momento.</p>
+        <p className="subtle" style={{ fontSize: 14 }}>Nenhum convite foi criado para esta loja.</p>
       )}
     </div>
   );

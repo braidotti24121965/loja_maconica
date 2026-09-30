@@ -5,11 +5,11 @@
 
 ## Visão executiva
 
-- Progresso funcional estimado do MVP: **80%**.
-- Situação geral: **núcleo cadastral estabilizado; sessões e atas prontas no código e aguardando validação remota**.
+- Progresso funcional estimado do MVP: **85%**.
+- Situação geral: **núcleo cadastral e convites seguros implantados; sessões e atas aguardam validação assistida pela interface**.
 - Build de produção e TypeScript: **aprovados**.
 - Qualidade de código (lint): **aprovada**, sem erros ou avisos.
-- Repositório local: **6 commits à frente do GitHub**.
+- Repositório: **sincronizado com o GitHub após a publicação desta rodada**.
 - Supabase de homologação: **ativo e saudável**, com histórico de migrations reconciliado e migration de segurança de sessões/atas aplicada.
 - Eventos e galeria: **migration local não versionada e sem interface**.
 - Produção: **não autorizada e não planejada neste cronograma**.
@@ -21,8 +21,8 @@
 | 1 | Descoberta, escopo e documento do MVP | Concluída | 100% | Concluída | Escopo, arquitetura, ambientes e limites documentados |
 | 2 | Design e arquitetura técnica | Concluída | 100% | Concluída | Next.js, Supabase, modelo multi-tenant e interface-base definidos |
 | 3.1 | Fundação, autenticação, multi-tenant e RLS | Concluída | 100% | Concluída | Login, sessão SSR, tenants, lojas, perfis, vínculos e RLS |
-| 3.2 | Onboarding, lojas, perfil e convites | Concluída no código | 95% | Concluída; validação em 01/10 | Fluxos integrados e aprovados em homologação |
-| 3.3 | Cadastro de membros e dependentes | Concluída no código | 100% | Concluída; publicação pendente | CRUD completo, permissões verificadas e commit publicado |
+| 3.2 | Onboarding, lojas, perfil e convites | Implantada em homologação | 95% | Validação assistida pendente | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
+| 3.3 | Cadastro de membros e dependentes | Concluída e publicada | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
 | 3.4 | Sessões e atas/documentos | Migration aplicada; validação funcional parcial | 95% | Próxima rodada assistida | Enviar/consultar um PDF pela interface e validar isolamento após existir uma segunda loja de teste |
 | 3.5 | Eventos e galeria de fotos | Iniciada | 20% | 05–08/10 | Migration segura, interface, upload e exclusão restritos à loja |
 | 4 | Estabilização técnica e segurança | Em andamento | 75% | 01–09/10 | Testes RLS ampliados, advisors remotos e regressão ponta a ponta |
@@ -69,8 +69,8 @@
 
 1. Executar pela interface o envio e a consulta de uma ata PDF de até 5 MB.
 2. Criar uma segunda loja/usuário de teste, quando autorizado, para provar o isolamento ponta a ponta.
-3. Avaliar os avisos dos advisors: `update_updated_at_column` sem `search_path` fixo, proteção de senhas vazadas desativada e função intencional `accept_invite` marcada por usar `SECURITY DEFINER`.
-4. Publicar os seis commits locais no GitHub quando a homologação funcional estiver aprovada.
+3. Avaliar os dois avisos restantes dos advisors: proteção de senhas vazadas desativada e função intencional `accept_invite` marcada por usar `SECURITY DEFINER`.
+4. Testar pela interface a criação, revogação, expiração e aceitação de convites vinculados ao e-mail.
 5. Manter a migration de eventos fora da aplicação: ela ainda não está versionada, não possui interface e tem políticas de Storage amplas demais.
 6. Produção depende de autorização explícita e não faz parte da entrega atual.
 
