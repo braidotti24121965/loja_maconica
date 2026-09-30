@@ -23,26 +23,17 @@ export async function setupFirstTenant(data: FormData) {
 
   const slug = generateSlug(name) + "-" + Math.floor(Math.random() * 1000);
 
-  // Criar Tenant
-  const { data: tenant, error: tenantError } = await supabase
-    .from("tenants")
-    .insert({ name, slug })
-    .select("id")
-    .single();
+  // Criar Tenant e Membership via RPC (bypassa RLS de inserção primária)
+  const { data: tenantId, error: rpcError } = await supabase
+    .rpc("create_tenant", {
+      new_name: name,
+      new_slug: slug
+    });
 
-  if (tenantError || !tenant) {
-    console.error(tenantError);
+  if (rpcError || !tenantId) {
+    console.error(rpcError);
     throw new Error("Erro ao criar organização");
   }
-
-  // Vincular Usuário como Owner
-  await supabase
-    .from("tenant_memberships")
-    .insert({
-      tenant_id: tenant.id,
-      user_id: userData.user.id,
-      role: "owner"
-    });
 
   redirect("/");
 }
