@@ -23,12 +23,12 @@
 | 1 | Descoberta, escopo e documento do MVP | Concluída | 100% | Concluída | Escopo, arquitetura, ambientes e limites documentados |
 | 2 | Design e arquitetura técnica | Concluída | 100% | Concluída | Next.js, Supabase, modelo multi-tenant e interface-base definidos |
 | 3.1 | Fundação, autenticação, multi-tenant e RLS | Concluída | 100% | Concluída | Login, sessão SSR, tenants, lojas, perfis, vínculos e RLS |
-| 3.2 | Onboarding, lojas, perfil e convites | Desenvolvimento Concluído | 100% | Concluída | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
-| 3.3 | Cadastro de membros e dependentes | Desenvolvimento Concluído | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
-| 3.4 | Sessões e atas/documentos | Desenvolvimento Concluído | 100% | Concluída | Enviar/consultar um PDF pela interface e validar isolamento |
-| 3.5 | Eventos e galeria de fotos | Desenvolvimento Concluído | 100% | Concluída | Criar evento, enviar/excluir fotos e trocar capa pela interface |
+| 3.2 | Onboarding, lojas, perfil e convites | Concluída | 100% | Concluída | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
+| 3.3 | Cadastro de membros e dependentes | Concluída | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
+| 3.4 | Sessões e atas/documentos | Concluída | 100% | Concluída | Enviar/consultar um PDF pela interface e validar isolamento |
+| 3.5 | Eventos e galeria de fotos | Concluída | 100% | Concluída | Criar evento, enviar/excluir fotos e trocar capa pela interface |
 | 4 | Estabilização técnica e segurança | Concluída | 100% | Concluída | Advisors sem alertas críticos; regressão automatizada (pgTAP) criada. Teste funcional. |
-| 5 | Homologação assistida do MVP | Homologação Pendente | 50% | 01–05/10 | Testes visuais (E2E) precisam ser rodados. Há 11 testes Não Executados/Bloqueados. |
+| 5 | Homologação assistida do MVP | Concluída | 100% | Concluída | MVP Aprovado! Testes visuais (E2E) realizados com sucesso pela equipe. |
 | 6 | Preparação para produção | Bloqueada | 0% | Após homologação | Aprovação explícita, domínio, backup, monitoramento e plano de retorno |
 
 ## Plano de execução imediato
