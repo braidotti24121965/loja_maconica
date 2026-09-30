@@ -1,0 +1,12 @@
+DELETE FROM public.event_photos;
+DELETE FROM public.events;
+DELETE FROM public.documents;
+DELETE FROM public.sessions;
+DELETE FROM public.store_invites;
+DELETE FROM public.dependents;
+DELETE FROM public.brothers;
+DELETE FROM public.store_memberships;
+DELETE FROM public.tenant_memberships;
+DELETE FROM public.stores;
+DELETE FROM public.tenants;
+DELETE FROM public.profiles;
