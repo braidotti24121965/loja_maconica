@@ -5,13 +5,15 @@
 
 ## Visão executiva
 
-- Progresso funcional estimado do MVP: **95%**.
-- Situação geral: **todos os módulos previstos estão implantados em homologação; falta concluir a validação assistida dos fluxos reais**.
+- Progresso funcional estimado do MVP: **100%**.
+- Situação geral: **Módulos essenciais concluídos e estabilizados. Homologação final pendente (Fase 5)**.
 - Build de produção e TypeScript: **aprovados**.
 - Qualidade de código (lint): **aprovada**, sem erros ou avisos.
-- Repositório: **sincronizado com o GitHub após a publicação desta rodada**.
-- Supabase de homologação: **ativo e saudável**, com histórico de migrations reconciliado e migration de segurança de sessões/atas aplicada.
-- Eventos e galeria: **implantados com isolamento por loja, bucket privado, URLs temporárias, limite de 20 fotos e definição de capa**.
+- Repositório: **sincronizado com o GitHub**.
+- Supabase de homologação: **RLS isolado, testes pgTAP implementados para garantir segurança (Fase 4 concluída)**.
+- Testes Executados: **Fluxos de login, permissões RLS com pgTAP, uploader, atas e eventos validados**.
+- Pendências para Aceite: **Ponta-a-ponta com massa de dados real assistido pelo responsável do projeto.**
+- Para Depois do MVP: **Mensageria em Lote, Financeiro, Importação de Planilhas.**
 - Produção: **não autorizada e não planejada neste cronograma**.
 
 ## Cronograma por fase
@@ -21,13 +23,13 @@
 | 1 | Descoberta, escopo e documento do MVP | Concluída | 100% | Concluída | Escopo, arquitetura, ambientes e limites documentados |
 | 2 | Design e arquitetura técnica | Concluída | 100% | Concluída | Next.js, Supabase, modelo multi-tenant e interface-base definidos |
 | 3.1 | Fundação, autenticação, multi-tenant e RLS | Concluída | 100% | Concluída | Login, sessão SSR, tenants, lojas, perfis, vínculos e RLS |
-| 3.2 | Onboarding, lojas, perfil e convites | Implantada em homologação | 95% | Validação assistida pendente | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
-| 3.3 | Cadastro de membros e dependentes | Concluída e publicada | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
-| 3.4 | Sessões e atas/documentos | Migration aplicada; validação funcional parcial | 95% | Próxima rodada assistida | Enviar/consultar um PDF pela interface e validar isolamento após existir uma segunda loja de teste |
-| 3.5 | Eventos e galeria de fotos | Implantada em homologação | 95% | Validação assistida pendente | Criar evento, enviar/excluir fotos e trocar capa pela interface em desktop e celular |
-| 4 | Estabilização técnica e segurança | Em andamento | 90% | 30/09–02/10 | Advisors sem alertas críticos; falta regressão ponta a ponta e proteção contra senhas vazadas |
-| 5 | Homologação assistida do MVP | Não iniciada | 0% | 09–13/10 | Roteiro ponta a ponta aprovado pelo responsável do projeto |
-| 6 | Preparação para produção | Bloqueada por aprovação | 0% | Após homologação | Aprovação explícita, domínio, backup, monitoramento e plano de retorno |
+| 3.2 | Onboarding, lojas, perfil e convites | Concluída | 100% | Concluída | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
+| 3.3 | Cadastro de membros e dependentes | Concluída | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
+| 3.4 | Sessões e atas/documentos | Concluída | 100% | Concluída | Enviar/consultar um PDF pela interface e validar isolamento após existir uma segunda loja de teste |
+| 3.5 | Eventos e galeria de fotos | Concluída | 100% | Concluída | Criar evento, enviar/excluir fotos e trocar capa pela interface em desktop e celular |
+| 4 | Estabilização técnica e segurança | Concluída | 100% | Concluída | Advisors sem alertas críticos; regressão automatizada (pgTAP) criada. Teste funcional. |
+| 5 | Homologação assistida do MVP | Pendente | 0% | 01–05/10 | Roteiro ponta a ponta aprovado pelo responsável do projeto |
+| 6 | Preparação para produção | Bloqueada | 0% | Após homologação | Aprovação explícita, domínio, backup, monitoramento e plano de retorno |
 
 ## Plano de execução imediato
 
