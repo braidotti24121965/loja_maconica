@@ -5,13 +5,13 @@
 
 ## Visão executiva
 
-- Progresso funcional estimado do MVP: **85%**.
-- Situação geral: **núcleo cadastral e convites seguros implantados; sessões e atas aguardam validação assistida pela interface**.
+- Progresso funcional estimado do MVP: **95%**.
+- Situação geral: **todos os módulos previstos estão implantados em homologação; falta concluir a validação assistida dos fluxos reais**.
 - Build de produção e TypeScript: **aprovados**.
 - Qualidade de código (lint): **aprovada**, sem erros ou avisos.
 - Repositório: **sincronizado com o GitHub após a publicação desta rodada**.
 - Supabase de homologação: **ativo e saudável**, com histórico de migrations reconciliado e migration de segurança de sessões/atas aplicada.
-- Eventos e galeria: **migration local não versionada e sem interface**.
+- Eventos e galeria: **implantados com isolamento por loja, bucket privado, URLs temporárias, limite de 20 fotos e definição de capa**.
 - Produção: **não autorizada e não planejada neste cronograma**.
 
 ## Cronograma por fase
@@ -24,8 +24,8 @@
 | 3.2 | Onboarding, lojas, perfil e convites | Implantada em homologação | 95% | Validação assistida pendente | Testar convite, revogação, expiração e aceite com dois usuários reais de teste |
 | 3.3 | Cadastro de membros e dependentes | Concluída e publicada | 100% | Concluída | CRUD completo, permissões verificadas e commit publicado |
 | 3.4 | Sessões e atas/documentos | Migration aplicada; validação funcional parcial | 95% | Próxima rodada assistida | Enviar/consultar um PDF pela interface e validar isolamento após existir uma segunda loja de teste |
-| 3.5 | Eventos e galeria de fotos | Iniciada | 20% | 05–08/10 | Migration segura, interface, upload e exclusão restritos à loja |
-| 4 | Estabilização técnica e segurança | Em andamento | 75% | 01–09/10 | Testes RLS ampliados, advisors remotos e regressão ponta a ponta |
+| 3.5 | Eventos e galeria de fotos | Implantada em homologação | 95% | Validação assistida pendente | Criar evento, enviar/excluir fotos e trocar capa pela interface em desktop e celular |
+| 4 | Estabilização técnica e segurança | Em andamento | 90% | 30/09–02/10 | Advisors sem alertas críticos; falta regressão ponta a ponta e proteção contra senhas vazadas |
 | 5 | Homologação assistida do MVP | Não iniciada | 0% | 09–13/10 | Roteiro ponta a ponta aprovado pelo responsável do projeto |
 | 6 | Preparação para produção | Bloqueada por aprovação | 0% | Após homologação | Aprovação explícita, domínio, backup, monitoramento e plano de retorno |
 
@@ -45,12 +45,12 @@
 - Testar isolamento entre lojas e papéis de usuário.
 - Corrigir falhas encontradas e registrar evidências de homologação.
 
-### 05/10–08/10 — concluir eventos e fotos
+### 30/09–02/10 — validar eventos e fotos
 
-- Reescrever a migration de eventos com políticas por operação e validação de pertencimento à loja.
-- Restringir upload e exclusão de arquivos ao contexto correto.
-- Criar listagem, cadastro, edição, exclusão e galeria.
-- Adicionar validações de formato, tamanho e tratamento de erros.
+- Criar, editar, publicar, cancelar e excluir logicamente um evento pela interface.
+- Enviar JPEG, PNG ou WebP de até 5 MB, excluir a imagem e trocar a capa.
+- Confirmar o limite de 20 fotos e o isolamento entre duas lojas.
+- Validar a experiência em desktop e celular.
 
 ### 08/10–09/10 — congelamento do candidato a MVP
 
@@ -71,7 +71,7 @@
 2. Criar uma segunda loja/usuário de teste, quando autorizado, para provar o isolamento ponta a ponta.
 3. Avaliar os dois avisos restantes dos advisors: proteção de senhas vazadas desativada e função intencional `accept_invite` marcada por usar `SECURITY DEFINER`.
 4. Testar pela interface a criação, revogação, expiração e aceitação de convites vinculados ao e-mail.
-5. Manter a migration de eventos fora da aplicação: ela ainda não está versionada, não possui interface e tem políticas de Storage amplas demais.
+5. Validar pela interface o módulo de eventos: cadastro, edição, publicação, upload, capa e exclusão de fotos.
 6. Produção depende de autorização explícita e não faz parte da entrega atual.
 
 ## Definição de pronto do MVP

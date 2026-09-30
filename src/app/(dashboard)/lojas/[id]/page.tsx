@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Settings, Users, FileText } from "lucide-react";
+import { ArrowLeft, CalendarDays, Settings, Users, FileText } from "lucide-react";
 
 export default async function LojaDashboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -106,6 +106,14 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
             <h3 style={{ margin: 0 }}>Sessões e Atas</h3>
           </div>
           <p className="subtle">Calendário de sessões, pautas e documentos anexos.</p>
+        </Link>
+
+        <Link href={`/lojas/${storeId}/eventos`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div className="icon"><CalendarDays size={20} /></div>
+            <h3 style={{ margin: 0 }}>Eventos e Galeria</h3>
+          </div>
+          <p className="subtle">Organize eventos da loja e compartilhe suas fotografias.</p>
         </Link>
         
         <Link href={`/lojas/${storeId}/membros`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>

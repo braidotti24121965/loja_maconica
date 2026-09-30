@@ -1,123 +1,195 @@
--- Fase 3.5: Eventos e Galeria
+-- Fase 3.5: Eventos e galeria privada por loja.
 
--- 1. Criar tabela de Eventos
-CREATE TABLE public.events (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id uuid NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
-  title text NOT NULL,
-  description text,
-  event_date date NOT NULL,
+create table public.events (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id) on delete cascade,
+  title text not null check (char_length(trim(title)) between 2 and 160),
+  description text check (description is null or char_length(description) <= 5000),
+  event_date date not null,
   event_time time,
-  location text,
-  status text NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published', 'cancelled', 'archived')),
+  location text check (location is null or char_length(location) <= 240),
+  status text not null default 'published'
+    check (status in ('draft', 'published', 'cancelled', 'archived')),
   deleted_at timestamptz,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  created_by uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (store_id, id)
 );
 
-CREATE INDEX events_store_id_idx ON public.events(store_id);
+create index events_store_date_idx on public.events(store_id, event_date desc)
+  where deleted_at is null;
 
--- 2. Criar tabela de Fotos dos Eventos
--- Nota: Adicionamos store_id por denormalização para simplificar políticas de RLS e Storage
-CREATE TABLE public.event_photos (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id uuid NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
-  store_id uuid NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
-  storage_path text NOT NULL,
-  is_cover boolean DEFAULT false,
-  order_index integer DEFAULT 0,
-  uploaded_by uuid NOT NULL REFERENCES auth.users(id),
-  created_at timestamptz DEFAULT now()
+create table public.event_photos (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null,
+  store_id uuid not null,
+  storage_path text not null unique,
+  is_cover boolean not null default false,
+  order_index integer not null default 0 check (order_index >= 0),
+  uploaded_by uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  constraint event_photos_store_event_fk
+    foreign key (store_id, event_id)
+    references public.events(store_id, id)
+    on delete cascade
 );
 
-CREATE INDEX event_photos_event_id_idx ON public.event_photos(event_id);
-CREATE INDEX event_photos_store_id_idx ON public.event_photos(store_id);
+create index event_photos_event_order_idx
+  on public.event_photos(event_id, order_index, created_at);
+create unique index event_photos_one_cover_idx
+  on public.event_photos(event_id)
+  where is_cover;
 
--- 3. Habilitar RLS
-ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.event_photos ENABLE ROW LEVEL SECURITY;
+alter table public.events enable row level security;
+alter table public.event_photos enable row level security;
 
--- 4. Criar gatilho de updated_at para events
-CREATE TRIGGER update_events_updated_at
-  BEFORE UPDATE ON public.events
-  FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+create trigger update_events_updated_at
+  before update on public.events
+  for each row execute function public.update_updated_at_column();
 
--- 5. Políticas de Acesso: EVENTS
-CREATE POLICY events_select ON public.events 
-  FOR SELECT TO authenticated 
-  USING (private.is_store_member(store_id) AND deleted_at IS NULL);
+create policy events_select on public.events
+  for select to authenticated
+  using (private.is_store_member(store_id) and deleted_at is null);
+create policy events_insert on public.events
+  for insert to authenticated
+  with check (
+    private.is_store_admin(store_id)
+    and created_by = (select auth.uid())
+    and deleted_at is null
+  );
+create policy events_update on public.events
+  for update to authenticated
+  using (private.is_store_admin(store_id))
+  with check (private.is_store_admin(store_id));
 
-CREATE POLICY events_insert ON public.events 
-  FOR INSERT TO authenticated 
-  WITH CHECK (private.is_store_admin(store_id));
+create policy event_photos_select on public.event_photos
+  for select to authenticated
+  using (private.is_store_member(store_id));
+create policy event_photos_insert on public.event_photos
+  for insert to authenticated
+  with check (
+    private.is_store_admin(store_id)
+    and uploaded_by = (select auth.uid())
+  );
+create policy event_photos_update on public.event_photos
+  for update to authenticated
+  using (private.is_store_admin(store_id))
+  with check (private.is_store_admin(store_id));
+create policy event_photos_delete on public.event_photos
+  for delete to authenticated
+  using (private.is_store_admin(store_id));
 
-CREATE POLICY events_update ON public.events 
-  FOR UPDATE TO authenticated 
-  USING (private.is_store_admin(store_id))
-  WITH CHECK (private.is_store_admin(store_id));
+-- Serializa uploads do mesmo evento, limita a galeria e define a ordem.
+create or replace function private.prepare_event_photo()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  photo_count integer;
+begin
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(new.event_id::text, 0)
+  );
 
-CREATE POLICY events_delete ON public.events 
-  FOR DELETE TO authenticated 
-  USING (private.is_store_admin(store_id));
+  select count(*) into photo_count
+  from public.event_photos
+  where event_id = new.event_id;
 
--- 6. Políticas de Acesso: EVENT_PHOTOS
-CREATE POLICY photos_select ON public.event_photos 
-  FOR SELECT TO authenticated 
-  USING (private.is_store_member(store_id));
+  if photo_count >= 20 then
+    raise exception 'event photo limit reached';
+  end if;
 
-CREATE POLICY photos_insert ON public.event_photos 
-  FOR INSERT TO authenticated 
-  WITH CHECK (private.is_store_admin(store_id));
+  select coalesce(max(order_index), -1) + 1 into new.order_index
+  from public.event_photos
+  where event_id = new.event_id;
 
-CREATE POLICY photos_update ON public.event_photos 
-  FOR UPDATE TO authenticated 
-  USING (private.is_store_admin(store_id))
-  WITH CHECK (private.is_store_admin(store_id));
+  if photo_count = 0 then
+    new.is_cover := true;
+  end if;
 
-CREATE POLICY photos_delete ON public.event_photos 
-  FOR DELETE TO authenticated 
-  USING (private.is_store_admin(store_id));
+  return new;
+end;
+$$;
 
--- 7. Configuração Segura do Storage (store_media)
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'store_media', 
-  'store_media', 
-  false, 
-  5242880, -- 5MB limit 
-  ARRAY['image/jpeg', 'image/png', 'image/webp']
+revoke execute on function private.prepare_event_photo()
+from public, anon, authenticated;
+create trigger prepare_event_photo
+before insert on public.event_photos
+for each row execute function private.prepare_event_photo();
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'store_media',
+  'store_media',
+  false,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
 )
-ON CONFLICT (id) DO UPDATE 
-SET public = false, file_size_limit = 5242880, allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp'];
+on conflict (id) do update
+set public = false,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
 
--- O nome do arquivo DEVE começar com o store_id (uuid)
--- path_tokens[1] será o store_id. Fazemos o cast para UUID com nullif para não quebrar.
+-- O caminho obrigatório é store_id/event_id/arquivo.ext. As funções abaixo
+-- validam o formato antes do cast e confirmam o evento no banco.
+create or replace function private.can_read_event_object(object_name text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when object_name ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/[^/]+$' then
+      exists (
+        select 1 from public.events e
+        where e.store_id = (pg_catalog.string_to_array(object_name, '/'))[1]::uuid
+          and e.id = (pg_catalog.string_to_array(object_name, '/'))[2]::uuid
+          and e.deleted_at is null
+          and private.is_store_member(e.store_id)
+      )
+    else false
+  end
+$$;
 
-CREATE POLICY storage_media_select ON storage.objects
-  FOR SELECT TO authenticated
-  USING (
-    bucket_id = 'store_media' AND 
-    private.is_store_member(NULLIF(path_tokens[1], '')::uuid)
-  );
+create or replace function private.can_manage_event_object(object_name text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when object_name ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/[^/]+$' then
+      exists (
+        select 1 from public.events e
+        where e.store_id = (pg_catalog.string_to_array(object_name, '/'))[1]::uuid
+          and e.id = (pg_catalog.string_to_array(object_name, '/'))[2]::uuid
+          and e.deleted_at is null
+          and private.is_store_admin(e.store_id)
+      )
+    else false
+  end
+$$;
 
-CREATE POLICY storage_media_insert ON storage.objects
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    bucket_id = 'store_media' AND 
-    private.is_store_admin(NULLIF(path_tokens[1], '')::uuid)
-  );
+revoke execute on function private.can_read_event_object(text),
+  private.can_manage_event_object(text) from public, anon;
+grant execute on function private.can_read_event_object(text),
+  private.can_manage_event_object(text) to authenticated;
 
-CREATE POLICY storage_media_update ON storage.objects
-  FOR UPDATE TO authenticated
-  USING (
-    bucket_id = 'store_media' AND 
-    private.is_store_admin(NULLIF(path_tokens[1], '')::uuid)
-  );
-
-CREATE POLICY storage_media_delete ON storage.objects
-  FOR DELETE TO authenticated
-  USING (
-    bucket_id = 'store_media' AND 
-    private.is_store_admin(NULLIF(path_tokens[1], '')::uuid)
-  );
+create policy storage_media_select on storage.objects
+  for select to authenticated
+  using (bucket_id = 'store_media' and private.can_read_event_object(name));
+create policy storage_media_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'store_media' and private.can_manage_event_object(name));
+create policy storage_media_update on storage.objects
+  for update to authenticated
+  using (bucket_id = 'store_media' and private.can_manage_event_object(name))
+  with check (bucket_id = 'store_media' and private.can_manage_event_object(name));
+create policy storage_media_delete on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'store_media' and private.can_manage_event_object(name));

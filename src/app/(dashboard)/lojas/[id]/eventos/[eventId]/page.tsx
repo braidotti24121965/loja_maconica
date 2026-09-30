@@ -40,17 +40,16 @@ export default async function EventoDetalhesPage({ params }: { params: Promise<{
     .select("*")
     .eq("event_id", eventId)
     .eq("store_id", storeId)
-    .order("created_at", { ascending: false });
+    .order("order_index", { ascending: true });
 
   // Generate signed URLs (1 hour)
-  const photosWithUrls = await Promise.all((photos || []).map(async (photo) => {
-    const { data } = await supabase.storage
-      .from("store_media")
-      .createSignedUrl(photo.storage_path, 3600);
-    return {
-      ...photo,
-      url: data?.signedUrl || ""
-    };
+  const orderedPhotos = photos || [];
+  const { data: signedUrls } = orderedPhotos.length
+    ? await supabase.storage.from("store_media").createSignedUrls(orderedPhotos.map((photo) => photo.storage_path), 3600)
+    : { data: [] };
+  const photosWithUrls = orderedPhotos.map((photo, index) => ({
+    ...photo,
+    url: signedUrls?.[index]?.signedUrl || "",
   }));
 
   return (
@@ -115,9 +114,9 @@ export default async function EventoDetalhesPage({ params }: { params: Promise<{
               storeId={storeId} 
               eventId={event.id} 
               photoId={p.id} 
-              storagePath={p.storage_path} 
               url={p.url} 
-              isAdmin={isAdmin} 
+              isAdmin={isAdmin}
+              isCover={p.is_cover}
             />
           ))}
         </div>
