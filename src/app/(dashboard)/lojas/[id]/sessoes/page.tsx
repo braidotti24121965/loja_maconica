@@ -5,6 +5,13 @@ import { ArrowLeft, Calendar, FileText, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+type SessionRow = {
+  id: string;
+  date: string;
+  session_type: string;
+  description: string | null;
+};
+
 export default async function SessoesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
   const supabase = await createClient();
@@ -51,7 +58,7 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {sessions && sessions.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {sessions.map((session: any, index: number) => (
+            {(sessions as SessionRow[]).map((session, index) => (
               <div key={session.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: index < sessions.length - 1 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <div className="icon" style={{ background: "var(--green-soft)", color: "var(--green-dark)", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8 }}>
@@ -60,7 +67,7 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
                   <div>
                     <h4 style={{ margin: "0 0 4px 0" }}>{session.session_type}</h4>
                     <span className="subtle" style={{ fontSize: 13 }}>
-                      {format(new Date(session.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {format(new Date(`${session.date}T12:00:00`), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </span>
                     {session.description && <p style={{ margin: "4px 0 0 0", fontSize: 14, color: "var(--subtle)" }}>{session.description}</p>}
                   </div>

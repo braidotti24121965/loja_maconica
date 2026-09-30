@@ -3,21 +3,55 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+const MAX_PDF_SIZE = 5 * 1024 * 1024;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function uploadAta(data: FormData) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData?.user) return { error: "Não autorizado" };
 
-  const storeId = data.get("store_id") as string;
-  const sessionId = data.get("session_id") as string;
-  const file = data.get("file") as File;
+  const storeId = String(data.get("store_id") ?? "");
+  const sessionId = String(data.get("session_id") ?? "");
+  const file = data.get("file");
 
-  if (!storeId || !sessionId || !file) return { error: "Dados inválidos" };
+  if (!UUID_PATTERN.test(storeId) || !UUID_PATTERN.test(sessionId) || !(file instanceof File)) {
+    return { error: "Dados do envio inválidos." };
+  }
+
+  if (file.type !== "application/pdf" || !file.name.toLowerCase().endsWith(".pdf")) {
+    return { error: "Envie somente um arquivo PDF." };
+  }
+
+  if (file.size === 0 || file.size > MAX_PDF_SIZE) {
+    return { error: "O PDF deve ter até 5 MB." };
+  }
+
+  const { data: membership } = await supabase
+    .from("store_memberships")
+    .select("role")
+    .eq("store_id", storeId)
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+
+  if (!membership || !["admin", "secretary"].includes(membership.role)) {
+    return { error: "Você não tem permissão para anexar atas nesta loja." };
+  }
+
+  const { data: session } = await supabase
+    .from("sessions")
+    .select("id")
+    .eq("id", sessionId)
+    .eq("store_id", storeId)
+    .maybeSingle();
+
+  if (!session) {
+    return { error: "Sessão não encontrada nesta loja." };
+  }
 
   // 1. Upload to storage
-  const fileExt = file.name.split('.').pop();
-  const filePath = `${storeId}/${sessionId}_ata.${fileExt}`;
+  const filePath = `${storeId}/${sessionId}_ata.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from("store_documents")
@@ -31,18 +65,16 @@ export async function uploadAta(data: FormData) {
   // 2. Insert metadata into documents table
   const { error: dbError } = await supabase
     .from("documents")
-    .insert({
+    .upsert({
       store_id: storeId,
       session_id: sessionId,
       title: "Ata da Sessão",
       file_path: filePath,
       uploaded_by: userData.user.id
-    });
+    }, { onConflict: "session_id" });
 
   if (dbError) {
     console.error("DB Error:", dbError);
-    // Tenta limpar o arquivo se falhou no DB
-    await supabase.storage.from("store_documents").remove([filePath]);
     return { error: "Erro ao salvar registro do documento." };
   }
 

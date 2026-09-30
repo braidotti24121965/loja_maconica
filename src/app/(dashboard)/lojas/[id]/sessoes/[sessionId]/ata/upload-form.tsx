@@ -6,7 +6,7 @@ import { uploadAta } from "./actions";
 export function UploadAtaForm({ storeId, sessionId }: { storeId: string, sessionId: string }) {
   const [file, setFile] = useState<File | null>(null);
 
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     if (!file) return { error: "Selecione um arquivo PDF." };
     data.append("file", file);
     return await uploadAta(data);
@@ -17,6 +17,7 @@ export function UploadAtaForm({ storeId, sessionId }: { storeId: string, session
       <h4 style={{ marginBottom: 16 }}>Anexar nova Ata</h4>
       
       {state?.error && <div className="message error">{state.error}</div>}
+      {state?.success && <div className="message success">Ata salva com sucesso.</div>}
       
       <input type="hidden" name="store_id" value={storeId} />
       <input type="hidden" name="session_id" value={sessionId} />
@@ -27,11 +28,16 @@ export function UploadAtaForm({ storeId, sessionId }: { storeId: string, session
           id="file" 
           type="file" 
           accept="application/pdf"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={(e) => {
+            const selectedFile = e.target.files?.[0] || null;
+            setFile(selectedFile && selectedFile.size <= 5 * 1024 * 1024 ? selectedFile : null);
+          }}
           required 
           style={{ padding: "8px", border: "1px dashed var(--border)", borderRadius: 6, width: "100%" }}
         />
       </div>
+
+      <p className="subtle" style={{ fontSize: 13 }}>Somente PDF, com tamanho máximo de 5 MB.</p>
 
       <button className="button" type="submit" disabled={pending || !file}>
         {pending ? "Enviando..." : "Salvar Ata"}

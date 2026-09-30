@@ -29,6 +29,7 @@ export default async function AtaPage({ params }: { params: Promise<{ id: string
     .from("sessions")
     .select("*")
     .eq("id", sessionId)
+    .eq("store_id", storeId)
     .single();
 
   if (!session) redirect(`/lojas/${storeId}/sessoes`);
@@ -38,9 +39,9 @@ export default async function AtaPage({ params }: { params: Promise<{ id: string
     .from("documents")
     .select("*")
     .eq("session_id", sessionId)
+    .eq("store_id", storeId)
     .maybeSingle();
 
-  // Get public URL if document exists (since bucket is private, we need a signed URL, wait, actually we can just use createSignedUrl)
   let fileUrl = null;
   if (document) {
     const { data: signedUrl } = await supabase.storage
@@ -57,7 +58,7 @@ export default async function AtaPage({ params }: { params: Promise<{ id: string
       
       <h1 style={{ fontSize: 24, marginBottom: 8 }}>Ata da Sessão</h1>
       <p className="subtle" style={{ marginBottom: 32 }}>
-        {session.session_type} • {format(new Date(session.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+        {session.session_type} • {format(new Date(`${session.date}T12:00:00`), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
       </p>
 
       <div className="card">
@@ -94,4 +95,3 @@ export default async function AtaPage({ params }: { params: Promise<{ id: string
     </div>
   );
 }
-// Note: forgot to import FileText. I'll add it in the next call if it breaks.
