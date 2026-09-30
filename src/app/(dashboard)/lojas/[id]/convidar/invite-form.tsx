@@ -46,8 +46,20 @@ export function InviteForm({ storeId }: { storeId: string }) {
           <input type="hidden" name="store_id" value={storeId} />
 
           <div className="field">
+            <label htmlFor="email">E-mail do Convidado</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required 
+              placeholder="email@exemplo.com" 
+              style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid var(--border)", marginBottom: 16 }}
+            />
+          </div>
+
+          <div className="field">
             <label htmlFor="role">Papel do Convidado</label>
-            <select id="role" name="role" required defaultValue="member">
+            <select id="role" name="role" required defaultValue="member" style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid var(--border)", marginBottom: 24, background: "#fff" }}>
               <option value="admin">Venerável Mestre (Admin)</option>
               <option value="member">Membro (Padrão)</option>
               <option value="treasurer">Tesoureiro</option>
@@ -56,8 +68,8 @@ export function InviteForm({ storeId }: { storeId: string }) {
             </select>
           </div>
 
-          <button className="button" type="submit" disabled={pending}>
-            {pending ? "Gerando..." : "Gerar Link de Convite"}
+          <button className="button" type="submit" disabled={pending} style={{ width: "100%", padding: "10px 0" }}>
+            {pending ? "Gerando..." : "Gerar Link de Convite Seguro"}
           </button>
         </form>
       )}

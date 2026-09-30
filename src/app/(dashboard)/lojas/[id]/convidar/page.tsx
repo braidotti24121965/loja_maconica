@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { InviteForm } from "./invite-form";
+import { RevokeButton } from "./revoke-button";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default async function ConvidarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -31,18 +34,47 @@ export default async function ConvidarPage({ params }: { params: Promise<{ id: s
 
   const storeName = (membership.stores as { name?: string })?.name || "Loja";
 
+  // Fetch pending invites (excluding token to prevent leak in UI)
+  const { data: invites } = await supabase
+    .from("store_invites")
+    .select("id, email, role, expires_at, created_at")
+    .eq("store_id", storeId)
+    .is("used_at", null)
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+
   return (
     <div style={{ maxWidth: 600 }}>
-      <Link href="/lojas" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
-        <ArrowLeft size={16} /> Voltar para Lojas
+      <Link href={`/lojas/${storeId}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
+        <ArrowLeft size={16} /> Voltar para Loja
       </Link>
       
       <h1 style={{ fontSize: 24, marginBottom: 8 }}>Gerar Convite</h1>
       <p className="subtle" style={{ marginBottom: 32 }}>Crie um link seguro para convidar um novo membro para a <strong>{storeName}</strong>.</p>
       
-      <div className="card">
+      <div className="card" style={{ marginBottom: 32 }}>
         <InviteForm storeId={storeId} />
       </div>
+
+      <h2 style={{ fontSize: 20, marginBottom: 16 }}>Convites Pendentes</h2>
+      {invites && invites.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {invites.map((inv) => (
+            <div key={inv.id} className="card" style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <strong style={{ display: "block", marginBottom: 4 }}>{inv.email || "Sem e-mail"}</strong>
+                <div style={{ fontSize: 13, display: "flex", gap: 12, color: "var(--subtle)" }}>
+                  <span className="badge">{inv.role}</span>
+                  <span>Expira em: {format(new Date(inv.expires_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                </div>
+              </div>
+              <RevokeButton storeId={storeId} inviteId={inv.id} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="subtle" style={{ fontSize: 14 }}>Não há convites pendentes no momento.</p>
+      )}
     </div>
   );
 }
