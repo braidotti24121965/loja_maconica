@@ -70,9 +70,16 @@ export default async function AtaPage({ params }: { params: Promise<{ id: string
             <h3 style={{ marginBottom: 8 }}>{document.title}</h3>
             <p className="subtle" style={{ marginBottom: 24, fontSize: 14 }}>Anexada em {format(new Date(document.created_at), "dd/MM/yyyy")}</p>
             
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="button" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="button" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: isAdmin ? 24 : 0 }}>
               <Download size={16} /> Baixar Ata PDF
             </a>
+
+            {isAdmin && (
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, textAlign: "left" }}>
+                <h4 style={{ fontSize: 14, marginBottom: 12 }}>Substituir Ata Anexada</h4>
+                <UploadAtaForm storeId={storeId} sessionId={sessionId} />
+              </div>
+            )}
           </div>
         ) : (
           <div>
