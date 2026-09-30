@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { submitOnboarding } from "./actions";
 
 export function OnboardingForm() {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await submitOnboarding(data);
   }, null);
 

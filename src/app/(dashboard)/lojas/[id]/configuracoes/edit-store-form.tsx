@@ -3,8 +3,8 @@
 import { useActionState } from "react";
 import { updateStore } from "./actions";
 
-export function EditStoreForm({ store }: { store: any }) {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+export function EditStoreForm({ store }: { store: { id: string; name: string; city: string | null; state: string | null; active: boolean } }) {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateStore(data);
   }, null);
 
@@ -23,11 +23,11 @@ export function EditStoreForm({ store }: { store: any }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div className="field">
           <label htmlFor="city">Cidade</label>
-          <input id="city" name="city" type="text" defaultValue={store.city} required />
+          <input id="city" name="city" type="text" defaultValue={store.city || ""} required />
         </div>
         <div className="field">
           <label htmlFor="state">Estado (UF)</label>
-          <input id="state" name="state" type="text" defaultValue={store.state} required maxLength={2} />
+          <input id="state" name="state" type="text" defaultValue={store.state || ""} required maxLength={2} />
         </div>
       </div>
 

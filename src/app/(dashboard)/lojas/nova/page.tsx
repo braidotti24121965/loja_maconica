@@ -35,7 +35,7 @@ export default async function NovaLojaPage() {
       <p className="subtle" style={{ marginBottom: 32 }}>Cadastre uma nova loja maçônica na organização.</p>
       
       <div className="card">
-        <StoreForm tenants={tenantMemberships.map(t => ({ id: t.tenant_id, name: (t.tenants as any)?.name || "Organização" }))} />
+        <StoreForm tenants={tenantMemberships.map(t => ({ id: t.tenant_id, name: (t.tenants as { name?: string })?.name || "Organização" }))} />
       </div>
     </div>
   );

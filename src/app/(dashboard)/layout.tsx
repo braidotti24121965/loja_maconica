@@ -1,4 +1,4 @@
-import { Building2, LayoutDashboard, Store, Users, User } from "lucide-react";
+import { LayoutDashboard, Store, User } from "lucide-react";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -42,7 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       if (memberships) {
         userStores = memberships.map(m => ({
           id: m.store_id,
-          name: (m.stores as any)?.name || "Loja Desconhecida"
+          name: (m.stores as { name?: string })?.name || "Loja Desconhecida"
         }));
       }
       

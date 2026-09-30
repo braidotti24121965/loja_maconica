@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Copy, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, } from "lucide-react";
 import { InviteForm } from "./invite-form";
 
 export default async function ConvidarPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,7 +29,7 @@ export default async function ConvidarPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const storeName = (membership.stores as any)?.name || "Loja";
+  const storeName = (membership.stores as { name?: string })?.name || "Loja";
 
   return (
     <div style={{ maxWidth: 600 }}>

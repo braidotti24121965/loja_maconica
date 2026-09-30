@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 export default function NovoMembroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = use(params);
   
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await createBrother(data);
   }, null);
 

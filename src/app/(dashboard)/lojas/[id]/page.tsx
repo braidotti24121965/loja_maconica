@@ -17,7 +17,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
     .eq("id", storeId)
     .single();
 
-  const role = (store?.store_memberships as any)?.[0]?.role;
+  const role = (store?.store_memberships as { role?: string }[])?.[0]?.role;
 
   if (!store || !role) {
     return (

@@ -17,9 +17,9 @@ export default async function ConfigStorePage({ params }: { params: Promise<{ id
     .eq("id", storeId)
     .single();
 
-  const role = (store?.store_memberships as any)?.[0]?.role;
+  const role = (store?.store_memberships as { role?: string }[])?.[0]?.role;
 
-  if (!store || !["admin", "secretary"].includes(role)) {
+  if (!store || !["admin", "secretary"].includes(role || "")) {
     return (
       <div className="card">
         <h3>Acesso Negado</h3>

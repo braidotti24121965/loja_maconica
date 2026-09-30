@@ -6,7 +6,7 @@ import { createStore } from "./actions";
 type TenantOption = { id: string, name: string };
 
 export function StoreForm({ tenants }: { tenants: TenantOption[] }) {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await createStore(data);
   }, null);
 

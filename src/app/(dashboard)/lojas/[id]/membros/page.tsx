@@ -68,7 +68,7 @@ export default async function MembrosPage({ params }: { params: Promise<{ id: st
       <div className="card" style={{ padding: 0, overflow: "hidden", marginBottom: 32 }}>
         {brothers && brothers.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {brothers.map((b: any, index: number) => (
+            {brothers.map((b: { id: string; full_name: string; cim: string | null; degree: string; office: string | null }, index: number) => (
               <div key={b.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: index < brothers.length - 1 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <UserCircle size={40} color="var(--subtle)" />
@@ -100,13 +100,13 @@ export default async function MembrosPage({ params }: { params: Promise<{ id: st
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {memberships && memberships.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {memberships.map((m: any, index: number) => (
+            {memberships.map((m: { id: string; user_id: string; role: string; profiles: { full_name: string; email: string } | { full_name: string; email: string }[] }, index: number) => (
               <div key={m.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: index < memberships.length - 1 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <UserCircle size={40} color="var(--subtle)" />
                   <div>
-                    <h4 style={{ margin: 0 }}>{(m.profiles as any)?.full_name || "Membro"}</h4>
-                    <span className="subtle" style={{ fontSize: 13 }}>{(m.profiles as any)?.email}</span>
+                    <h4 style={{ margin: 0 }}>{(m.profiles as { full_name?: string; email?: string })?.full_name || "Membro"}</h4>
+                    <span className="subtle" style={{ fontSize: 13 }}>{(m.profiles as { full_name?: string; email?: string })?.email}</span>
                   </div>
                 </div>
                 

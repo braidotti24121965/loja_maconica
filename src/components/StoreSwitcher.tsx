@@ -8,7 +8,6 @@ type StoreData = { id: string, name: string };
 export function StoreSwitcher({ stores, activeId }: { stores: StoreData[], activeId: string | null }) {
   const [isPending, startTransition] = useTransition();
 
-  const activeStore = stores.find(s => s.id === activeId);
 
   return (
     <div className="tenant-card">

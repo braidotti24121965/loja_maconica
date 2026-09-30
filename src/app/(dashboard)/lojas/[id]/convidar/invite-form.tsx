@@ -5,7 +5,7 @@ import { generateInvite } from "./actions";
 import { Copy, Check } from "lucide-react";
 
 export function InviteForm({ storeId }: { storeId: string }) {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await generateInvite(data);
   }, null);
   

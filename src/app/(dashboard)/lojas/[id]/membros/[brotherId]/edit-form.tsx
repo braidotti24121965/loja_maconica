@@ -4,12 +4,12 @@ import { useActionState, useState } from "react";
 import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent } from "./actions";
 import { Trash, Pencil } from "lucide-react";
 
-export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: any }) {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; cim: string | null; degree: string; office: string | null; phone: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
   }, null);
 
-  const [editingDep, setEditingDep] = useState<any>(null);
+  const [editingDep, setEditingDep] = useState<{ id: string; name: string; relationship: string; birthdate: string | null; } | null>(null);
 
   const dependents = brother.dependents || [];
 
@@ -93,7 +93,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
       
       {dependents.length > 0 ? (
         <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px 0" }}>
-          {dependents.map((dep: any) => (
+          {dependents.map((dep: { id: string; name: string; relationship: string; birthdate: string | null; }) => (
             <li key={dep.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", border: "1px solid var(--border)", borderRadius: 6, marginBottom: 8, backgroundColor: "var(--background-alt)" }}>
               <div>
                 <strong>{dep.name}</strong> <span className="badge" style={{ marginLeft: 8 }}>{dep.relationship}</span>

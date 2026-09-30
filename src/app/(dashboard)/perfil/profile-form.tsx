@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { updateProfile } from "./actions";
 
 export function ProfileForm({ initialName }: { initialName: string }) {
-  const [state, action, pending] = useActionState(async (_state: any, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateProfile(data);
   }, null);
 

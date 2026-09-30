@@ -3,17 +3,17 @@
 import { useActionState, useState } from "react";
 import { updateRole, removeMember } from "./actions";
 
-export function MemberList({ member, isAdmin, storeId, currentUserId }: { member: any, isAdmin: boolean, storeId: string, currentUserId: string }) {
+export function MemberList({ member, isAdmin, storeId, currentUserId }: { member: { id: string; user_id: string; role: string; profiles: { full_name: string; email: string } | { full_name: string; email: string }[] }, isAdmin: boolean, storeId: string, currentUserId: string }) {
   const isMe = member.user_id === currentUserId;
   const [isEditing, setIsEditing] = useState(false);
 
-  const [updateState, updateAction, isUpdating] = useActionState(async (_state: any, data: FormData) => {
+  const [updateState, updateAction, isUpdating] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     const res = await updateRole(data);
     if (res?.success) setIsEditing(false);
     return res;
   }, null);
 
-  const [, removeAction, isRemoving] = useActionState(async (_state: any, data: FormData) => {
+  const [, removeAction, isRemoving] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     if (confirm("Tem certeza que deseja remover este membro da loja?")) {
       return await removeMember(data);
     }
