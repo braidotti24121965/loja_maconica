@@ -9,8 +9,8 @@
 - Situação geral: **núcleo cadastral estabilizado; sessões e atas prontas no código e aguardando validação remota**.
 - Build de produção e TypeScript: **aprovados**.
 - Qualidade de código (lint): **aprovada**, sem erros ou avisos.
-- Repositório local: **4 commits à frente do GitHub**.
-- Supabase de homologação: **ativo e saudável**, mas com histórico remoto de migrations divergente do esquema existente.
+- Repositório local: **6 commits à frente do GitHub**.
+- Supabase de homologação: **ativo e saudável**, com histórico de migrations reconciliado e migration de segurança de sessões/atas aplicada.
 - Eventos e galeria: **migration local não versionada e sem interface**.
 - Produção: **não autorizada e não planejada neste cronograma**.
 
@@ -23,7 +23,7 @@
 | 3.1 | Fundação, autenticação, multi-tenant e RLS | Concluída | 100% | Concluída | Login, sessão SSR, tenants, lojas, perfis, vínculos e RLS |
 | 3.2 | Onboarding, lojas, perfil e convites | Concluída no código | 95% | Concluída; validação em 01/10 | Fluxos integrados e aprovados em homologação |
 | 3.3 | Cadastro de membros e dependentes | Concluída no código | 100% | Concluída; publicação pendente | CRUD completo, permissões verificadas e commit publicado |
-| 3.4 | Sessões e atas/documentos | Código concluído; histórico de migrations em revisão | 90% | Após reconciliar histórico | Aplicar migration, criar sessão, enviar/consultar ata e validar isolamento por loja |
+| 3.4 | Sessões e atas/documentos | Migration aplicada; validação funcional parcial | 95% | Próxima rodada assistida | Enviar/consultar um PDF pela interface e validar isolamento após existir uma segunda loja de teste |
 | 3.5 | Eventos e galeria de fotos | Iniciada | 20% | 05–08/10 | Migration segura, interface, upload e exclusão restritos à loja |
 | 4 | Estabilização técnica e segurança | Em andamento | 75% | 01–09/10 | Testes RLS ampliados, advisors remotos e regressão ponta a ponta |
 | 5 | Homologação assistida do MVP | Não iniciada | 0% | 09–13/10 | Roteiro ponta a ponta aprovado pelo responsável do projeto |
@@ -67,10 +67,10 @@
 
 ## Pendências que impedem declarar o MVP pronto
 
-1. Reconciliar, com aprovação explícita, o histórico remoto: os objetos das migrations 002–006 existem, mas apenas a migration 001 aparece como aplicada.
-2. Aplicar a migration de segurança de sessões e atas.
-3. Executar testes ponta a ponta com usuários de duas lojas diferentes.
-4. Publicar os quatro commits locais no GitHub quando a homologação remota estiver aprovada.
+1. Executar pela interface o envio e a consulta de uma ata PDF de até 5 MB.
+2. Criar uma segunda loja/usuário de teste, quando autorizado, para provar o isolamento ponta a ponta.
+3. Avaliar os avisos dos advisors: `update_updated_at_column` sem `search_path` fixo, proteção de senhas vazadas desativada e função intencional `accept_invite` marcada por usar `SECURITY DEFINER`.
+4. Publicar os seis commits locais no GitHub quando a homologação funcional estiver aprovada.
 5. Manter a migration de eventos fora da aplicação: ela ainda não está versionada, não possui interface e tem políticas de Storage amplas demais.
 6. Produção depende de autorização explícita e não faz parte da entrega atual.
 
