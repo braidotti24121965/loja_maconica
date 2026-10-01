@@ -38,8 +38,17 @@ export default async function ConfigStorePage({ params }: { params: Promise<{ id
       <h1 style={{ fontSize: 24, marginBottom: 8 }}>Configurações</h1>
       <p className="subtle" style={{ marginBottom: 32 }}>Altere os dados básicos da {store.name}.</p>
       
-      <div className="card">
+      <div className="card" style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 18, marginTop: 0, marginBottom: 16 }}>Dados Básicos</h2>
         <EditStoreForm store={store} />
+      </div>
+
+      <div className="card">
+        <h2 style={{ fontSize: 18, marginTop: 0, marginBottom: 8 }}>Avançado</h2>
+        <p className="subtle" style={{ marginBottom: 16 }}>Importe dados legados da loja via arquivos CSV (Excel).</p>
+        <Link href={`/lojas/${storeId}/configuracoes/importar`} className="button" style={{ display: "inline-block", background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)" }}>
+          Acessar Importação em Lote
+        </Link>
       </div>
     </div>
   );
