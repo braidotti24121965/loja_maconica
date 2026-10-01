@@ -2,8 +2,8 @@
 
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
-import { revokeAndGenerateDigitalCard } from "./actions";
-import { ShieldAlert, RefreshCw, CheckCircle2 } from "lucide-react";
+import { generateDigitalCard, revokeDigitalCard } from "./actions";
+import { ShieldAlert, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 
 export default function DigitalCardClient({
   storeId,
@@ -23,14 +23,14 @@ export default function DigitalCardClient({
   token?: string;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRevoking, setIsRevoking] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleRevoke = async () => {
-    if (!confirm("Tem certeza que deseja revogar a carteirinha atual e gerar uma nova? O QR Code antigo deixará de funcionar imediatamente.")) return;
+  const handleGenerate = async () => {
     setIsGenerating(true);
     setErrorMsg(null);
     try {
-      await revokeAndGenerateDigitalCard(storeId, brotherId);
+      await generateDigitalCard(storeId, brotherId);
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setErrorMsg(err.message || "Erro desconhecido.");
     } finally {
@@ -38,7 +38,20 @@ export default function DigitalCardClient({
     }
   };
 
-  const validationUrl = typeof window !== "undefined" ? `${window.location.origin}/validar/${token}` : `https://maconaria360.com.br/validar/${token}`;
+  const handleRevoke = async () => {
+    if (!confirm("Tem certeza que deseja revogar esta carteirinha? Ela deixará de funcionar imediatamente.")) return;
+    setIsRevoking(true);
+    setErrorMsg(null);
+    try {
+      await revokeDigitalCard(storeId, brotherId);
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      setErrorMsg(err.message || "Erro desconhecido.");
+    } finally {
+      setIsRevoking(false);
+    }
+  };
+
+  const validationUrl = typeof window !== "undefined" ? `${window.location.origin}/validar/${token}` : `https://www.maconaria360.com.br/validar/${token}`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -50,9 +63,9 @@ export default function DigitalCardClient({
 
       {!token ? (
         <div style={{ textAlign: "center", padding: "32px 16px", background: "var(--page)", border: "1px dashed var(--border)", borderRadius: 8 }}>
-          <p className="subtle" style={{ marginBottom: 16 }}>Você ainda não possui uma Carteirinha Digital ativa.</p>
-          <button className="button" onClick={handleRevoke} disabled={isGenerating}>
-            {isGenerating ? "Gerando..." : "Gerar Minha Carteirinha"}
+          <p className="subtle" style={{ marginBottom: 16 }}>Você não possui uma Carteirinha Digital ativa.</p>
+          <button className="button" onClick={handleGenerate} disabled={isGenerating || isRevoking}>
+            {isGenerating ? "Gerando..." : "Gerar Carteirinha Segura"}
           </button>
         </div>
       ) : (
@@ -84,9 +97,12 @@ export default function DigitalCardClient({
       )}
 
       {token && (
-        <div style={{ textAlign: "right" }}>
-          <button onClick={handleRevoke} disabled={isGenerating} style={{ background: "transparent", border: "none", color: "var(--danger)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
-            <RefreshCw size={12} /> {isGenerating ? "Revogando..." : "Revogar e Gerar Nova"}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={handleRevoke} disabled={isRevoking || isGenerating} style={{ background: "transparent", border: "none", color: "var(--danger)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
+            <XCircle size={12} /> {isRevoking ? "Revogando..." : "Apenas Revogar"}
+          </button>
+          <button onClick={handleGenerate} disabled={isGenerating || isRevoking} style={{ background: "transparent", border: "none", color: "var(--brand)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
+            <RefreshCw size={12} /> {isGenerating ? "Gerando..." : "Substituir por Nova"}
           </button>
         </div>
       )}
