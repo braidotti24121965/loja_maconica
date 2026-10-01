@@ -53,6 +53,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
   }
 
+  const activeStore = userStores.find((store) => store.id === activeStoreId)
+    ?? (userStores.length === 1 ? userStores[0] : null);
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -62,12 +65,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/lojas"><Store size={18}/><span>Loja</span></Link>
           <Link href="/perfil"><User size={18}/><span>Meu Perfil</span></Link>
         </nav>
-        <StoreSwitcher stores={userStores} activeId={activeStoreId} />
+        {userStores.length > 1 && (
+          <StoreSwitcher stores={userStores} activeId={activeStoreId} />
+        )}
       </aside>
       <main className="main">
         <header className="topbar">
           <div>
-             {/* Simple dynamic header could be added later, we'll keep it simple for now */}
+            {activeStore && (
+              <>
+                <p style={{ margin: 0, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                  Loja ativa
+                </p>
+                <strong style={{ display: "block", marginTop: 3, color: "var(--navy)" }}>
+                  {activeStore.name}
+                </strong>
+              </>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div className="avatar" title={email}>{profileName.slice(0, 2).toUpperCase()}</div>
