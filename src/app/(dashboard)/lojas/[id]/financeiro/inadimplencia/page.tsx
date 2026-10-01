@@ -45,9 +45,20 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
     .select("id, name")
     .eq("store_id", storeId);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const enrichedDues = (dues || []).map(due => {
     const brother = brothers?.find(b => b.id === due.brother_id);
-    return { ...due, brotherName: brother?.full_name || "Desconhecido" };
+    let currentStatus = due.status;
+    if (currentStatus === "pending") {
+      const dueDate = new Date(due.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        currentStatus = "overdue";
+      }
+    }
+    return { ...due, status: currentStatus, brotherName: brother?.full_name || "Desconhecido" };
   });
 
   const totalOverdue = enrichedDues.filter(d => d.status === "overdue").reduce((acc, curr) => acc + Number(curr.amount), 0);

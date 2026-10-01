@@ -38,6 +38,21 @@ export default async function MeuExtratoPage({ params }: { params: Promise<{ id:
     .eq("brother_id", brother.id)
     .order("competence", { ascending: false });
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const enrichedDues = (dues || []).map(due => {
+    let currentStatus = due.status;
+    if (currentStatus === "pending") {
+      const dueDate = new Date(due.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        currentStatus = "overdue";
+      }
+    }
+    return { ...due, status: currentStatus };
+  });
+
   return (
     <div>
       <Link href={`/lojas/${storeId}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
@@ -63,7 +78,7 @@ export default async function MeuExtratoPage({ params }: { params: Promise<{ id:
             </tr>
           </thead>
           <tbody>
-            {(dues || []).map((due) => (
+            {enrichedDues.map((due) => (
               <tr key={due.id} style={{ borderBottom: "1px solid var(--border)" }}>
                 <td style={{ padding: "16px 24px" }}>{due.competence}</td>
                 <td style={{ padding: "16px 24px" }}>{new Date(due.due_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
@@ -82,7 +97,7 @@ export default async function MeuExtratoPage({ params }: { params: Promise<{ id:
                 </td>
               </tr>
             ))}
-            {(!dues || dues.length === 0) && (
+            {enrichedDues.length === 0 && (
               <tr>
                 <td colSpan={5} style={{ padding: 32, textAlign: "center", color: "var(--subtle)" }}>
                   <Wallet size={32} color="var(--subtle)" style={{ margin: "0 auto 16px auto" }} />
