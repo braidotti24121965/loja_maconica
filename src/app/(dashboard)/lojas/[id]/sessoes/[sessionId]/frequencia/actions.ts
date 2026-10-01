@@ -29,6 +29,22 @@ export async function saveAttendance(storeId: string, sessionId: string, data: R
   return { success: true };
 }
 
+export async function getSessionAttendances(sessionId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Não autenticado.", attendances: [] };
+
+  const { data, error } = await supabase
+    .from("session_attendances")
+    .select("brother_id, status, justification")
+    .eq("session_id", sessionId);
+
+  if (error) return { error: "Erro ao atualizar a frequência.", attendances: [] };
+
+  return { attendances: data || [] };
+}
+
 export async function openCheckinWindow(sessionId: string, hours: number = 4) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

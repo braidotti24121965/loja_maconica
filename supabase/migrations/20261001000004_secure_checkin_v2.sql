@@ -1,5 +1,7 @@
 -- Fase 11: Correções Finais de Segurança e RLS para o Check-in
 
+BEGIN;
+
 -- 1. Limpar funções antigas e vulneráveis (Idempotente)
 REVOKE ALL ON FUNCTION public.open_checkin_window(uuid) FROM PUBLIC, anon, authenticated;
 DROP FUNCTION IF EXISTS public.open_checkin_window(uuid);
@@ -10,9 +12,7 @@ DROP FUNCTION IF EXISTS public.close_checkin_window(uuid);
 REVOKE ALL ON FUNCTION public.register_presence_by_challenge(text, text) FROM PUBLIC, anon, authenticated;
 DROP FUNCTION IF EXISTS public.register_presence_by_challenge(text, text);
 
--- 2. Garantir Chave Composta em Sessions
-ALTER TABLE public.sessions DROP CONSTRAINT IF EXISTS sessions_store_id_id_key;
-ALTER TABLE public.sessions ADD CONSTRAINT sessions_store_id_id_key UNIQUE (store_id, id);
+-- A constraint sessions_store_id_id_key já existe e é usada pelas atas.
 
 -- 3. Atualizar Tabela de Janelas (session_checkin_windows)
 ALTER TABLE public.session_checkin_windows ADD COLUMN IF NOT EXISTS qr_token text UNIQUE;
@@ -44,7 +44,7 @@ ALTER TABLE public.session_checkin_windows ADD CONSTRAINT chk_window_dates CHECK
 
 -- Índice Parcial Único: Uma janela ativa por LOJA (não apenas por sessão)
 DROP INDEX IF EXISTS public.idx_one_open_window_per_store;
-CREATE UNIQUE INDEX idx_one_open_window_per_store ON public.session_checkin_windows(store_id) WHERE status = 'open' AND expires_at > pg_catalog.now();
+CREATE UNIQUE INDEX idx_one_open_window_per_store ON public.session_checkin_windows(store_id) WHERE status = 'open';
 
 -- 4. Restringir RLS (Apenas admin lê a janela)
 DROP POLICY IF EXISTS checkin_windows_select ON public.session_checkin_windows;
@@ -54,14 +54,11 @@ CREATE POLICY checkin_windows_select ON public.session_checkin_windows
 
 -- 5. Rate Limiting Table para Códigos Curtos
 CREATE TABLE IF NOT EXISTS public.checkin_rate_limits (
-  id uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  store_id uuid NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
-  attempts int NOT NULL DEFAULT 1,
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  attempts int NOT NULL DEFAULT 0 CHECK (attempts >= 0),
   locked_until timestamptz,
   created_at timestamptz DEFAULT pg_catalog.now(),
-  updated_at timestamptz DEFAULT pg_catalog.now(),
-  UNIQUE(user_id, store_id)
+  updated_at timestamptz DEFAULT pg_catalog.now()
 );
 ALTER TABLE public.checkin_rate_limits ENABLE ROW LEVEL SECURITY;
 
@@ -86,7 +83,7 @@ BEGIN
   END IF;
 
   v_qr_token := pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '') || pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '');
-  v_short_code := pg_catalog.upper(pg_catalog.substring(pg_catalog.encode(extensions.gen_random_bytes(16), 'hex'), 1, 6));
+  v_short_code := pg_catalog.upper(pg_catalog.substr(pg_catalog.encode(extensions.gen_random_bytes(16), 'hex'), 1, 6));
   v_expires_at := pg_catalog.now() + (p_duration_hours || ' hours')::interval;
 
   -- Fechar janelas expiradas ou abertas da mesma loja
@@ -152,7 +149,7 @@ BEGIN
     RETURN pg_catalog.json_build_object('success', false, 'message', 'Janela de check-in expirada ou fechada.');
   END IF;
 
-  SELECT id INTO v_brother_id FROM public.brothers WHERE store_id = v_window.store_id AND user_id = auth.uid() AND active = true LIMIT 1;
+  SELECT id INTO v_brother_id FROM public.brothers WHERE store_id = v_window.store_id AND user_id = auth.uid() LIMIT 1;
   IF NOT FOUND THEN
     RETURN pg_catalog.json_build_object('success', false, 'message', 'Obreiro não encontrado ou inativo nesta loja.');
   END IF;
@@ -207,7 +204,6 @@ SET search_path = ''
 AS $$
 DECLARE
   v_window_id uuid;
-  v_store_id uuid;
   v_rate_limit record;
 BEGIN
   -- Rate limiting básico global por usuário, protegendo enumeração
@@ -216,12 +212,12 @@ BEGIN
     RETURN pg_catalog.json_build_object('success', false, 'message', 'Muitas tentativas. Aguarde 5 minutos.');
   END IF;
 
-  SELECT id, store_id INTO v_window_id, v_store_id FROM public.session_checkin_windows WHERE short_code = p_short_code AND status = 'open' AND expires_at > pg_catalog.now();
+  SELECT id INTO v_window_id FROM public.session_checkin_windows WHERE short_code = p_short_code AND status = 'open' AND expires_at > pg_catalog.now();
   
   IF NOT FOUND THEN
-    INSERT INTO public.checkin_rate_limits (user_id, store_id, attempts, updated_at)
-    VALUES (auth.uid(), pg_catalog.gen_random_uuid(), 1, pg_catalog.now())
-    ON CONFLICT (user_id, store_id) DO UPDATE SET attempts = public.checkin_rate_limits.attempts + 1, updated_at = pg_catalog.now(), locked_until = CASE WHEN public.checkin_rate_limits.attempts >= 4 THEN pg_catalog.now() + interval '5 minutes' ELSE NULL END;
+    INSERT INTO public.checkin_rate_limits (user_id, attempts, updated_at)
+    VALUES (auth.uid(), 1, pg_catalog.now())
+    ON CONFLICT (user_id) DO UPDATE SET attempts = public.checkin_rate_limits.attempts + 1, updated_at = pg_catalog.now(), locked_until = CASE WHEN public.checkin_rate_limits.attempts + 1 >= 5 THEN pg_catalog.now() + interval '5 minutes' ELSE NULL END;
     RETURN pg_catalog.json_build_object('success', false, 'message', 'Código incorreto.');
   END IF;
 
@@ -233,3 +229,5 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.register_presence_short(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.register_presence_short(text) TO authenticated;
+
+COMMIT;

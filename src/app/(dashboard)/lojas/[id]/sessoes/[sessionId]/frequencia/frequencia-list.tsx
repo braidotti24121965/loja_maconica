@@ -1,23 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import { saveAttendance } from "./actions";
+import { useEffect, useState } from "react";
+import { getSessionAttendances, saveAttendance } from "./actions";
 
 type Brother = { id: string, full_name: string, degree: string };
 type Attendance = { brother_id: string, status: string, justification: string | null };
 
 export function FrequenciaList({ 
-  storeId, sessionId, brothers, initialAttendances, readOnly 
+  storeId, sessionId, brothers, initialAttendances, readOnly, autoRefresh
 }: { 
-  storeId: string, sessionId: string, brothers: Brother[], initialAttendances: Attendance[], readOnly: boolean 
+  storeId: string, sessionId: string, brothers: Brother[], initialAttendances: Attendance[], readOnly: boolean, autoRefresh: boolean
 }) {
   const [attendances, setAttendances] = useState<Record<string, Attendance>>(
     initialAttendances.reduce((acc, curr) => ({ ...acc, [curr.brother_id]: curr }), {})
   );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const refreshInterval = window.setInterval(async () => {
+      if (hasUnsavedChanges) return;
+
+      const result = await getSessionAttendances(sessionId);
+      if (result.error) return;
+
+      setAttendances(
+        result.attendances.reduce<Record<string, Attendance>>(
+          (acc, curr) => ({ ...acc, [curr.brother_id]: curr }),
+          {}
+        )
+      );
+    }, 4000);
+
+    return () => window.clearInterval(refreshInterval);
+  }, [autoRefresh, hasUnsavedChanges, sessionId]);
 
   const handleStatusChange = (brotherId: string, status: string) => {
+    setHasUnsavedChanges(true);
     setAttendances(prev => ({
       ...prev,
       [brotherId]: { ...prev[brotherId], brother_id: brotherId, status, justification: status === 'justified' ? prev[brotherId]?.justification || '' : null }
@@ -25,6 +47,7 @@ export function FrequenciaList({
   };
 
   const handleJustificationChange = (brotherId: string, text: string) => {
+    setHasUnsavedChanges(true);
     setAttendances(prev => ({
       ...prev,
       [brotherId]: { ...prev[brotherId], justification: text }
@@ -40,6 +63,7 @@ export function FrequenciaList({
       if (res?.error) {
         setMessage(res.error);
       } else {
+        setHasUnsavedChanges(false);
         setMessage("✅ Presenças salvas com sucesso!");
         setTimeout(() => setMessage(""), 3000);
       }

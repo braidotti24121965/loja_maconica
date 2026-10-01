@@ -87,7 +87,8 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
             sessionId={sessionId} 
             brothers={brothers} 
             initialAttendances={attendances || []} 
-            readOnly={!isAdmin} 
+            readOnly={!isAdmin}
+            autoRefresh={Boolean(windowData)}
           />
         ) : (
           <div style={{ textAlign: "center", padding: 24 }}>
