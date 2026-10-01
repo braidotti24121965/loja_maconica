@@ -31,7 +31,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           {!brother.user_id ? (
             <button 
               type="submit" 
-              formAction={linkOwnUserToBrother} 
+              formAction={async (formData) => { await linkOwnUserToBrother(formData); }} 
               className="button" 
               style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13 }}
             >
