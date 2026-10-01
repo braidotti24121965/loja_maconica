@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { revokeInvite } from "./actions";
 import { Trash } from "lucide-react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -8,9 +8,15 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 export function RevokeButton({ storeId, inviteId }: { storeId: string, inviteId: string }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const formId = `revoke-invite-${inviteId}`;
-  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string, success?: boolean } | null | undefined, data: FormData) => {
     return await revokeInvite(data);
   }, null);
+
+  useEffect(() => {
+    if (confirmOpen && state?.success) {
+      setTimeout(() => setConfirmOpen(false), 0);
+    }
+  }, [state?.success, confirmOpen]);
 
   return (
     <>
@@ -23,8 +29,10 @@ export function RevokeButton({ storeId, inviteId }: { storeId: string, inviteId:
         title="Revogar Convite"
         style={{ background: "transparent", border: "none", color: "var(--destructive)", cursor: "pointer", padding: 4 }}
         onClick={(event) => {
-          event.preventDefault();
-          setConfirmOpen(true);
+          if (!confirmOpen) {
+            event.preventDefault();
+            setConfirmOpen(true);
+          }
         }}
       >
         <Trash size={16} />
@@ -39,6 +47,7 @@ export function RevokeButton({ storeId, inviteId }: { storeId: string, inviteId:
       confirmLabel="Revogar convite"
       pending={pending}
       formId={formId}
+      
     />
     </>
   );

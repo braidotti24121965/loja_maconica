@@ -98,7 +98,8 @@ export function ConfirmDialog({
             disabled={pending}
             onClick={() => {
               if (formId) {
-                onClose();
+                // Do NOT call onClose. Let the parent close it when pending becomes false,
+                // or let the form submission proceed without unmounting the submit button.
                 return;
               }
               void onConfirm?.();

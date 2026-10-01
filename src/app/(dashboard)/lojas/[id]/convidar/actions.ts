@@ -137,7 +137,7 @@ export async function generateInvite(data: FormData) {
       code: inviteError.code,
       message: inviteError.message,
     });
-    return { error: "Não foi possível enviar o convite. Tente novamente em alguns minutos." };
+    return { error: "Não foi possível enviar o convite pelo Supabase. O usuário pode já possuir conta ou o limite de envios foi atingido." };
   }
 
   revalidatePath(`/lojas/${storeId}/convidar`);
