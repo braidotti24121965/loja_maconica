@@ -1,4 +1,4 @@
--- Fase 13: Correção do Accept Invite para Isolamento de Tenant (Revisada)
+-- Fase 13: Correção do Accept Invite para Isolamento de Tenant (Definitivo)
 
 CREATE OR REPLACE FUNCTION public.accept_invite(invite_token uuid)
 RETURNS boolean
@@ -23,13 +23,13 @@ BEGIN
   WHERE token = invite_token
   FOR UPDATE;
 
-  -- 3. Validações estritas: não utilizado, não revogado, não expirado, e-mail normalizado igual
+  -- 3. Validações estritas
   IF NOT FOUND
     OR v_invite.email IS NULL
     OR v_invite.used_at IS NOT NULL
     OR v_invite.revoked_at IS NOT NULL
     OR v_invite.expires_at <= pg_catalog.now()
-    OR v_invite.email <> v_email THEN
+    OR lower(trim(v_invite.email)) <> v_email THEN
     RETURN false;
   END IF;
 
@@ -48,17 +48,16 @@ BEGIN
   END IF;
 
   -- 5. Insere o usuário como 'viewer' no tenant (se já não estiver lá)
-  -- Permite que o RLS is_tenant_member autorize a leitura dos dados da Loja
   INSERT INTO public.tenant_memberships (tenant_id, user_id, role)
   VALUES (v_tenant_id, v_uid, 'viewer'::public.tenant_role)
   ON CONFLICT (tenant_id, user_id) DO NOTHING;
 
-  -- 6. Insere o usuário na loja com o papel definido no convite
+  -- 6. Insere o usuário na loja
   INSERT INTO public.store_memberships (store_id, user_id, role)
   VALUES (v_invite.store_id, v_uid, v_invite.role)
   ON CONFLICT (store_id, user_id) DO UPDATE SET role = excluded.role;
 
-  -- 7. Marca o convite como aceito protegendo contra reutilização
+  -- 7. Marca o convite como aceito
   UPDATE public.store_invites
   SET used_at = pg_catalog.now(), accepted_by = v_uid
   WHERE id = v_invite.id;
