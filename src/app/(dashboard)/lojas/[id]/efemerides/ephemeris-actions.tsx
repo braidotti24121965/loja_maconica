@@ -65,8 +65,19 @@ export function EphemerisActions({
             setErrorMessage(null);
             setIsEditing(true);
           }}
-          className="button"
-          style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", padding: "4px 10px", fontSize: 12, gap: 4 }}
+          style={{
+            backgroundColor: "#f0fdf4",
+            color: "#0f766e",
+            border: "1px solid #0f766e",
+            fontWeight: 600,
+            fontSize: 12,
+            padding: "5px 12px",
+            borderRadius: 6,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            cursor: "pointer",
+          }}
         >
           <Pencil size={13} /> Editar
         </button>
@@ -77,8 +88,19 @@ export function EphemerisActions({
             setErrorMessage(null);
             setIsDeleting(true);
           }}
-          className="button"
-          style={{ background: "transparent", color: "var(--danger)", padding: "4px 10px", fontSize: 12, border: "1px solid var(--danger)", gap: 4 }}
+          style={{
+            backgroundColor: "#fef2f2",
+            color: "#dc2626",
+            border: "1px solid #fca5a5",
+            fontWeight: 600,
+            fontSize: 12,
+            padding: "5px 12px",
+            borderRadius: 6,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            cursor: "pointer",
+          }}
         >
           <Trash size={13} /> Excluir
         </button>

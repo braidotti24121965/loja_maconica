@@ -96,7 +96,7 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           <Link
             href={`/lojas/${storeId}/efemerides/relatorio`}
             className="button"
-            style={{ background: "var(--brand)", color: "#fff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none" }}
+            style={{ background: "#0f766e", color: "#ffffff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontWeight: 700, padding: "10px 18px", borderRadius: "8px", boxShadow: "0 2px 6px rgba(15, 118, 110, 0.25)" }}
           >
             <Calendar size={16} /> Relatório PDF (Chanceler)
           </Link>

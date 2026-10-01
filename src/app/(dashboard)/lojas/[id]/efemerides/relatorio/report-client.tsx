@@ -224,16 +224,42 @@ export function EphemeridesReportClient({
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button
+              type="button"
               onClick={handlePrint}
-              className="button"
-              style={{ background: "#0f766e", color: "#ffffff", gap: 8, fontWeight: 700, boxShadow: "0 2px 6px rgba(15, 118, 110, 0.25)", border: "none" }}
+              style={{
+                backgroundColor: "#0f766e",
+                color: "#ffffff",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontWeight: 700,
+                fontSize: 14,
+                padding: "10px 18px",
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(15, 118, 110, 0.3)",
+              }}
             >
               <Printer size={16} /> Imprimir / Baixar PDF
             </button>
             <button
+              type="button"
               onClick={() => setEmailModalOpen(true)}
-              className="button"
-              style={{ background: "#2563eb", color: "#ffffff", gap: 8, fontWeight: 700, boxShadow: "0 2px 6px rgba(37, 99, 235, 0.25)", border: "none" }}
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#ffffff",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontWeight: 700,
+                fontSize: 14,
+                padding: "10px 18px",
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(37, 99, 235, 0.3)",
+              }}
             >
               <Mail size={16} /> Enviar por E-mail
             </button>

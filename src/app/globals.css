@@ -4,12 +4,16 @@
   --green: #148779;
   --green-dark: #0f766e;
   --green-soft: #e8f6f3;
+  --brand: #0f766e;
+  --brand-hover: #115e59;
+  --brand-light: #e8f6f3;
   --gold: #b88a34;
   --page: #f3f7fb;
   --surface: #ffffff;
   --border: #dbe3ec;
   --text: #102a43;
   --muted: #526173;
+  --subtle: #526173;
   --soft: #7f8ea3;
   --danger: #c2414b;
 }
