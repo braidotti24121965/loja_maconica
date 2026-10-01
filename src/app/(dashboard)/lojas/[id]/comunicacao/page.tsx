@@ -19,7 +19,7 @@ export default async function ComunicacaoPage({ params }: { params: Promise<{ id
     .single();
 
   if (!membership || !["admin", "secretary"].includes(membership.role)) {
-    redirect(`/lojas/${storeId}`);
+    redirect(`/lojas/${storeId}/meu-espaco`);
   }
 
   const { data: store } = await supabase.from("stores").select("name").eq("id", storeId).single();

@@ -24,7 +24,7 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
     .single();
 
   if (!membership || !["admin", "treasurer"].includes(membership.role)) {
-    redirect(`/lojas/${storeId}`);
+    redirect(`/lojas/${storeId}/meu-espaco`);
   }
 
   // Fetch all brothers and their dues

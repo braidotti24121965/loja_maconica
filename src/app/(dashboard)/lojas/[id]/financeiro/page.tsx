@@ -19,7 +19,7 @@ export default async function FinanceiroPage({ params }: { params: Promise<{ id:
     .single();
 
   if (!membership || !["admin", "treasurer"].includes(membership.role)) {
-    redirect(`/lojas/${storeId}`);
+    redirect(`/lojas/${storeId}/meu-espaco`);
   }
 
   // Fetch accounts

@@ -20,13 +20,7 @@ export default async function ConfigStorePage({ params }: { params: Promise<{ id
   const role = (store?.store_memberships as { role?: string }[])?.[0]?.role;
 
   if (!store || !["admin", "secretary"].includes(role || "")) {
-    return (
-      <div className="card">
-        <h3>Acesso Negado</h3>
-        <p className="subtle">Você precisa ser administrador para editar esta loja.</p>
-        <Link href={`/lojas/${storeId}`} className="button" style={{ marginTop: 16, display: "inline-block" }}>Voltar</Link>
-      </div>
-    );
+    redirect(`/lojas/${storeId}/meu-espaco`);
   }
 
   return (

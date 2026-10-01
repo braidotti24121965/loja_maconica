@@ -21,6 +21,7 @@ export default async function MembrosPage({ params }: { params: Promise<{ id: st
 
   if (!myMembership) redirect("/lojas");
   const isAdmin = ["admin", "secretary"].includes(myMembership.role);
+  if (!isAdmin) redirect(`/lojas/${storeId}/meu-espaco`);
 
   // Buscar todos os membros (acessos) e juntar com profiles
   const { data: memberships } = await supabase
