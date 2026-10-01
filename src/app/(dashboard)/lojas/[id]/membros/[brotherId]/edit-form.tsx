@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; birthdate?: string | null; initiation_date?: string | null; elevation_date?: string | null; exaltation_date?: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
-  const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
+  const [state, action, pending] = useActionState(async (_state: { error?: string; success?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
   }, null);
 
@@ -23,6 +23,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
     <div>
       <form action={action} className="form">
         {state?.error && <div className="message error">{state.error}</div>}
+        {state?.success && <div className="message success">{state.success}</div>}
         
         <input type="hidden" name="store_id" value={storeId} />
         <input type="hidden" name="brother_id" value={brother.id} />

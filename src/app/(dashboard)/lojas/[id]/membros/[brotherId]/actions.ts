@@ -29,7 +29,7 @@ export async function updateBrother(data: FormData) {
   }
 
   const supabase = await createClient();
-  const { data: updatedBrother, error } = await supabase
+  const { error } = await supabase
     .from("brothers")
     .update({
       full_name: fullName,
@@ -44,18 +44,15 @@ export async function updateBrother(data: FormData) {
       exaltation_date: exaltationDate || null,
     })
     .eq("id", brotherId)
-    .eq("store_id", storeId)
-    .select("id")
-    .maybeSingle();
+    .eq("store_id", storeId);
 
   if (error) {
     console.error("Erro ao atualizar obreiro:", error);
     return { error: "Falha ao atualizar irmão. Verifique suas permissões." };
   }
-  if (!updatedBrother) return { error: "Irmão não encontrado nesta loja." };
-
   revalidatePath(`/lojas/${storeId}/membros`);
-  redirect(`/lojas/${storeId}/membros`);
+  revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
+  return { success: "Alterações salvas com sucesso!" };
 }
 
 export async function deleteBrother(data: FormData) {
