@@ -97,13 +97,21 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
   const masonicAnniversaries = inScopeItems.filter((i: EphemerisItem) => ["initiation", "elevation", "exaltation"].includes(i.item_type));
   const ephemerides = inScopeItems.filter((i: EphemerisItem) => i.item_type === "ephemeris");
 
+  const currentYear = now.getFullYear();
+
   // Aniversariantes da semana/mês para copiar mensagem WhatsApp
   const whatsappBirthdaysText = birthdays
-    .map((b: EphemerisItem) => `🎉 Ir. ${b.brother_name} (${String(b.day).padStart(2, "0")}/${String(b.month).padStart(2, "0")})`)
+    .map((b: EphemerisItem) => {
+      const age = b.year ? currentYear - b.year : null;
+      return `🎉 Ir. ${b.brother_name} (${String(b.day).padStart(2, "0")}/${String(b.month).padStart(2, "0")}${age !== null ? ` - ${age} anos` : ""})`;
+    })
     .join("%0A");
 
   const whatsappDependentsText = dependentBirthdays
-    .map((d: EphemerisItem) => `🌺 ${d.brother_name} (${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")})`)
+    .map((d: EphemerisItem) => {
+      const age = d.year ? currentYear - d.year : null;
+      return `🌺 ${d.brother_name} (${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")}${age !== null ? ` - ${age} anos` : ""})`;
+    })
     .join("%0A");
 
   const whatsappSections: string[] = [];
@@ -178,12 +186,13 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {birthdays.map((b: EphemerisItem) => {
                 const isToday = b.day === currentDay && b.month === currentMonth;
+                const age = b.year ? currentYear - b.year : null;
                 return (
                   <div key={b.item_id + b.title} style={{ padding: 12, borderRadius: 8, background: isToday ? "#ecfdf5" : "var(--page)", border: isToday ? "1px solid #34d399" : "1px solid var(--border)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <strong>{b.brother_name}</strong>
                       <span className="badge" style={{ background: isToday ? "#10b981" : undefined, color: isToday ? "#fff" : undefined }}>
-                        {String(b.day).padStart(2, "0")}/{String(b.month).padStart(2, "0")} {isToday && "🎂 HOJE!"}
+                        {String(b.day).padStart(2, "0")}/{String(b.month).padStart(2, "0")} {age !== null ? `(${age} anos)` : ""} {isToday && "🎂 HOJE!"}
                       </span>
                     </div>
                     <span className="subtle" style={{ fontSize: 12 }}>{b.degree}</span>
@@ -205,12 +214,13 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {dependentBirthdays.map((d: EphemerisItem) => {
                 const isToday = d.day === currentDay && d.month === currentMonth;
+                const age = d.year ? currentYear - d.year : null;
                 return (
                   <div key={d.item_id + d.title} style={{ padding: 12, borderRadius: 8, background: isToday ? "#fdf2f8" : "var(--page)", border: isToday ? "1px solid #f472b6" : "1px solid var(--border)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <strong>{d.brother_name}</strong>
                       <span className="badge" style={{ background: isToday ? "#ec4899" : undefined, color: isToday ? "#fff" : undefined }}>
-                        {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")} {d.year ? `(${d.year})` : ""} {isToday && "🎂 HOJE!"}
+                        {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")} {age !== null ? `(${age} anos)` : ""} {isToday && "🎂 HOJE!"}
                       </span>
                     </div>
                     <p className="subtle" style={{ margin: "4px 0 0 0", fontSize: 12 }}>{d.description}</p>
@@ -230,17 +240,23 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
             <p className="subtle" style={{ fontSize: 14 }}>Nenhuma data maçônica neste período.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {masonicAnniversaries.map((m: EphemerisItem) => (
-                <div key={m.item_id + m.item_type} style={{ padding: 12, borderRadius: 8, background: "var(--page)", border: "1px solid var(--border)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <strong>{m.title}</strong>
-                    <span className="badge">
-                      {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")} {m.year ? `(${m.year})` : ""}
-                    </span>
+              {masonicAnniversaries.map((m: EphemerisItem) => {
+                const masonicYears = m.year ? currentYear - m.year : null;
+                const milestoneLabel = masonicYears !== null ? `${masonicYears} ${masonicYears === 1 ? "ano" : "anos"}` : "";
+                return (
+                  <div key={m.item_id + m.item_type} style={{ padding: 12, borderRadius: 8, background: "var(--page)", border: "1px solid var(--border)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <strong>{m.title}</strong>
+                      <span className="badge">
+                        {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")} {milestoneLabel ? `(${milestoneLabel})` : ""}
+                      </span>
+                    </div>
+                    <p className="subtle" style={{ margin: "4px 0 0 0", fontSize: 12 }}>
+                      {m.description} {m.year ? `(${milestoneLabel ? `${milestoneLabel} - ` : ""}Ano: ${m.year})` : ""}
+                    </p>
                   </div>
-                  <p className="subtle" style={{ margin: "4px 0 0 0", fontSize: 12 }}>{m.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -259,24 +275,27 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           <p className="subtle" style={{ fontSize: 14 }}>Nenhuma efeméride histórica cadastrada.</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {ephemerides.map((e: EphemerisItem) => (
-              <div key={e.item_id} style={{ padding: 16, borderRadius: 8, background: e.is_global ? "#f0f9ff" : "var(--page)", border: e.is_global ? "1px solid #7dd3fc" : "1px solid var(--border)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                  <div>
-                    <strong style={{ fontSize: 15 }}>{e.title}</strong>
-                    {e.is_global && <span className="badge" style={{ marginLeft: 8, background: "#0284c7", color: "#fff" }}>SaaS Geral</span>}
+            {ephemerides.map((e: EphemerisItem) => {
+              const ephemYears = e.year ? currentYear - e.year : null;
+              return (
+                <div key={e.item_id} style={{ padding: 16, borderRadius: 8, background: e.is_global ? "#f0f9ff" : "var(--page)", border: e.is_global ? "1px solid #7dd3fc" : "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <div>
+                      <strong style={{ fontSize: 15 }}>{e.title}</strong>
+                      {e.is_global && <span className="badge" style={{ marginLeft: 8, background: "#0284c7", color: "#fff" }}>SaaS Geral</span>}
+                    </div>
+                    <span className="badge">
+                      {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")} {ephemYears !== null ? `(${ephemYears} anos)` : ""}
+                    </span>
                   </div>
-                  <span className="badge">
-                    {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")} {e.year ? `(${e.year})` : ""}
-                  </span>
-                </div>
-                {e.description && <p className="subtle" style={{ fontSize: 13, margin: 0 }}>{e.description}</p>}
+                  {e.description && <p className="subtle" style={{ fontSize: 13, margin: 0 }}>{e.description}</p>}
 
-                {isAdmin && !e.is_global && (
-                  <EphemerisActions storeId={storeId} ephemeris={e} />
-                )}
-              </div>
-            ))}
+                  {isAdmin && !e.is_global && (
+                    <EphemerisActions storeId={storeId} ephemeris={e} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

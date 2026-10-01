@@ -143,29 +143,43 @@ export function EphemeridesReportClient({
   // Construct Email Text
   const emailSubject = `Prancha de Efemérides - A.R.L.S. ${store.name} (${formatDateBR(startDate)} a ${formatDateBR(endDate)})`;
   
+  const currentYear = new Date().getFullYear();
+
   const formattedSections: string[] = [];
   if (birthdays.length > 0) {
     formattedSections.push(
       `🏛️ IRMÃOS ANIVERSARIANTES:\n` +
-      birthdays.map((b) => `- ${String(b.day).padStart(2, "0")}/${String(b.month).padStart(2, "0")}: Ir. ${b.brother_name} (${b.degree})`).join("\n")
+      birthdays.map((b) => {
+        const age = b.year ? currentYear - b.year : null;
+        return `- ${String(b.day).padStart(2, "0")}/${String(b.month).padStart(2, "0")}: Ir. ${b.brother_name}${age !== null ? ` (${age} anos)` : ""} - ${b.degree}`;
+      }).join("\n")
     );
   }
   if (dependentBirthdays.length > 0) {
     formattedSections.push(
       `🌺 DEPENDENTES & FAMILIARES ANIVERSARIANTES:\n` +
-      dependentBirthdays.map((d) => `- ${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")}: ${d.brother_name}`).join("\n")
+      dependentBirthdays.map((d) => {
+        const age = d.year ? currentYear - d.year : null;
+        return `- ${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")}: ${d.brother_name}${age !== null ? ` (${age} anos)` : ""}`;
+      }).join("\n")
     );
   }
   if (masonicAnniversaries.length > 0) {
     formattedSections.push(
       `📜 DATAS MAÇÔNICAS DOS IRMÃOS:\n` +
-      masonicAnniversaries.map((m) => `- ${String(m.day).padStart(2, "0")}/${String(m.month).padStart(2, "0")}: ${m.title}`).join("\n")
+      masonicAnniversaries.map((m) => {
+        const mYears = m.year ? currentYear - m.year : null;
+        return `- ${String(m.day).padStart(2, "0")}/${String(m.month).padStart(2, "0")}: ${m.title}${mYears !== null ? ` (${mYears} ${mYears === 1 ? "ano" : "anos"})` : ""}`;
+      }).join("\n")
     );
   }
   if (ephemerides.length > 0) {
     formattedSections.push(
       `⭐ EFEMÉRIDES HISTÓRICAS E COMEMORATIVAS:\n` +
-      ephemerides.map((e) => `- ${String(e.day).padStart(2, "0")}/${String(e.month).padStart(2, "0")}: ${e.title}`).join("\n")
+      ephemerides.map((e) => {
+        const eYears = e.year ? currentYear - e.year : null;
+        return `- ${String(e.day).padStart(2, "0")}/${String(e.month).padStart(2, "0")}: ${e.title}${eYears !== null ? ` (${eYears} anos)` : ""}`;
+      }).join("\n")
     );
   }
 
@@ -496,19 +510,26 @@ export function EphemeridesReportClient({
                 <tr style={{ borderBottom: "1px solid #cbd5e1", textAlign: "left", background: "#f8fafc" }}>
                   <th style={{ padding: "6px 12px", width: "80px" }}>Data</th>
                   <th style={{ padding: "6px 12px" }}>Nome do Irmão</th>
+                  <th style={{ padding: "6px 12px", width: "100px" }}>Idade</th>
                   <th style={{ padding: "6px 12px" }}>Grau Maçônico</th>
                 </tr>
               </thead>
               <tbody>
-                {birthdays.map((b) => (
-                  <tr key={b.item_id + b.title} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "8px 12px", fontWeight: 700 }}>
-                      {String(b.day).padStart(2, "0")}/{String(b.month).padStart(2, "0")}
-                    </td>
-                    <td style={{ padding: "8px 12px", fontWeight: 600 }}>{b.brother_name}</td>
-                    <td style={{ padding: "8px 12px", color: "#475569" }}>{b.degree}</td>
-                  </tr>
-                ))}
+                {birthdays.map((b) => {
+                  const age = b.year ? currentYear - b.year : null;
+                  return (
+                    <tr key={b.item_id + b.title} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 12px", fontWeight: 700 }}>
+                        {String(b.day).padStart(2, "0")}/{String(b.month).padStart(2, "0")}
+                      </td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>{b.brother_name}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0f766e" }}>
+                        {age !== null ? `${age} anos` : "-"}
+                      </td>
+                      <td style={{ padding: "8px 12px", color: "#475569" }}>{b.degree}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -542,19 +563,26 @@ export function EphemeridesReportClient({
                 <tr style={{ borderBottom: "1px solid #cbd5e1", textAlign: "left", background: "#f8fafc" }}>
                   <th style={{ padding: "6px 12px", width: "80px" }}>Data</th>
                   <th style={{ padding: "6px 12px" }}>Familiar / Dependente</th>
+                  <th style={{ padding: "6px 12px", width: "100px" }}>Idade</th>
                   <th style={{ padding: "6px 12px" }}>Vínculo de Parentesco</th>
                 </tr>
               </thead>
               <tbody>
-                {dependentBirthdays.map((d) => (
-                  <tr key={d.item_id + d.title} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "8px 12px", fontWeight: 700 }}>
-                      {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")}
-                    </td>
-                    <td style={{ padding: "8px 12px", fontWeight: 600 }}>{d.brother_name}</td>
-                    <td style={{ padding: "8px 12px", color: "#475569" }}>{d.description}</td>
-                  </tr>
-                ))}
+                {dependentBirthdays.map((d) => {
+                  const age = d.year ? currentYear - d.year : null;
+                  return (
+                    <tr key={d.item_id + d.title} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 12px", fontWeight: 700 }}>
+                        {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")}
+                      </td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>{d.brother_name}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0f766e" }}>
+                        {age !== null ? `${age} anos` : "-"}
+                      </td>
+                      <td style={{ padding: "8px 12px", color: "#475569" }}>{d.description}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -588,19 +616,28 @@ export function EphemeridesReportClient({
                 <tr style={{ borderBottom: "1px solid #cbd5e1", textAlign: "left", background: "#f8fafc" }}>
                   <th style={{ padding: "6px 12px", width: "80px" }}>Data</th>
                   <th style={{ padding: "6px 12px" }}>Acontecimento Maçônico</th>
+                  <th style={{ padding: "6px 12px", width: "140px" }}>Tempo Decorrido</th>
                   <th style={{ padding: "6px 12px" }}>Descrição</th>
                 </tr>
               </thead>
               <tbody>
-                {masonicAnniversaries.map((m) => (
-                  <tr key={m.item_id + m.item_type} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "8px 12px", fontWeight: 700 }}>
-                      {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")}
-                    </td>
-                    <td style={{ padding: "8px 12px", fontWeight: 600 }}>{m.title}</td>
-                    <td style={{ padding: "8px 12px", color: "#475569" }}>{m.description}</td>
-                  </tr>
-                ))}
+                {masonicAnniversaries.map((m) => {
+                  const mYears = m.year ? currentYear - m.year : null;
+                  return (
+                    <tr key={m.item_id + m.item_type} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 12px", fontWeight: 700 }}>
+                        {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")}
+                      </td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600 }}>{m.title}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0f766e" }}>
+                        {mYears !== null ? `${mYears} ${mYears === 1 ? "ano" : "anos"}` : "-"}
+                      </td>
+                      <td style={{ padding: "8px 12px", color: "#475569" }}>
+                        {m.description} {m.year ? `(Ano: ${m.year})` : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -630,19 +667,24 @@ export function EphemeridesReportClient({
             </p>
           ) : (
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {ephemerides.map((e) => (
-                <li key={e.item_id} style={{ padding: "8px 0", borderBottom: "1px dashed #e2e8f0" }}>
-                  <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-                    <strong style={{ minWidth: 60, fontSize: 14 }}>
-                      {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")}
-                    </strong>
-                    <div>
-                      <strong style={{ fontSize: 15 }}>{e.title}</strong>
-                      {e.description && <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#475569" }}>{e.description}</p>}
+              {ephemerides.map((e) => {
+                const eYears = e.year ? currentYear - e.year : null;
+                return (
+                  <li key={e.item_id} style={{ padding: "8px 0", borderBottom: "1px dashed #e2e8f0" }}>
+                    <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+                      <strong style={{ minWidth: 60, fontSize: 14 }}>
+                        {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")}
+                      </strong>
+                      <div>
+                        <strong style={{ fontSize: 15 }}>
+                          {e.title} {eYears !== null ? `(${eYears} anos)` : ""}
+                        </strong>
+                        {e.description && <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#475569" }}>{e.description}</p>}
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
