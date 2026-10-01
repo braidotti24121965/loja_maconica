@@ -17,13 +17,22 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
   const { data: store } = await supabase.from("stores").select("name").eq("id", storeId).single();
   if (!store) redirect("/lojas");
 
-  // Authentication & Authorization (must be linked to a brother)
-  const { data: brother } = await supabase
-    .from("brothers")
-    .select("*")
-    .eq("store_id", storeId)
-    .eq("user_id", user.id)
-    .single();
+  // Authentication & Authorization (auto-link or fetch brother)
+  let brother = null;
+  const { data: brothersRpc } = await supabase.rpc("get_or_link_my_brother", { p_store_id: storeId });
+  if (brothersRpc && brothersRpc.length > 0) {
+    brother = brothersRpc[0];
+  } else {
+    // Fallback query
+    const { data: directBrother } = await supabase
+      .from("brothers")
+      .select("*")
+      .eq("store_id", storeId)
+      .or(`user_id.eq.${user.id},email.ilike.${user.email}`)
+      .limit(1)
+      .maybeSingle();
+    brother = directBrother;
+  }
 
   if (!brother) {
     return (

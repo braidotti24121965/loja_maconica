@@ -72,6 +72,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
     : profileName.slice(0, 2).toUpperCase();
 
+  const hasAdminPrivileges = userStores.some((s) =>
+    ["admin", "secretary", "treasurer"].includes(s.role || "")
+  );
+
+  const overviewHref = activeStore ? `/lojas/${activeStore.id}` : "/";
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -83,11 +89,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
         <nav className="nav" aria-label="Navegação principal">
-          <Link href="/"><LayoutDashboard size={18}/><span>Visão geral</span></Link>
-          <Link href="/lojas"><Store size={18}/><span>Loja</span></Link>
+          <Link href={overviewHref}><LayoutDashboard size={18}/><span>Visão geral</span></Link>
+          {hasAdminPrivileges && (
+            <Link href="/lojas"><Store size={18}/><span>Loja</span></Link>
+          )}
           <Link href="/perfil"><User size={18}/><span>Meu Perfil</span></Link>
         </nav>
-        {userStores.length > 1 && (
+        {userStores.length > 1 && hasAdminPrivileges && (
           <StoreSwitcher stores={userStores} activeId={activeStoreId} />
         )}
       </aside>

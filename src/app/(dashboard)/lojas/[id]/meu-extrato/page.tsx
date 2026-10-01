@@ -12,13 +12,21 @@ export default async function MeuExtratoPage({ params }: { params: Promise<{ id:
 
   if (!user) redirect("/login");
 
-  // Fetch the brother matching the user
-  const { data: brother } = await supabase
-    .from("brothers")
-    .select("id, full_name")
-    .eq("store_id", storeId)
-    .eq("user_id", user.id)
-    .single();
+  // Fetch or auto-link the brother matching the user
+  let brother: { id: string; full_name: string } | null = null;
+  const { data: brothersRpc } = await supabase.rpc("get_or_link_my_brother", { p_store_id: storeId });
+  if (brothersRpc && brothersRpc.length > 0) {
+    brother = brothersRpc[0];
+  } else {
+    const { data: directBrother } = await supabase
+      .from("brothers")
+      .select("id, full_name")
+      .eq("store_id", storeId)
+      .or(`user_id.eq.${user.id},email.ilike.${user.email}`)
+      .limit(1)
+      .maybeSingle();
+    brother = directBrother;
+  }
 
   if (!brother) {
     return (

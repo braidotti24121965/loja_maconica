@@ -37,6 +37,15 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
 
   if (storesError) throw new Error("Stores Error: " + storesError.message);
 
+  const hasManagementRole = stores?.some((store) => {
+    const roles = store.store_memberships as { role?: string }[] | undefined;
+    return roles?.some((r) => ["admin", "secretary", "treasurer"].includes(r.role || ""));
+  });
+
+  if (!hasManagementRole && stores && stores.length > 0) {
+    redirect(`/lojas/${stores[0].id}`);
+  }
+
   return (
     <div>
       {erroConvite && (
