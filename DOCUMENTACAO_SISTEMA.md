@@ -102,6 +102,7 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
     - **Edição**: Permitida apenas para **sessões futuras** (`data >= data_atual`).
     - **Exclusão**: Permitida apenas para **sessões futuras** e que **NÃO possuam registros de frequência associados** (`session_attendances.count == 0`).
     - Exclusão protegida por validação no servidor e diálogo de confirmação visual (`ConfirmDialog`).
+    - **Desseleção de Frequência (`/sessoes/[sessionId]/frequencia`)**: Administradores podem escolher a opção `⚪ Selecione / Não registrado` ou clicar no atalho *Desselecionar*, o que remove o registro da tabela `session_attendances` ao salvar.
   - **Prancha de Efemérides da Sessão (Ferramenta do Chanceler - `/lojas/[id]/efemerides/relatorio`)**:
     - Cálculo automático do período da sessão (da data da reunião até 1 dia antes da próxima sessão).
     - Pré-visualização do PDF na tela formatado como boletim oficial maçônico (cabeçalho da A.R.L.S., 4 seções organizadas e campo para assinatura do Ir. Chanceler).

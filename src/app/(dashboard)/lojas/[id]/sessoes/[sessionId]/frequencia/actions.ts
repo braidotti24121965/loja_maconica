@@ -38,24 +38,47 @@ export async function saveAttendance(
     return { error: "A lista contém irmão de outra loja ou cadastro inexistente." };
   }
 
-  const toUpsert = data.map((item) => ({
-    store_id: storeId,
-    session_id: sessionId,
-    brother_id: item.brother_id,
-    status: item.status,
-    justification: item.justification,
-  }));
+  const toUpsert = data
+    .filter((item) => item.status && String(item.status).trim() !== "")
+    .map((item) => ({
+      store_id: storeId,
+      session_id: sessionId,
+      brother_id: item.brother_id,
+      status: item.status,
+      justification: item.status === "justified" ? (item.justification as string | null) || null : null,
+    }));
 
-  const { error } = await supabase
-    .from("session_attendances")
-    .upsert(toUpsert, { onConflict: "session_id, brother_id" });
+  const toDeleteBrotherIds = data
+    .filter((item) => !item.status || String(item.status).trim() === "")
+    .map((item) => String(item.brother_id));
 
-  if (error) {
-    console.error("Erro ao salvar frequência:", error.message);
-    return { error: "Erro ao salvar os dados no banco." };
+  if (toUpsert.length > 0) {
+    const { error: upsertError } = await supabase
+      .from("session_attendances")
+      .upsert(toUpsert, { onConflict: "session_id, brother_id" });
+
+    if (upsertError) {
+      console.error("Erro ao salvar frequência:", upsertError.message);
+      return { error: "Erro ao salvar os dados no banco." };
+    }
+  }
+
+  if (toDeleteBrotherIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("session_attendances")
+      .delete()
+      .eq("session_id", sessionId)
+      .eq("store_id", storeId)
+      .in("brother_id", toDeleteBrotherIds);
+
+    if (deleteError) {
+      console.error("Erro ao remover frequência desselecionada:", deleteError.message);
+      return { error: "Erro ao atualizar os dados no banco." };
+    }
   }
 
   revalidatePath(`/lojas/${storeId}/sessoes/${sessionId}/frequencia`);
+  revalidatePath(`/lojas/${storeId}/sessoes`);
   return { success: true };
 }
 

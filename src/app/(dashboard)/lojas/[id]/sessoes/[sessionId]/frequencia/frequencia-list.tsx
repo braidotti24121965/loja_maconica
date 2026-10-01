@@ -89,19 +89,31 @@ export function FrequenciaList({
               </div>
               
               {!readOnly ? (
-                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  <div className="field" style={{ marginBottom: 0, minWidth: 150 }}>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                  <div className="field" style={{ marginBottom: 0, minWidth: 200 }}>
                     <select 
                       className="input" 
                       value={current?.status || ""} 
                       onChange={e => handleStatusChange(brother.id, e.target.value)}
                     >
-                      <option value="" disabled>Selecione...</option>
+                      <option value="">⚪ Selecione / Não registrado</option>
                       <option value="present">🟢 Presente</option>
                       <option value="absent">🔴 Faltou</option>
                       <option value="justified">🟡 Falta Justificada</option>
                     </select>
                   </div>
+
+                  {current?.status && (
+                    <button
+                      type="button"
+                      onClick={() => handleStatusChange(brother.id, "")}
+                      className="subtle"
+                      style={{ background: "transparent", border: "none", color: "var(--danger)", cursor: "pointer", fontSize: 13, textDecoration: "underline", padding: "4px 0" }}
+                      title="Desselecionar / Limpar Frequência"
+                    >
+                      Desselecionar
+                    </button>
+                  )}
 
                   {isJustified && (
                     <div className="field" style={{ marginBottom: 0, flex: "1 1 200px" }}>
