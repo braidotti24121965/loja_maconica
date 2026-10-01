@@ -6,6 +6,7 @@ type ChartData = {
   month: string;
   receitas: number;
   despesas: number;
+  inadimplencias: number;
 };
 
 export default function ChartsClient({ data }: { data: ChartData[] }) {
@@ -27,6 +28,7 @@ export default function ChartsClient({ data }: { data: ChartData[] }) {
           <Legend wrapperStyle={{ paddingTop: 20 }} />
           <Bar dataKey="receitas" name="Receitas" fill="#0f766e" radius={[4, 4, 0, 0]} maxBarSize={50} />
           <Bar dataKey="despesas" name="Despesas" fill="#c2414b" radius={[4, 4, 0, 0]} maxBarSize={50} />
+          <Bar dataKey="inadimplencias" name="Inadimplência" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={50} />
         </BarChart>
       </ResponsiveContainer>
     </div>

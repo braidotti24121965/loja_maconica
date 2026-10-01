@@ -41,12 +41,12 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
   const totalPendente = (transactions || []).filter(t => t.status === 'pending').reduce((acc, t) => acc + Number(t.amount), 0);
 
   // Group by month for chart
-  const monthlyData: Record<string, { month: string, receitas: number, despesas: number }> = {};
+  const monthlyData: Record<string, { month: string, receitas: number, despesas: number, inadimplencias: number }> = {};
   
   // Initialize 12 months
   const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   monthNames.forEach((m, idx) => {
-    monthlyData[String(idx + 1).padStart(2, '0')] = { month: m, receitas: 0, despesas: 0 };
+    monthlyData[String(idx + 1).padStart(2, '0')] = { month: m, receitas: 0, despesas: 0, inadimplencias: 0 };
   });
 
   (transactions || []).forEach(t => {
@@ -55,6 +55,36 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
     if (monthlyData[m]) {
       if (t.type === 'income') monthlyData[m].receitas += Number(t.amount);
       if (t.type === 'expense') monthlyData[m].despesas += Number(t.amount);
+    }
+  });
+
+  // Fetch dues to calculate inadimplência per month
+  const { data: dues } = await supabase
+    .from("monthly_dues")
+    .select("*")
+    .eq("store_id", storeId)
+    .gte("due_date", `${currentYearStr}-01-01`)
+    .lte("due_date", `${currentYearStr}-12-31`);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let totalInadimplencia = 0;
+
+  (dues || []).forEach(due => {
+    const m = due.due_date.substring(5, 7);
+    if (monthlyData[m]) {
+      let isOverdue = due.status === 'overdue';
+      if (due.status === 'pending') {
+        const dueDate = new Date(due.due_date);
+        dueDate.setHours(0, 0, 0, 0);
+        if (dueDate < today) isOverdue = true;
+      }
+      if (isOverdue) {
+        const amt = Number(due.amount);
+        monthlyData[m].inadimplencias += amt;
+        totalInadimplencia += amt;
+      }
     }
   });
 
@@ -80,6 +110,10 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
         <div className="card" style={{ borderTop: "4px solid var(--gold)" }}>
           <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Contas Pendentes</h3>
           <p style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", margin: 0 }}>R$ {totalPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+        </div>
+        <div className="card" style={{ borderTop: "4px solid #d97706" }}>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Inadimplência (Ano)</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "#d97706", margin: 0 }}>R$ {totalInadimplencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
         </div>
       </div>
 
