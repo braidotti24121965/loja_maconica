@@ -47,7 +47,7 @@ export default async function LojasPage() {
       </div>
 
       {stores && stores.length > 0 ? (
-        <div className="section-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 24, marginTop: 16 }}>
           {stores.map((store) => {
             const roles = store.store_memberships as { role?: string }[] | undefined;
             const role = roles?.[0]?.role || "Membro";
