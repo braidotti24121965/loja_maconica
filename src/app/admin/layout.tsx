@@ -37,8 +37,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin" style={{ color: "#cbd5e1", textDecoration: "none", padding: "12px 16px", borderRadius: 8, background: "rgba(255,255,255,0.05)" }}>
             Visão Geral
           </Link>
-          <Link href="/admin/auditoria" style={{ color: "#cbd5e1", textDecoration: "none", padding: "12px 16px", borderRadius: 8 }}>
-            Logs de Auditoria
+          <Link href="/lojas/nova" style={{ color: "#cbd5e1", textDecoration: "none", padding: "12px 16px", borderRadius: 8 }}>
+            + Nova Loja
           </Link>
         </nav>
 

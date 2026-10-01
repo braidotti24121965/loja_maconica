@@ -14,16 +14,13 @@ export function StoreForm({ tenants }: { tenants: TenantOption[] }) {
     <form action={action} className="form">
       {state?.error && <div className="message error">{state.error}</div>}
       
-      {tenants.length > 1 ? (
-        <div className="field">
-          <label htmlFor="tenant_id">Organização (Tenant)</label>
-          <select id="tenant_id" name="tenant_id" required>
-            {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-        </div>
-      ) : (
-        <input type="hidden" name="tenant_id" value={tenants[0]?.id} />
-      )}
+      <div className="field">
+        <label htmlFor="tenant_id">Organização (Tenant)</label>
+        <select id="tenant_id" name="tenant_id" required>
+          <option value="new">+ Criar Novo Tenant (Automático)</option>
+          {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+      </div>
 
       <div className="field">
         <label htmlFor="name">Nome da Loja</label>

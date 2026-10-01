@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { StoreForm } from "./store-form";
 
 export default async function NovaLojaPage() {
   const supabase = await createClient();
@@ -21,16 +22,19 @@ export default async function NovaLojaPage() {
     );
   }
 
+  // Se for admin da plataforma, buscamos os tenants para ele escolher (ou ele pode criar)
+  const { data: tenants } = await supabase.from("tenants").select("id, name").order("name");
+
   return (
     <div style={{ maxWidth: 600 }}>
-      <Link href="/lojas" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
-        <ArrowLeft size={16} /> Voltar para Lojas
+      <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
+        <ArrowLeft size={16} /> Voltar para Painel Admin
       </Link>
-      <h1 style={{ fontSize: 24, marginBottom: 8 }}>Nova Loja</h1>
-      <p className="subtle" style={{ marginBottom: 32 }}>O provisionamento de novos Tenants deve ser feito pelo administrador da plataforma.</p>
+      <h1 style={{ fontSize: 24, marginBottom: 8 }}>Provisionar Nova Loja</h1>
+      <p className="subtle" style={{ marginBottom: 32 }}>Crie uma nova Loja (o Tenant correspondente será gerado automaticamente se não escolhido).</p>
       
       <div className="card">
-        <p>A criação de Lojas e Tenants via interface está temporariamente desativada. Para provisionar uma nova Loja, crie o Tenant e a Loja via banco de dados.</p>
+        <StoreForm tenants={tenants || []} />
       </div>
     </div>
   );

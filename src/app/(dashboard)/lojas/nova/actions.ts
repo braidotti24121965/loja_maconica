@@ -12,14 +12,34 @@ export async function createStore(data: FormData) {
     return { error: "Não autorizado." };
   }
 
+  const { data: isAdmin } = await supabase.rpc("is_platform_admin");
+  if (!isAdmin) {
+    return { error: "Apenas o admin da plataforma pode criar lojas." };
+  }
+
   const name = data.get("name") as string;
   const number = data.get("number") as string;
   const city = data.get("city") as string;
   const state = data.get("state") as string;
-  const tenant_id = data.get("tenant_id") as string;
+  let tenant_id = data.get("tenant_id") as string;
 
-  if (!name || !tenant_id) {
-    return { error: "Nome e Organização são obrigatórios." };
+  if (!name) {
+    return { error: "Nome é obrigatório." };
+  }
+
+  if (!tenant_id || tenant_id === "new") {
+    // Cria um novo tenant para esta loja
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+    const { data: newTenant, error: tenantErr } = await supabase
+      .from("tenants")
+      .insert({ name: name, slug })
+      .select("id")
+      .single();
+    
+    if (tenantErr || !newTenant) {
+      return { error: "Erro ao criar Tenant." };
+    }
+    tenant_id = newTenant.id;
   }
 
   // 1. Create the store
@@ -41,20 +61,10 @@ export async function createStore(data: FormData) {
     return { error: "Erro ao criar loja. O nome pode já existir nesta organização." };
   }
 
-  // 2. Add the creator as store Admin automatically
-  const { error: memberError } = await supabase
-    .from("store_memberships")
-    .insert({
-      store_id: store.id,
-      user_id: userData.user.id,
-      role: "admin"
-    });
+  // Não inserimos o platform admin no store_memberships
+  // O SaaS Owner provisiona a loja e envia o primeiro convite interno ou adiciona o owner via banco.
+  // Em uma fase futura, a tela de admin terá uma forma de gerar um convite master para o Tenant.
 
-  if (memberError) {
-    console.error("Erro ao vincular membro:", memberError);
-    // Ignore error for now, as store was created, but log it
-  }
-
-  revalidatePath("/lojas");
-  redirect("/lojas");
+  revalidatePath("/admin");
+  redirect("/admin");
 }
