@@ -9,6 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!user) redirect("/login");
 
+  // Use server-side checking. Since we use RLS for the RPC, it works.
   const { data: isAdmin } = await supabase.rpc("is_platform_admin");
 
   if (!isAdmin) {

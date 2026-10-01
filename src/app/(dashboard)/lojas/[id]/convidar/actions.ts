@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
@@ -40,7 +41,7 @@ export async function generateInvite(data: FormData) {
     return { error: "Você não pode conceder esta função." };
   }
 
-  // Insert into store_invites
+  // Insert into internal store_invites first to get the token
   const { data: invite, error } = await supabase
     .from("store_invites")
     .insert({
@@ -53,17 +54,36 @@ export async function generateInvite(data: FormData) {
     .single();
 
   if (error || !invite) {
-    console.error("Erro ao gerar convite:", error);
-    return { error: "Não foi possível gerar o convite. Verifique suas permissões." };
+    console.error("Erro ao gerar convite interno:", error);
+    return { error: "Não foi possível gerar o convite interno." };
   }
 
   const headersList = await headers();
   const origin = headersList.get("origin");
   const fallbackHost = headersList.get("x-forwarded-host") || headersList.get("host") || "localhost:3000";
   const fallbackProtocol = fallbackHost.includes("localhost") ? "http" : "https";
-  const inviteUrl = new URL(`/invite/${invite.token}`, origin || `${fallbackProtocol}://${fallbackHost}`).toString();
+  
+  // The redirect URL that the user will land on after clicking the email link
+  const redirectTo = new URL(`/auth/confirm?type=invite&next=/invite/${invite.token}`, origin || `${fallbackProtocol}://${fallbackHost}`).toString();
 
-  return { inviteUrl };
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  // Send official Supabase Invite
+  const { error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: redirectTo
+  });
+
+  if (inviteError) {
+    console.error("Erro ao enviar convite do Supabase Auth:", inviteError);
+    // If auth fails to send, we might want to revoke the internal invite or inform the user, but for now we just return error
+    return { error: "Erro no provedor de e-mail ao disparar o convite oficial." };
+  }
+
+  // Return empty URL to prevent showing it in the UI (since Supabase sends it)
+  return { inviteUrl: "E-mail de convite enviado oficialmente via Supabase!" };
 }
 
 export async function revokeInvite(data: FormData) {
