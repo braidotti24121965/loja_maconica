@@ -38,7 +38,6 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
   // Calculate totals
   const totalReceitas = (transactions || []).filter(t => t.type === 'income' && t.status === 'paid').reduce((acc, t) => acc + Number(t.amount), 0);
   const totalDespesas = (transactions || []).filter(t => t.type === 'expense' && t.status === 'paid').reduce((acc, t) => acc + Number(t.amount), 0);
-  let totalPendente = (transactions || []).filter(t => t.status === 'pending').reduce((acc, t) => acc + Number(t.amount), 0);
 
   // Group by month for chart
   const monthlyData: Record<string, { month: string, receitas: number, despesas: number, inadimplencias: number }> = {};
@@ -69,7 +68,23 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  let totalInadimplencia = 0;
+  // Variables for new indicators
+  let contasAPagarTotal = 0;
+  let contasAPagarCount = 0;
+
+  let mensalidadesAReceberTotal = 0;
+  let mensalidadesAReceberCount = 0;
+
+  let inadimplenciaTotal = 0;
+  let inadimplenciaCount = 0;
+  const inadimplentesSet = new Set<string>();
+
+  (transactions || []).forEach(t => {
+    if (t.type === 'expense' && (t.status === 'pending' || t.status === 'overdue')) {
+      contasAPagarTotal += Number(t.amount);
+      contasAPagarCount++;
+    }
+  });
 
   (dues || []).forEach(due => {
     let isOverdue = due.status === 'overdue';
@@ -81,16 +96,21 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
     
     if (isOverdue) {
       const amt = Number(due.amount);
-      totalInadimplencia += amt;
+      inadimplenciaTotal += amt;
+      inadimplenciaCount++;
+      inadimplentesSet.add(due.brother_id);
+      
       const m = due.due_date.substring(5, 7);
       if (monthlyData[m]) {
         monthlyData[m].inadimplencias += amt;
       }
     } else if (due.status === 'pending') {
-      totalPendente += Number(due.amount);
+      mensalidadesAReceberTotal += Number(due.amount);
+      mensalidadesAReceberCount++;
     }
   });
 
+  const saldoDisponivel = totalReceitas - totalDespesas;
   const chartData = Object.keys(monthlyData).sort().map(k => monthlyData[k]);
 
   return (
@@ -101,22 +121,35 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
       
       <h1 style={{ fontSize: 24, margin: "0 0 24px 0" }}>Relatórios Financeiros</h1>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 32 }}>
+        <div className="card" style={{ borderTop: "4px solid var(--navy)" }}>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Saldo Disponível (Realizado)</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--navy)", margin: 0 }}>R$ {saldoDisponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <p className="subtle" style={{ fontSize: 12, margin: "4px 0 0 0" }}>Receitas pagas - Despesas pagas</p>
+        </div>
         <div className="card" style={{ borderTop: "4px solid var(--green-dark)" }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Total Receitas (Ano)</h3>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Receitas Realizadas (Ano)</h3>
           <p style={{ fontSize: 24, fontWeight: 700, color: "var(--green-dark)", margin: 0 }}>R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
         </div>
         <div className="card" style={{ borderTop: "4px solid var(--danger)" }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Total Despesas (Ano)</h3>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Despesas Realizadas (Ano)</h3>
           <p style={{ fontSize: 24, fontWeight: 700, color: "var(--danger)", margin: 0 }}>R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
         </div>
+        
+        <div className="card" style={{ borderTop: "4px solid #b91c1c" }}>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Contas a Pagar</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "#b91c1c", margin: 0 }}>R$ {contasAPagarTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <p className="subtle" style={{ fontSize: 12, margin: "4px 0 0 0" }}>{contasAPagarCount} despesas agendadas</p>
+        </div>
         <div className="card" style={{ borderTop: "4px solid var(--gold)" }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Contas Pendentes</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", margin: 0 }}>R$ {totalPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Mensalidades a Receber</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--gold)", margin: 0 }}>R$ {mensalidadesAReceberTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <p className="subtle" style={{ fontSize: 12, margin: "4px 0 0 0" }}>{mensalidadesAReceberCount} mensalidades no prazo</p>
         </div>
         <div className="card" style={{ borderTop: "4px solid #d97706" }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Inadimplência (Ano)</h3>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "#d97706", margin: 0 }}>R$ {totalInadimplencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 14, color: "var(--subtle)" }}>Inadimplência</h3>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "#d97706", margin: 0 }}>R$ {inadimplenciaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <p className="subtle" style={{ fontSize: 12, margin: "4px 0 0 0" }}>{inadimplenciaCount} vencidas de {inadimplentesSet.size} membros</p>
         </div>
       </div>
 
