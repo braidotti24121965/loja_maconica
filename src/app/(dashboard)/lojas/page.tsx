@@ -20,10 +20,14 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
   const { data: isAdmin, error: platformAdminError } = await supabase.rpc("is_platform_admin");
 
   if (platformAdminError) {
-    throw new Error("Não foi possível validar o acesso do administrador da plataforma.");
+    // A listagem já é limitada por RLS. Em caso de falha nesta checagem de
+    // roteamento, mantém o usuário no fluxo comum sem liberar acesso global.
+    console.error("Falha ao verificar administrador da plataforma na listagem de lojas:", {
+      code: platformAdminError.code,
+    });
   }
 
-  if (isAdmin) {
+  if (!platformAdminError && isAdmin) {
     redirect("/admin");
   }
 

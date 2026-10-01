@@ -19,10 +19,14 @@ export default async function Home() {
     await supabase.rpc("is_platform_admin");
 
   if (platformAdminError) {
-    throw new Error("Não foi possível validar o acesso do administrador da plataforma.");
+    // Esta checagem serve somente para escolher o painel inicial. A área
+    // /admin mantém sua própria validação fail-closed no servidor.
+    console.error("Falha ao verificar administrador da plataforma na página inicial:", {
+      code: platformAdminError.code,
+    });
   }
 
-  if (isPlatformAdmin) {
+  if (!platformAdminError && isPlatformAdmin) {
     redirect("/admin");
   }
 
