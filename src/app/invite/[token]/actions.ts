@@ -29,7 +29,7 @@ export async function setupPasswordAction(data: FormData) {
 
   if (acceptError || !success) {
     console.error("Erro ao aceitar convite:", acceptError);
-    redirect("/?erro_convite=invalido_ou_expirado");
+    redirect("/lojas?erro_convite=invalido_ou_expirado");
   }
 
   redirect("/lojas");
@@ -50,7 +50,7 @@ export async function acceptInviteAction(data: FormData) {
 
   if (error || !success) {
     console.error("Erro ao aceitar convite:", error);
-    redirect("/?erro_convite=invalido_ou_expirado");
+    redirect("/lojas?erro_convite=invalido_ou_expirado");
   }
 
   redirect("/lojas");

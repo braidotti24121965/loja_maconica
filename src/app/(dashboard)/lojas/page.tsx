@@ -3,7 +3,9 @@ import { Store as StoreIcon, Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function LojasPage() {
+export default async function LojasPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  const erroConvite = params.erro_convite;
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -33,6 +35,15 @@ export default async function LojasPage() {
 
   return (
     <div>
+      {erroConvite && (
+        <div style={{ background: "#fef2f2", color: "#991b1b", padding: "16px 24px", borderRadius: 8, marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontSize: 20 }}>⚠️</div>
+          <div>
+            <strong style={{ display: "block", marginBottom: 4 }}>Erro no Convite</strong>
+            <span style={{ fontSize: 14 }}>O convite acessado é inválido, já foi utilizado ou expirou. Solicite um novo convite à Loja.</span>
+          </div>
+        </div>
+      )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
         <div>
           <h1 style={{ fontSize: 24, marginBottom: 8 }}>Minhas Lojas</h1>
