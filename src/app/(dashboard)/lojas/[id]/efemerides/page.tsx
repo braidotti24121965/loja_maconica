@@ -95,10 +95,21 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Link
             href={`/lojas/${storeId}/efemerides/relatorio`}
-            className="button"
-            style={{ background: "#0f766e", color: "#ffffff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontWeight: 700, padding: "10px 18px", borderRadius: "8px", boxShadow: "0 2px 6px rgba(15, 118, 110, 0.25)" }}
+            style={{
+              backgroundColor: "#0f766e",
+              color: "#ffffff",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: 14,
+              padding: "10px 18px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(15, 118, 110, 0.3)",
+            }}
           >
-            <Calendar size={16} /> Relatório PDF (Chanceler)
+            <Calendar size={16} color="#ffffff" /> Relatório PDF (Chanceler)
           </Link>
 
           {(birthdays.length > 0 || dependentBirthdays.length > 0) && (
