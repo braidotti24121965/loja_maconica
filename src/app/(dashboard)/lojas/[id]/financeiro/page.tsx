@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Settings } from "lucide-react";
+import { ArrowLeft, Wallet, TrendingUp, Settings } from "lucide-react";
 
 export default async function FinanceiroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;

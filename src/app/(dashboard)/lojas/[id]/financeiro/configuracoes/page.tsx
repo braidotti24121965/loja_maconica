@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Wallet, Tags, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Wallet, Tags, Plus } from "lucide-react";
 import { createAccount, createCategory } from "../actions";
 import { revalidatePath } from "next/cache";
 

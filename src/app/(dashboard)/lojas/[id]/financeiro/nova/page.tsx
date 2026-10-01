@@ -11,7 +11,7 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
 
   if (!user) redirect("/login");
 
-  const [{ data: accounts }, { data: categories }, { data: brothers }] = await Promise.all([
+  const [{ data: accounts }, { data: brothers }] = await Promise.all([
     supabase.from("financial_accounts").select("id, name").eq("store_id", storeId),
     supabase.from("financial_categories").select("id, name, type").eq("store_id", storeId),
     supabase.from("brothers").select("id, full_name").eq("store_id", storeId)

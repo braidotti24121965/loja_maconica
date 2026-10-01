@@ -17,7 +17,7 @@ export async function createCategory(storeId: string, name: string, type: 'incom
   revalidatePath(`/lojas/${storeId}/financeiro`);
 }
 
-export async function addTransaction(storeId: string, data: any) {
+export async function addTransaction(storeId: string, data: Record<string, unknown>) {
   const supabase = await createClient();
   
   // Create transaction

@@ -43,7 +43,7 @@ export function FrequenciaList({
         setMessage("✅ Presenças salvas com sucesso!");
         setTimeout(() => setMessage(""), 3000);
       }
-    } catch (e: any) {
+    } catch {
       setMessage("Erro ao salvar.");
     } finally {
       setSaving(false);

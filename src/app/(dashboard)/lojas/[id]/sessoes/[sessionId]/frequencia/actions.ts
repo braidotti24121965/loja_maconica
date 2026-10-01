@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function saveAttendance(storeId: string, sessionId: string, data: any[]) {
+export async function saveAttendance(storeId: string, sessionId: string, data: Record<string, unknown>[]) {
   const supabase = await createClient();
 
   // First, delete existing attendances for this session to replace them (or we can upsert)
