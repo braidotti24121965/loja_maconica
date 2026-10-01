@@ -102,7 +102,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
       <h3 style={{ marginBottom: 16 }}>Atalhos da Loja</h3>
       <div className="section-grid">
         {/* Sessões — visível para todos os membros (leitura) */}
-        <Link href={`/lojas/${storeId}/sessoes`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <Link href={`/lojas/${storeId}/sessoes`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><FileText size={20} /></div>
             <h3 style={{ margin: 0 }}>Sessões e Atas</h3>
@@ -111,7 +111,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         </Link>
 
         {/* Eventos — visível para todos os membros (leitura) */}
-        <Link href={`/lojas/${storeId}/eventos`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <Link href={`/lojas/${storeId}/eventos`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><CalendarDays size={20} /></div>
             <h3 style={{ margin: 0 }}>Eventos e Galeria</h3>
@@ -120,7 +120,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         </Link>
         
         {/* Efemérides — visível para todos os membros (leitura) */}
-        <Link href={`/lojas/${storeId}/efemerides`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <Link href={`/lojas/${storeId}/efemerides`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon" style={{ background: "#fef3c7", color: "#d97706" }}><Sparkles size={20} /></div>
             <h3 style={{ margin: 0 }}>Efemérides e Datas</h3>
@@ -129,7 +129,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         </Link>
 
         {/* Membros — somente admin/secretary */}
-        {isAdmin && (<Link href={`/lojas/${storeId}/membros`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        {isAdmin && (<Link href={`/lojas/${storeId}/membros`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><Users size={20} /></div>
             <h3 style={{ margin: 0 }}>Membros</h3>
@@ -137,7 +137,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
           <p className="subtle">Gerencie os membros da loja e seus respectivos cargos.</p>
         </Link>)}
         
-        <Link href={`/lojas/${storeId}/meu-espaco`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <Link href={`/lojas/${storeId}/meu-espaco`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon" style={{ background: "var(--brand-soft)", color: "var(--brand)" }}><UserCircle size={20} /></div>
             <h3 style={{ margin: 0 }}>Meu Espaço</h3>
@@ -145,7 +145,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
           <p className="subtle">Sua carteirinha digital, frequência, extrato e resumo.</p>
         </Link>
         
-        <Link href={`/lojas/${storeId}/meu-extrato`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        <Link href={`/lojas/${storeId}/meu-extrato`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><Wallet size={20} /></div>
             <h3 style={{ margin: 0 }}>Meu Extrato</h3>
@@ -154,7 +154,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         </Link>
         
         {isTreasurer && (
-          <Link href={`/lojas/${storeId}/financeiro`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <Link href={`/lojas/${storeId}/financeiro`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <div className="icon" style={{ background: "var(--green-soft)", color: "var(--green-dark)" }}><Wallet size={20} /></div>
               <h3 style={{ margin: 0 }}>Financeiro</h3>
@@ -165,7 +165,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         
 
         {isAdmin && (
-          <Link href={`/lojas/${storeId}/comunicacao`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <Link href={`/lojas/${storeId}/comunicacao`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <div className="icon" style={{ background: "#e0f2fe", color: "#0369a1" }}><MessageSquare size={20} /></div>
               <h3 style={{ margin: 0 }}>Comunicados</h3>
@@ -175,7 +175,7 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
         )}
 
         {isAdmin && (
-          <Link href={`/lojas/${storeId}/configuracoes`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <Link href={`/lojas/${storeId}/configuracoes`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <div className="icon"><Settings size={20} /></div>
               <h3 style={{ margin: 0 }}>Configurações</h3>
