@@ -125,6 +125,14 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
           <p className="subtle">Gerencie os membros da loja e seus respectivos cargos.</p>
         </Link>
         
+        <Link href={`/lojas/${storeId}/meu-extrato`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div className="icon"><Wallet size={20} /></div>
+            <h3 style={{ margin: 0 }}>Meu Extrato</h3>
+          </div>
+          <p className="subtle">Acompanhe suas mensalidades e histórico de pagamentos.</p>
+        </Link>
+        
         {isTreasurer && (
           <Link href={`/lojas/${storeId}/financeiro`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>

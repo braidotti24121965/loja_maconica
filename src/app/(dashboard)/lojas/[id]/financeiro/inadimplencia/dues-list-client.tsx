@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { generateMonthlyDues, payMonthlyDue } from "../mensalidades/actions";
 
 type Due = {
   id: string;
+  brother_id: string;
   brotherName: string;
   competence: string;
   due_date: string;
@@ -141,6 +143,9 @@ export default function DuesListClient({ storeId, dues, accounts }: { storeId: s
                   </span>
                 </td>
                 <td style={{ padding: "16px 24px", textAlign: "right" }}>
+                  <Link href={`/lojas/${storeId}/membros/${due.brother_id}/extrato`} className="button" style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", fontSize: 12, padding: "4px 8px", marginRight: 8, textDecoration: "none" }}>
+                    Extrato
+                  </Link>
                   {due.status !== 'paid' && (
                     <button className="button" style={{ fontSize: 12, padding: "4px 8px" }} onClick={() => setPayModal(due)}>
                       Dar Baixa
