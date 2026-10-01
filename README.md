@@ -1,35 +1,58 @@
-# Controle de Lojas Maçônicas
+# Controle de Lojas Maçônicas (A.R.L.S.) — SaaS Multi-Tenant
 
-Fundação independente para gestão multi-tenant de organizações e lojas maçônicas. O projeto usa Next.js, TypeScript, Supabase Auth/Postgres/RLS e está preparado para homologação na Vercel.
+Sistema web SaaS completo e seguro para gestão administrativa, financeira, ritualística e comunitária de Lojas Maçônicas.
 
-## Arquitetura da Fase 3.1
+> 📄 **Documentação Técnica Completa:** Consulte [`DOCUMENTACAO_SISTEMA.md`](file:///Users/fernandoluizbraidotti/Documents/ChatGPT/Loja%20Maconica/DOCUMENTACAO_SISTEMA.md) para detalhes completos de arquitetura, banco de dados, RLS, matriz de permissões, RPCs e mapa de rotas.
 
-- **Tenant → Loja → Usuário** por tabelas de organização, loja e vínculos com papéis.
-- Sessões Supabase SSR armazenadas em cookies e renovadas por `proxy.ts`.
-- RLS ativa em todas as tabelas públicas, acesso anônimo revogado e políticas por operação.
-- Funções internas de autorização no schema `private`, fora do Data API.
-- Cadastro público desabilitado. Usuários serão convidados por fluxo administrativo na Fase 3.2.
-- Interface responsiva baseada apenas na linguagem visual do Gabi Nails; nenhuma informação, tabela ou regra daquele sistema foi copiada.
+---
 
-## Desenvolvimento
+## 🚀 Status do Projeto
 
-1. Instale Node.js 22 ou superior e execute `npm install`.
-2. Copie `.env.example` para `.env.local` e preencha a URL e a chave publicável do projeto Supabase de desenvolvimento/homologação.
-3. Execute `npm run dev`.
+- **Fases 1 a 14 (Partes 1 e 2):** 100% Concluídas, Auditadas, Testadas e Homologadas.
+- **Ambientes:** Supabase Cloud (Postgres & Storage) e Vercel.
+- **Build & Quality:** `npm run lint`, `npx tsc --noEmit` e `npm run build` aprovados com 0 erros.
 
-Sem as variáveis do Supabase, a interface abre em modo de demonstração local para revisão visual. Nunca coloque a chave secreta ou `service_role` em variável `NEXT_PUBLIC_*`.
+---
 
-## Banco de dados
+## 🛠️ Stack Tecnológica
 
-A migration inicial está em `supabase/migrations`. Antes de aplicar remotamente:
+- **Frontend:** Next.js 16 (App Router com Turbopack, React 19).
+- **Backend:** Supabase Postgres, Auth (SSR Cookies) e Row Level Security (RLS) Fail-Closed.
+- **Estilização:** CSS Custom Properties (Design System responsivo).
+- **Linguagem:** TypeScript (Strict).
 
-1. Vincule explicitamente o projeto de homologação.
-2. Revise o diff e aplique a migration.
-3. Execute os testes de banco e os advisors de segurança e desempenho.
-4. Cadastre o primeiro usuário e seus vínculos somente por fluxo administrativo seguro.
+---
 
-## Ambientes
+## 💻 Desenvolvimento & Validação Local
 
-- **Local:** desenvolvimento e revisão visual.
-- **Homologação:** Supabase e Vercel dedicados, sem dados reais.
-- **Produção:** não criada nem promovida sem aprovação explícita.
+1. Instale o Node.js (22+) e execute:
+   ```bash
+   npm install
+   ```
+2. Configure o arquivo `.env.local` com as credenciais do Supabase:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://<seu-projeto>.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<sua-chave-anon>
+   ```
+3. Execute o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+### Comandos de Validação e Testes:
+
+```bash
+npm run lint         # Checagem do ESLint
+npx tsc --noEmit     # Checagem estática de tipos TypeScript
+npm run build        # Build de produção do Next.js
+npx supabase db push # Aplicação de migrações no banco remoto
+```
+
+---
+
+## 🔒 Segurança e Privacidade
+
+- **RLS Ativo:** 100% das tabelas possuem Row Level Security habilitado.
+- **Fail-Closed:** Server Actions protegidas por `requireStoreAdmin` / `requireStoreMember`.
+- **Privacidade de Menores & Familiares:** Sobrenomes e anos de nascimento de dependentes são ocultados para membros comuns na RPC `get_upcoming_ephemerides`.
+- **Dados Confidenciais:** O arquivo `lista_obreiros_salto_moutonnee.csv` permanece fora do repositório (mantido no `.gitignore`).
