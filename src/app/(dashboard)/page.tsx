@@ -1,25 +1,31 @@
 import { createClient } from "@/lib/supabase/server";
 import { CalendarDays, ShieldCheck, Store, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const supabase = await createClient();
   
-  // RLS will automatically scope these counts to the stores the user has access to
-  const [
-    { count: storesCount },
-    { count: brothersCount },
-    { count: sessionsCount }
-  ] = await Promise.all([
-    supabase.from("stores").select("*", { count: "exact", head: true }).eq("active", true),
-    supabase.from("brothers").select("*", { count: "exact", head: true }),
-    supabase.from("sessions").select("*", { count: "exact", head: true })
-      .gte("date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
-  ]);
+  // Verifica quantas lojas o usuário tem acesso
+  const { data: userStores, error } = await supabase
+    .from("stores")
+    .select("id")
+    .eq("active", true);
 
+  // Se o usuário tiver acesso a EXATAMENTE UMA loja, redireciona diretamente para o painel dela
+  if (!error && userStores && userStores.length === 1) {
+    redirect(`/lojas/${userStores[0].id}`);
+  }
+
+  // Se tiver mais de uma, redireciona para a listagem para ele escolher
+  if (!error && userStores && userStores.length > 1) {
+    redirect("/lojas");
+  }
+
+  // Se chegou aqui (0 lojas), mostra o dashboard vazio
   const metrics = [
-    ["Lojas ativas", storesCount?.toString() || "0", Store],
-    ["Membros", brothersCount?.toString() || "0", Users],
-    ["Sessões no mês", sessionsCount?.toString() || "0", CalendarDays],
+    ["Lojas ativas", "0", Store],
+    ["Membros", "0", Users],
+    ["Sessões no mês", "0", CalendarDays],
     ["Conformidade", "RLS ativo", ShieldCheck],
   ] as const;
 
@@ -27,9 +33,9 @@ export default async function Home() {
     <>
       <section className="hero">
         <div>
-          <div className="eyebrow">Visão Geral</div>
-          <h2>Painel de Controle</h2>
-          <p>Selecione uma loja no menu lateral ou crie uma nova para começar.</p>
+          <div className="eyebrow">Acesso Restrito</div>
+          <h2>Nenhuma Loja Vinculada</h2>
+          <p>Você não possui acesso a nenhuma Loja ativa no momento. Aguarde um convite ou entre em contato com a administração.</p>
         </div>
         <span className="badge"><ShieldCheck size={15}/> Ambiente Seguro</span>
       </section>
