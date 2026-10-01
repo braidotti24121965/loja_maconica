@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet } from "lucide-react";
+import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet, UserCircle } from "lucide-react";
 
 export default async function LojaDashboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -123,6 +123,14 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
             <h3 style={{ margin: 0 }}>Membros</h3>
           </div>
           <p className="subtle">Gerencie os membros da loja e seus respectivos cargos.</p>
+        </Link>
+        
+        <Link href={`/lojas/${storeId}/meu-espaco`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div className="icon" style={{ background: "var(--brand-soft)", color: "var(--brand)" }}><UserCircle size={20} /></div>
+            <h3 style={{ margin: 0 }}>Meu Espaço</h3>
+          </div>
+          <p className="subtle">Sua carteirinha digital, frequência, extrato e resumo.</p>
         </Link>
         
         <Link href={`/lojas/${storeId}/meu-extrato`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
