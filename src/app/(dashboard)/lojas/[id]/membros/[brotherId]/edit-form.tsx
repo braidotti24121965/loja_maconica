@@ -86,11 +86,8 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           <div className="field" style={{ flex: "0 0 200px" }}>
             <label htmlFor="degree">Grau</label>
             <select id="degree" name="degree" required defaultValue={brother.degree} style={{ width: "100%", height: "42px", padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
-              <option value="Aprendiz">Aprendiz</option>
               <option value="Aprendiz Maçom">Aprendiz Maçom</option>
-              <option value="Companheiro">Companheiro</option>
               <option value="Companheiro Maçom">Companheiro Maçom</option>
-              <option value="Mestre">Mestre</option>
               <option value="Mestre Maçom">Mestre Maçom</option>
               <option value="Mestre Instalado">Mestre Instalado</option>
             </select>
