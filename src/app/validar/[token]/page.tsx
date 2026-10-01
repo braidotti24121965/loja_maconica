@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { ShieldCheck, ShieldAlert, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
@@ -7,19 +7,13 @@ export const revalidate = 0;
 export default async function ValidarCarteirinhaPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   
-  // We use the admin client because the visitor is not authenticated,
-  // and RLS prevents reading digital_cards and brothers for unauthenticated users.
-  // We ONLY fetch by the high-entropy token, preventing enumeration.
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Create regular client (will run as anon since there is no session on public device)
+  const supabase = await createClient();
 
-  const { data: card } = await supabaseAdmin
-    .from("digital_cards")
-    .select("status, brothers(full_name, cim, degree), stores(name)")
-    .eq("token", token)
-    .single();
+  // Call the public RPC function
+  const { data: card } = await supabase.rpc("validate_digital_card", {
+    p_token: token
+  });
 
   if (!card) {
     return (
@@ -35,9 +29,6 @@ export default async function ValidarCarteirinhaPage({ params }: { params: Promi
       </div>
     );
   }
-
-  const brother = card.brothers as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const store = card.stores as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const isValid = card.status === "active";
 
@@ -57,19 +48,19 @@ export default async function ValidarCarteirinhaPage({ params }: { params: Promi
         
         <div style={{ background: "#f8fafc", padding: 24, borderRadius: 12, marginTop: 32, textAlign: "left" }}>
           <div style={{ fontSize: 13, color: "var(--subtle)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Nome do Obreiro</div>
-          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>{brother.full_name}</div>
+          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>{card.full_name}</div>
           
           <div style={{ fontSize: 13, color: "var(--subtle)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Loja</div>
-          <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 16 }}>{store.name}</div>
+          <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 16 }}>{card.store_name}</div>
 
           <div style={{ display: "flex", gap: 24 }}>
             <div>
               <div style={{ fontSize: 13, color: "var(--subtle)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Grau</div>
-              <div style={{ fontSize: 16, fontWeight: 500 }}>{brother.degree}</div>
+              <div style={{ fontSize: 16, fontWeight: 500 }}>{card.degree}</div>
             </div>
             <div>
               <div style={{ fontSize: 13, color: "var(--subtle)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>CIM</div>
-              <div style={{ fontSize: 16, fontWeight: 500 }}>{brother.cim ? `${brother.cim.substring(0, 3)}***` : 'N/A'}</div>
+              <div style={{ fontSize: 16, fontWeight: 500 }}>{card.cim_masked}</div>
             </div>
           </div>
         </div>
