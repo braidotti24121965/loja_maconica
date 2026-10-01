@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Store as StoreIcon, Plus } from "lucide-react";
+import { Store as StoreIcon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -17,14 +17,21 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
   if (userError) throw new Error("Auth Error: " + userError.message);
   if (!user) redirect("/login");
 
+  const { data: isAdmin, error: platformAdminError } = await supabase.rpc("is_platform_admin");
+
+  if (platformAdminError) {
+    throw new Error("Não foi possível validar o acesso do administrador da plataforma.");
+  }
+
+  if (isAdmin) {
+    redirect("/admin");
+  }
+
   const { data: stores, error: storesError } = await supabase
     .from("stores")
     .select("id, name, city, state, active, store_memberships(role)");
 
   if (storesError) throw new Error("Stores Error: " + storesError.message);
-
-  const { data: isAdmin } = await supabase.rpc("is_platform_admin");
-  const canCreate = !!isAdmin;
 
   return (
     <div>
@@ -42,12 +49,6 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
           <h1 style={{ fontSize: 24, marginBottom: 8 }}>Loja</h1>
           <p className="subtle">Lojas nas quais você possui vínculo.</p>
         </div>
-        {canCreate && (
-          <Link href="/lojas/nova" className="button">
-            <Plus size={16} style={{ marginRight: 8 }} />
-            Nova Loja
-          </Link>
-        )}
       </div>
 
       {stores && stores.length > 0 ? (

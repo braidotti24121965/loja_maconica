@@ -4,7 +4,28 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const supabase = await createClient();
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // O gestor geral do SaaS possui uma área própria e não precisa estar
+  // vinculado a uma loja cliente para acessar o sistema.
+  const { data: isPlatformAdmin, error: platformAdminError } =
+    await supabase.rpc("is_platform_admin");
+
+  if (platformAdminError) {
+    throw new Error("Não foi possível validar o acesso do administrador da plataforma.");
+  }
+
+  if (isPlatformAdmin) {
+    redirect("/admin");
+  }
+
   // Verifica quantas lojas o usuário tem acesso
   const { data: userStores, error } = await supabase
     .from("stores")
