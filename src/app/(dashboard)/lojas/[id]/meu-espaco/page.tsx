@@ -68,6 +68,7 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
     else if (due.status === 'pending') pendingCount++;
   });
 
+  
   // Get events overview (next 3)
   const { data: events } = await supabase
     .from("events")
@@ -77,8 +78,30 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
     .order("event_date", { ascending: true })
     .limit(3);
 
-  // Frequency overview (mocked since attendance module is not fully populated yet with member links)
-  // For now, we just show a placeholder or basic query.
+  // Calculate Real Frequency
+  const startOfYear = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+  const todayStr = today.toISOString().split('T')[0];
+
+  const { count: totalSessions } = await supabase
+    .from("sessions")
+    .select("*", { count: "exact", head: true })
+    .eq("store_id", storeId)
+    .gte("date", startOfYear)
+    .lte("date", todayStr);
+
+  const { count: totalAttendances } = await supabase
+    .from("session_attendances")
+    .select("sessions!inner(date)", { count: "exact", head: true })
+    .eq("store_id", storeId)
+    .eq("brother_id", brother.id)
+    .eq("status", "present")
+    .gte("sessions.date", startOfYear)
+    .lte("sessions.date", todayStr);
+
+  const freqPercent = (totalSessions && totalSessions > 0) 
+    ? Math.round(((totalAttendances || 0) / totalSessions) * 100)
+    : 100;
+
 
   return (
     <div>
@@ -131,10 +154,24 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
               <FileText size={18} color="var(--brand)" /> Frequência
             </h2>
             <div style={{ padding: 16, background: "var(--page)", borderRadius: 8, textAlign: "center" }}>
-              <div style={{ fontSize: 32, fontWeight: 700, color: "var(--brand)" }}>100%</div>
-              <div style={{ fontSize: 13, color: "var(--subtle)", marginTop: 4 }}>Presença neste ano maçônico (Simulado)</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: "var(--brand)" }}>{freqPercent}%</div>
+              <div style={{ fontSize: 13, color: "var(--subtle)", marginTop: 4 }}>Presença neste ano civil</div>
             </div>
-            <p className="subtle" style={{ fontSize: 13, marginTop: 16, textAlign: "center" }}>O histórico detalhado de sessões estará disponível na Fase 11 (QR Code de Frequência).</p>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, padding: "0 16px" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 12, color: "var(--subtle)" }}>Sessões Realizadas</div>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>{totalSessions || 0}</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 12, color: "var(--subtle)" }}>Suas Presenças</div>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>{totalAttendances || 0}</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, textAlign: "center" }}>
+               <Link href={`/lojas/${storeId}/checkin`} className="button" style={{ display: "inline-flex", background: "var(--brand)", color: "#fff", width: "100%", justifyContent: "center" }}>
+                 Fazer Check-in de Presença
+               </Link>
+            </div>
           </div>
 
           <div className="card">
