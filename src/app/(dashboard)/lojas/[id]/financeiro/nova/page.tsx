@@ -52,7 +52,7 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
         redirect(`/lojas/${storeId}/financeiro`);
       }} className="card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         
-        <div className="form-group">
+        <div className="field">
           <label>Tipo de Lançamento</label>
           <select name="type" required className="input">
             <option value="income">Receita (Entrada)</option>
@@ -60,29 +60,29 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Conta</label>
           <select name="account_id" required className="input">
             {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Valor (R$)</label>
           <input type="number" step="0.01" min="0.01" name="amount" required className="input" placeholder="0,00" />
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Data</label>
           <input type="date" name="transaction_date" required className="input" defaultValue={new Date().toISOString().split('T')[0]} />
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Descrição</label>
           <input type="text" name="description" required className="input" placeholder="Ex: Mensalidade de Janeiro" />
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Irmão Vinculado (Opcional)</label>
           <select name="brother_id" className="input">
             <option value="">Nenhum (Despesa Geral / Receita Avulsa)</option>
@@ -90,7 +90,7 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="field">
           <label>Status</label>
           <select name="status" required className="input">
             <option value="paid">Pago / Concluído</option>
