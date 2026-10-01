@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldAlert, Database, LogOut } from "lucide-react";
 
+import { logout } from "@/app/actions";
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -42,7 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
         </nav>
 
-        <form action="/auth/signout" method="post">
+        <form action={logout}>
           <button type="submit" style={{ background: "transparent", border: "none", color: "#ef4444", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: 12, width: "100%", textAlign: "left" }}>
             <LogOut size={16} /> Sair do Painel
           </button>
