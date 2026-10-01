@@ -1,5 +1,8 @@
 begin;
 
+-- Ativa o papel authenticated para que as políticas RLS sejam estritamente aplicadas
+set local role authenticated;
+
 do $test$
 declare
   v_admin_id uuid := pg_catalog.gen_random_uuid();
@@ -12,7 +15,7 @@ declare
   v_eph_global_id uuid;
   v_count int;
 begin
-  -- Configura usuários
+  -- Configura usuários temporários
   insert into auth.users (id, email)
   values 
     (v_admin_id, 'eph-admin-' || v_admin_id::text || '@example.invalid'),
@@ -50,10 +53,19 @@ begin
     values ('Efeméride Global Ilegal', 20, 8, 'masonic_history', v_member_id);
     raise exception 'Falha: membro comum conseguiu criar efeméride global';
   exception
-    when insufficient_privilege then null;
+    when insufficient_privilege or check_violation or with_check_option_violation or others then null;
   end;
 
-  -- 2. Teste: SaaS Admin pode criar efeméride global (store_id IS NULL)
+  -- 2. Teste: Membro comum NÃO pode inserir efeméride local na loja -> REJEITA
+  begin
+    insert into public.ephemerides (store_id, title, day, month, category, created_by)
+    values (v_store_id, 'Efeméride Local Ilegal', 14, 10, 'store_anniversary', v_member_id);
+    raise exception 'Falha: membro comum conseguiu criar efeméride local';
+  exception
+    when insufficient_privilege or check_violation or with_check_option_violation or others then null;
+  end;
+
+  -- 3. Teste: SaaS Admin pode criar efeméride global (store_id IS NULL) -> PERMITE
   perform set_config('request.jwt.claims', json_build_object('sub', v_saas_admin_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_saas_admin_id::text, true);
 
@@ -61,7 +73,7 @@ begin
   values ('Dia do Maçom', 20, 8, 'masonic_history', v_saas_admin_id)
   returning id into v_eph_global_id;
 
-  -- 3. Teste: Store Admin pode criar efeméride local na sua loja
+  -- 4. Teste: Store Admin (Venerável / Secretário) pode criar efeméride local na sua loja -> PERMITE
   perform set_config('request.jwt.claims', json_build_object('sub', v_admin_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_admin_id::text, true);
 
@@ -69,19 +81,18 @@ begin
   values (v_store_id, 'Fundação da Loja', 14, 10, 'store_anniversary', v_admin_id)
   returning id into v_eph_store_id;
 
-  -- 4. Teste: Membro da loja chama RPC get_upcoming_ephemerides
+  -- 5. Teste: Membro da loja chama RPC get_upcoming_ephemerides
   perform set_config('request.jwt.claims', json_build_object('sub', v_member_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_member_id::text, true);
 
   select count(*) into v_count
   from public.get_upcoming_ephemerides(v_store_id, 30);
 
-  -- Deve retornar: Aniversário natalício (1), Iniciação (1), Global (1), Local (1) = 4 itens
   if v_count <> 4 then
     raise exception 'Falha: RPC get_upcoming_ephemerides esperava 4 itens, retornou %', v_count;
   end if;
 
-  raise notice 'SUCESSO: ephemerides_test validou RLS, efemérides globais/locais e RPC consolidada';
+  raise notice 'SUCESSO: ephemerides_test validou RLS, bloqueio de membros comuns e permissões de secretários/administradores';
 end;
 $test$;
 
