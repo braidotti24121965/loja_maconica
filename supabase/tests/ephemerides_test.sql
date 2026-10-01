@@ -1,8 +1,5 @@
 begin;
 
--- Ativa o papel authenticated para que as políticas RLS sejam estritamente aplicadas
-set local role authenticated;
-
 do $test$
 declare
   v_admin_id uuid := pg_catalog.gen_random_uuid();
@@ -15,7 +12,7 @@ declare
   v_eph_global_id uuid;
   v_count int;
 begin
-  -- Configura usuários temporários
+  -- 1. Cria dados temporários no schema auth e public como superusuário
   insert into auth.users (id, email)
   values 
     (v_admin_id, 'eph-admin-' || v_admin_id::text || '@example.invalid'),
@@ -44,7 +41,10 @@ begin
     v_store_id, 'Irmão Aniversariante', 'Mestre Maçom', date '1985-10-15', date '2015-05-20', v_admin_id
   ) returning id into v_brother_id;
 
-  -- 1. Teste: Membro comum NÃO pode inserir efeméride global (store_id IS NULL)
+  -- 2. Transfere o papel da sessão para 'authenticated' para simular a aplicação com RLS ativada
+  execute 'set local role authenticated';
+
+  -- 3. Teste: Membro comum NÃO pode inserir efeméride global (store_id IS NULL) -> RLS BLOQUEIA
   perform set_config('request.jwt.claims', json_build_object('sub', v_member_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_member_id::text, true);
 
@@ -56,7 +56,7 @@ begin
     when insufficient_privilege or check_violation or with_check_option_violation or others then null;
   end;
 
-  -- 2. Teste: Membro comum NÃO pode inserir efeméride local na loja -> REJEITA
+  -- 4. Teste: Membro comum NÃO pode inserir efeméride local na loja -> RLS BLOQUEIA
   begin
     insert into public.ephemerides (store_id, title, day, month, category, created_by)
     values (v_store_id, 'Efeméride Local Ilegal', 14, 10, 'store_anniversary', v_member_id);
@@ -65,7 +65,7 @@ begin
     when insufficient_privilege or check_violation or with_check_option_violation or others then null;
   end;
 
-  -- 3. Teste: SaaS Admin pode criar efeméride global (store_id IS NULL) -> PERMITE
+  -- 5. Teste: SaaS Admin pode criar efeméride global (store_id IS NULL) -> PERMITE
   perform set_config('request.jwt.claims', json_build_object('sub', v_saas_admin_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_saas_admin_id::text, true);
 
@@ -73,7 +73,7 @@ begin
   values ('Dia do Maçom', 20, 8, 'masonic_history', v_saas_admin_id)
   returning id into v_eph_global_id;
 
-  -- 4. Teste: Store Admin (Venerável / Secretário) pode criar efeméride local na sua loja -> PERMITE
+  -- 6. Teste: Store Admin (Venerável / Secretário) pode criar efeméride local na sua loja -> PERMITE
   perform set_config('request.jwt.claims', json_build_object('sub', v_admin_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_admin_id::text, true);
 
@@ -81,7 +81,7 @@ begin
   values (v_store_id, 'Fundação da Loja', 14, 10, 'store_anniversary', v_admin_id)
   returning id into v_eph_store_id;
 
-  -- 5. Teste: Membro da loja chama RPC get_upcoming_ephemerides
+  -- 7. Teste: Membro da loja chama RPC get_upcoming_ephemerides
   perform set_config('request.jwt.claims', json_build_object('sub', v_member_id, 'role', 'authenticated')::text, true);
   perform set_config('request.jwt.claim.sub', v_member_id::text, true);
 
