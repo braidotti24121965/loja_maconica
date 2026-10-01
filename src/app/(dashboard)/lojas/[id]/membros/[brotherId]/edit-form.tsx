@@ -1,10 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent } from "./actions";
-import { Trash, Pencil } from "lucide-react";
+import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent, linkOwnUserToBrother } from "./actions";
+import { Trash, Pencil, Link as LinkIcon, CheckCircle } from "lucide-react";
 
-export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; cim: string | null; degree: string; office: string | null; phone: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
+export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; cim: string | null; degree: string; office: string | null; phone: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
   }, null);
@@ -20,6 +20,29 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         
         <input type="hidden" name="store_id" value={storeId} />
         <input type="hidden" name="brother_id" value={brother.id} />
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, padding: 16, background: "var(--page)", borderRadius: 6, border: "1px dashed var(--border)" }}>
+          <div>
+            <h4 style={{ margin: "0 0 4px 0" }}>Vínculo de Acesso</h4>
+            <p className="subtle" style={{ margin: 0, fontSize: 13 }}>
+              {brother.user_id ? "Esta ficha já está vinculada a um login de usuário." : "Esta ficha não possui um login vinculado. O membro não poderá acessar seu próprio extrato."}
+            </p>
+          </div>
+          {!brother.user_id ? (
+            <button 
+              type="submit" 
+              formAction={linkOwnUserToBrother} 
+              className="button" 
+              style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13 }}
+            >
+              <LinkIcon size={14} /> Sou eu (Vincular)
+            </button>
+          ) : (
+            <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--green-dark)", fontSize: 13, fontWeight: 600 }}>
+              <CheckCircle size={14} /> Vinculado
+            </span>
+          )}
+        </div>
 
         <div className="field">
           <label htmlFor="full_name">Nome Completo</label>

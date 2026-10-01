@@ -151,3 +151,30 @@ export async function editDependent(formData: FormData) {
     revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
   }
 }
+
+export async function linkOwnUserToBrother(data: FormData) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+
+  if (!userData?.user) return { error: "Não autorizado" };
+
+  const storeId = data.get("store_id") as string;
+  const brotherId = data.get("brother_id") as string;
+  
+  if (!storeId || !brotherId) return { error: "Dados obrigatórios faltando" };
+
+  const { error } = await supabase
+    .from("brothers")
+    .update({ user_id: userData.user.id })
+    .eq("id", brotherId)
+    .eq("store_id", storeId);
+
+  if (error) {
+    console.error("Erro ao vincular usuário:", error);
+    return { error: "Falha ao vincular usuário. Verifique suas permissões." };
+  }
+
+  revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
+  revalidatePath(`/lojas/${storeId}`);
+  redirect(`/lojas/${storeId}`);
+}
