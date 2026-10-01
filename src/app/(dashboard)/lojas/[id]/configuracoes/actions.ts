@@ -1,22 +1,27 @@
 "use server";
 
+import { requireStoreAdmin } from "@/lib/auth/require-store-role";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function updateStore(data: FormData) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData?.user) return { error: "Não autorizado" };
-
   const storeId = data.get("store_id") as string;
+  if (!storeId) return { error: "Não autorizado" };
+
+  try {
+    await requireStoreAdmin(storeId);
+  } catch {
+    return { error: "Não autorizado" };
+  }
+
   const name = data.get("name") as string;
   const city = data.get("city") as string;
   const state = data.get("state") as string;
   const active = data.get("active") === "on";
 
-  if (!storeId || !name) return { error: "Nome inválido" };
+  if (!name) return { error: "Nome inválido" };
 
+  const supabase = await createClient();
   const { error } = await supabase
     .from("stores")
     .update({ name, city, state, active })

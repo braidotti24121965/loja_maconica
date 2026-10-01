@@ -77,7 +77,7 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
 
 
       {isAdmin && (
-        <CheckinWindowControl sessionId={sessionId} initialWindow={windowData || null} />
+        <CheckinWindowControl sessionId={sessionId} storeId={storeId} initialWindow={windowData || null} />
       )}
 
       <div className="card">

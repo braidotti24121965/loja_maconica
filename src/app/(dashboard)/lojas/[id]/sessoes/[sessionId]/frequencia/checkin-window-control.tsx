@@ -7,10 +7,12 @@ import { openCheckinWindow, closeCheckinWindow } from "./actions";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function CheckinWindowControl({ 
-  sessionId, 
+  sessionId,
+  storeId,
   initialWindow 
 }: { 
   sessionId: string;
+  storeId: string;
   initialWindow: { qr_token: string; short_code: string; expires_at: string; status: string } | null;
 }) {
   const [activeWindow, setActiveWindow] = useState(initialWindow);
@@ -47,7 +49,7 @@ export function CheckinWindowControl({
   const handleOpen = async () => {
     setLoading(true);
     setMessage(null);
-    const res = await openCheckinWindow(sessionId, 4);
+    const res = await openCheckinWindow(sessionId, storeId, 4);
     if (res.success) {
       setActiveWindow({ qr_token: res.qr_token, short_code: res.short_code, expires_at: res.expires_at, status: "open" });
     } else {
@@ -59,7 +61,7 @@ export function CheckinWindowControl({
   const handleClose = async () => {
     setLoading(true);
     setMessage(null);
-    const res = await closeCheckinWindow(sessionId);
+    const res = await closeCheckinWindow(sessionId, storeId);
     if (res.success) {
       setActiveWindow(null);
     } else {
