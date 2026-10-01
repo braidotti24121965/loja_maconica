@@ -56,7 +56,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand"><div className="brand-mark">CL</div><div className="brand-copy"><strong>Controle de Lojas</strong><small>Administração</small></div></div>
+        <div className="brand"><div className="brand-mark">CL</div><div className="brand-copy"><strong>Controle da Loja</strong><small>Administração</small></div></div>
         <nav className="nav" aria-label="Navegação principal">
           <Link href="/"><LayoutDashboard size={18}/><span>Visão geral</span></Link>
           <Link href="/lojas"><Store size={18}/><span>Loja</span></Link>

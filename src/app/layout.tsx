@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Controle de Lojas Maçônicas",
+  title: "Controle da Loja Maçônica",
   description: "Gestão segura e multi-loja para organizações maçônicas.",
 };
 

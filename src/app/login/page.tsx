@@ -8,7 +8,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="login-page">
       <section className="login-art">
         <span className="eyebrow" style={{ color: "#e6c778" }}>Gestão com propósito</span>
-        <h1>Controle de Lojas Maçônicas</h1>
+        <h1>Controle da Loja Maçônica</h1>
         <p>Uma base segura, organizada e independente para administrar lojas, membros e atividades respeitando cada jurisdição.</p>
       </section>
       <section className="login-panel">
