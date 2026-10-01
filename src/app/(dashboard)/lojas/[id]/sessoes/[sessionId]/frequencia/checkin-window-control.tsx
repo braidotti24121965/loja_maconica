@@ -1,30 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { QrCode, Play, Square, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { QrCode, Play, Square, ExternalLink, Clock } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { openCheckinWindow, closeCheckinWindow } from "./actions";
 
 export function CheckinWindowControl({ 
-  
   sessionId, 
   initialWindow 
 }: { 
-  storeId: string;
   sessionId: string;
-  initialWindow: { challenge_code: string; status: string } | null;
+  initialWindow: { qr_token: string; short_code: string; expires_at: string; status: string } | null;
 }) {
   const [activeWindow, setActiveWindow] = useState(initialWindow);
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    if (activeWindow?.status !== "open" || !activeWindow.expires_at) {
+      // setTimeLeft("");
+      return;
+    }
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const expires = new Date(activeWindow.expires_at).getTime();
+      const diff = expires - now;
+      if (diff <= 0) {
+        setActiveWindow(null); // Auto-hide when expired
+        setTimeLeft("Expirado");
+        clearInterval(interval);
+      } else {
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        setTimeLeft(`${h}h ${m}m restantes`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activeWindow]);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://www.maconaria360.com.br";
-  const challengeUrl = activeWindow?.status === "open" ? `${baseUrl}/checkin/${activeWindow.challenge_code}` : "";
+  const challengeUrl = activeWindow?.status === "open" ? `${baseUrl}/checkin/qr/${activeWindow.qr_token}` : "";
 
   const handleOpen = async () => {
     setLoading(true);
-    const res = await openCheckinWindow(sessionId);
+    const res = await openCheckinWindow(sessionId, 4);
     if (res.success) {
-      setActiveWindow({ challenge_code: res.challenge_code, status: "open" });
+      setActiveWindow({ qr_token: res.qr_token, short_code: res.short_code, expires_at: res.expires_at, status: "open" });
     } else {
       alert(res.message);
     }
@@ -32,7 +53,7 @@ export function CheckinWindowControl({
   };
 
   const handleClose = async () => {
-    if (!confirm("Tem certeza que deseja encerrar o check-in por QR Code para esta sessão?")) return;
+    if (!confirm("Tem certeza que deseja encerrar o check-in?")) return;
     setLoading(true);
     const res = await closeCheckinWindow(sessionId);
     if (res.success) {
@@ -75,14 +96,19 @@ export function CheckinWindowControl({
           <div style={{ padding: 16, background: "#fff", border: "1px solid var(--border)", borderRadius: 8 }}>
             <QRCodeSVG value={challengeUrl} size={150} level="H" includeMargin={false} />
           </div>
-          <div>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: "var(--subtle)", marginBottom: 4 }}>Código da Sessão</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: "var(--subtle)", marginBottom: 4 }}>Código Numérico</div>
             <div style={{ fontSize: 32, fontFamily: "monospace", fontWeight: 700, letterSpacing: 4, color: "var(--text)", marginBottom: 16 }}>
-              {activeWindow.challenge_code}
+              {activeWindow.short_code}
             </div>
-            <a href={challengeUrl} target="_blank" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, color: "var(--brand)", textDecoration: "none" }}>
-              Abrir URL no navegador <ExternalLink size={14} />
-            </a>
+            <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+              <a href={challengeUrl} target="_blank" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, color: "var(--brand)", textDecoration: "none" }}>
+                Abrir Link de QR <ExternalLink size={14} />
+              </a>
+              <span style={{ fontSize: 13, color: "var(--danger)", display: "flex", alignItems: "center", gap: 4 }}>
+                <Clock size={14} /> Expira em: {timeLeft}
+              </span>
+            </div>
           </div>
         </div>
       )}

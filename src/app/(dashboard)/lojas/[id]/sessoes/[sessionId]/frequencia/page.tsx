@@ -46,7 +46,7 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
   // Fetch active checkin window
   const { data: windowData } = await supabase
     .from("session_checkin_windows")
-    .select("challenge_code, status")
+    .select("qr_token, short_code, expires_at, status")
     .eq("session_id", sessionId)
     .eq("status", "open")
     .single();
@@ -77,13 +77,13 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
 
 
       {isAdmin && (
-        <CheckinWindowControl storeId={storeId} sessionId={sessionId} initialWindow={windowData || null} />
+        <CheckinWindowControl sessionId={sessionId} initialWindow={windowData || null} />
       )}
 
       <div className="card">
         {brothers && brothers.length > 0 ? (
-          <FrequenciaList 
-            storeId={storeId} 
+          <FrequenciaList storeId={storeId} 
+            
             sessionId={sessionId} 
             brothers={brothers} 
             initialAttendances={attendances || []} 
