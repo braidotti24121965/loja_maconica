@@ -26,8 +26,8 @@
 | **7–10** | Check-in Presencial e Frequência Digital | Concluída | 100% | Attendance, QR Code/Código temporário de presença e geofencing. |
 | **11–12** | Módulo Financeiro & Importação CSV | Concluída | 100% | Mensalidades, receitas/despesas, saldo por obreiro, extrato individual e importador CSV em lote. |
 | **13** | Comunicação & Auditoria Server-Only | Concluída | 100% | Central de Mensagens WhatsApp, Middleware Proxy fail-closed e validação `require-store-role.ts`. |
-| **14.1** | Efemérides & Datas Maçônicas | Concluída | 100% | Efemérides globais/locais, datas de Iniciação/Elevação/Exaltação, RPC `get_upcoming_ephemerides`. |
-| **14.2** | Dependentes & Regras de Privacidade | Concluída | 100% | Tabela `dependents` com `store_id`, RLS restrito a admins/secretários, ocultação de sobrenomes/ano de nascimento para membros comuns e testes SQL com `ROLLBACK`. |
+| **14** | Efemérides, Dependentes & Privacidade | Concluída | 100% | Efemérides globais/locais, tabela `dependents`, RLS de privacidade de menores e fluxo de recuperação de senha. |
+| **15** | Refinamentos do Chanceler, Membros & Efemérides | Concluída | 100% | Prancha de Efemérides PDF, edição de efemérides locais, datas de evolução maçônica/nascimento nos membros, desseleção de frequência, escopo por mês vigente/próxima sessão e RLS de dependentes no *Meu Espaço*. |
 
 ---
 

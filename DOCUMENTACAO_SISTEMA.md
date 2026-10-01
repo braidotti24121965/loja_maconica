@@ -1,7 +1,7 @@
 # Documentação Completa e Definitiva do Sistema
 ## SaaS de Gestão Multi-Tenant para Lojas Maçônicas (A.R.L.S.)
 
-> **Data de Atualização:** 01/10/2026  
+> **Data de Atualização:** 01/10/2026 (Refinamentos da Fase 15 Concluídos)  
 > **Status Geral do Projeto:** MVP 100% Concluído, Auditado, Testado e Homologado.  
 > **Repositório:** `braidotti24121965/loja_maconica` (Branch `main`)
 
@@ -18,6 +18,7 @@ O **Controle de Lojas Maçônicas** é um sistema web SaaS Multi-Tenant desenvol
 4. **Comunicação Agilizada via WhatsApp:** Geradores inteligentes de mensagens formatadas com emojis para aniversariantes, convocações e cobranças.
 5. **Gestão Ritualística e Frequência Digital:** Registro de sessões, upload de atas validadas por QR Code e check-in presencial com geofencing.
 6. **Autenticação & Recuperação de Acesso:** Fluxo de convites por e-mail, autovinculação à ficha de membro e redefinição de senha via e-mail (`/esqueci-senha` e `/redefinir-senha`).
+7. **Prancha de Efemérides da Sessão (Chanceler):** Relatório oficial impresso/PDF e e-mail com busca automática de aniversários natalícios, datas maçônicas e comemorações históricas da loja.
 
 ---
 
@@ -25,7 +26,7 @@ O **Controle de Lojas Maçônicas** é um sistema web SaaS Multi-Tenant desenvol
 
 - **Framework Web:** Next.js 16 (App Router com Turbopack e React 19).
 - **Linguagem:** TypeScript (Strict Mode).
-- **Estilização:** CSS Custom Properties (Design Token System responsivo e padronizado).
+- **Estilização:** CSS Custom Properties (Design Token System responsivo e padronizado com `--brand: #0f766e`).
 - **Backend & Banco de Dados:** Supabase Postgres com Row Level Security (RLS) habilitado em 100% das tabelas.
 - **Autenticação:** Supabase Auth com sessão SSR via Cookies seguros (`@supabase/ssr`).
 - **Funções de Segurança:** Schemas isolados (`private` para funções de verificação de permissão e `public` para RPCs com `SET search_path = ''`).
@@ -43,7 +44,7 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 | **Store Admin (`admin`)** | Venerável Mestre ou Administrador da Loja. Controle total sobre membros, financeiro, atas, eventos, efemérides locais e configurações da loja. |
 | **Secretary (`secretary`)** | Secretário da Loja. Permissões equivalentes ao Admin para gestão de membros, dependentes, atas, sessões e efemérides. |
 | **Treasurer (`treasurer`)** | Tesoureiro da Loja. Acesso total ao módulo financeiro, lançamento de mensalidades, baixa de boletos/transações e relatórios de inadimplência. |
-| **Member (`member`)** | Irmão Obreiro. Acesso de leitura aos membros da loja, "Meu Espaço", "Meu Extrato", consulta de efemérides e check-in de presença. |
+| **Member (`member`)** | Irmão Obreiro. Acesso de leitura aos membros da loja, "Meu Espaço", "Meu Extrato", consulta de efemérides e check-in de presença. Ocultação do menu "Loja" para perfis comuns. |
 | **Viewer (`viewer`)** | Visitante / Consulta. Permissão de leitura estritamente limitada na loja vinculada. |
 
 ---
@@ -76,39 +77,32 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 - Proteção Server-Only (`require-store-role.ts`) em todas as Server Actions.
 - Refatoração do Middleware Proxy (`src/proxy.ts`) operando em modo *fail-closed*.
 
-### Fase 14 (Parte 1) — Efemérides & Datas Maçônicas
+### Fase 14 — Efemérides, Dependentes & Privacidade
 - Tabela `ephemerides` para datas históricas do SaaS e locais da loja.
-- Cadastro de datas pessoais do irmão (Iniciação, Elevação, Exaltação, Nascimento).
-- RPC `get_upcoming_ephemerides` com busca consolidada de eventos nos próximos 30/60 dias.
-- Gestão global no painel `/admin/efemerides`.
+- Tabela `dependents` com coluna `store_id` e RLS restrito a admins/secretários e ao próprio membro.
+- **Regra de Privacidade de Menores**: RPC retorna apenas o **Primeiro Nome** do dependente e oculta ano de nascimento para membros comuns.
+- **Associação de E-mail (`brothers.email`)**: Gatilho `trg_sync_brother_email_from_auth` e botão de convite rápido.
+- **Recuperação de Senha**: Páginas `/esqueci-senha` e `/redefinir-senha`.
 
-### Fase 14 (Parte 2) — Aniversariantes Dependentes, Privacidade e Fluxo de Autenticação
-- Tabela `dependents` com coluna `store_id` e data de nascimento (`birthdate`).
-- **Regra de Privacidade de Menores**:
-  - Para **Membros Comuns**: RPC retorna apenas o **Primeiro Nome** do dependente (ex: *"Maria (Esposa do Ir. Luiz Marcelo)"*) e oculta o ano de nascimento (`year = NULL`).
-  - Para **Administradores/Secretários**: Exibição completa de nome e data integral.
-- **Associação de E-mail de Membro (`brothers.email`)**:
-  - Adicionada coluna `email` em `brothers` com gatilho de sincronização automática (`trg_sync_brother_email_from_auth`) e preenchimento na RPC `link_own_user_to_brother`.
-  - Formulário de Edição com atalho direto **"Enviar Convite"** apontando para o e-mail do irmão.
-- **Fluxo de Recuperação de Senha**:
-  - Páginas `/esqueci-senha` (solicitação por e-mail) e `/redefinir-senha` (redefinição de senha com validação de token OTP).
-- **Ajustes Finais de Usabilidade, Navegação e Chanceler**:
-  - Exibição do Nome Completo do Usuário e Perfil/Papel na barra superior (`topbar`) ao lado das iniciais.
-  - Ocultação do menu "Loja" para membros comuns sem privilégios administrativos.
-  - Auto-vinculação de Ficha de Obreiro via RPC `get_or_link_my_brother` para eliminar a mensagem de membro não vinculado.
-  - Cadastro de Familiares/Dependentes diretamente no portal **"Meu Espaço"** de cada irmão.
-  - **Gestão e Regras de Edição/Exclusão de Sessões (`/lojas/[id]/sessoes`)**:
-    - Restrito estritamente a cargos de gestão (`admin` e `secretary`).
-    - **Edição**: Permitida apenas para **sessões futuras** (`data >= data_atual`).
-    - **Exclusão**: Permitida apenas para **sessões futuras** e que **NÃO possuam registros de frequência associados** (`session_attendances.count == 0`).
-    - Exclusão protegida por validação no servidor e diálogo de confirmação visual (`ConfirmDialog`).
-    - **Desseleção de Frequência (`/sessoes/[sessionId]/frequencia`)**: Administradores podem escolher a opção `⚪ Selecione / Não registrado` ou clicar no atalho *Desselecionar*, o que remove o registro da tabela `session_attendances` ao salvar.
-  - **Prancha de Efemérides da Sessão (Ferramenta do Chanceler - `/lojas/[id]/efemerides/relatorio`)**:
-    - Cálculo automático do período da sessão (da data da reunião até 1 dia antes da próxima sessão).
-    - Pré-visualização do PDF na tela formatado como boletim oficial maçônico (cabeçalho da A.R.L.S., 4 seções organizadas e campo para assinatura do Ir. Chanceler).
-    - Impressão / Salvar em PDF otimizado para A4 via CSS `@media print` com botão estilizado em verde de alta visibilidade (`#0f766e`).
-    - Envio do relatório por e-mail via leitor padrão (`mailto`) ou para os irmãos cadastrados.
-    - Edição e exclusão de efemérides locais da loja diretamente pela Central de Efemérides.
+### Fase 15 — Refinamentos do Chanceler, Membros, Efemérides & Frequência (Fase Atual)
+- **Edição & Exclusão de Efemérides Locais**:
+  - Modal de edição de título, dia, mês, ano, categoria e descrição de efemérides da loja via Server Action `updateEphemeris`.
+  - Botão **✏️ Editar** (verde claro com borda verde) e **🗑️ Excluir** com `ConfirmDialog`.
+- **Estilização de Impressão e Design Tokens**:
+  - Adicionadas variáveis de token CSS `--brand: #0f766e;` e `--subtle: #526173;` no `:root`.
+  - Reset no `@media print` para forçar `.shell`, `.main` e `.content` com `display: block !important; width: 100% !important;`, garantindo geração perfeita de PDF A4 sem colapso de largura.
+  - Botões **"Relatório PDF (Chanceler)"** e **"Imprimir / Baixar PDF"** estilizados em verde maçônico destacado (`#0f766e` com texto branco).
+- **Desseleção de Frequência & Opção "Não Registrado"**:
+  - Opção **`Não Registrado`** posicionada diretamente no combo select de frequência (`/sessoes/[sessionId]/frequencia`).
+  - Server Action `saveAttendance` atualizada para remover registros da tabela `session_attendances` ao mudar para `Não Registrado`.
+- **"Meu Espaço" & Dependentes pelo Próprio Membro**:
+  - Link **"← Voltar para Visão Geral"** e seção **"Família e Dependentes"** no portal *Meu Espaço*.
+  - RLS `20261001234500_allow_members_manage_own_dependents.sql` permitindo ao membro cadastrar, editar e remover seus próprios familiares.
+- **Datas de Evolução Maçônica e Nascimento dos Membros**:
+  - Adicionados os campos **Data de Nasc.** (alinhado a *Cargo* e *Celular*) e **Iniciação (Aprendiz)**, **Elevação (Companheiro)** e **Exaltação (Mestre)** na ficha de membros (`edit-form.tsx` e `novo/page.tsx`).
+  - Integração total com a RPC `get_upcoming_ephemerides` para exibir aniversários natalícios e datas maçônicas de irmãos no relatório e no painel.
+- **Escopo Dinâmico de Efemérides**:
+  - O painel principal de efemérides (`/lojas/[id]/efemerides`) filtra automaticamente comemorações do **mês vigente**, estendendo a exibição até o dia da próxima sessão caso ela ocorra no mês subsequente.
 
 ---
 
