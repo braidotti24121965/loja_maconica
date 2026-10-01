@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { generateDigitalCard, revokeDigitalCard } from "./actions";
 import { ShieldAlert, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export default function DigitalCardClient({
   storeId,
@@ -25,6 +26,7 @@ export default function DigitalCardClient({
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRevoking, setIsRevoking] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [revokeOpen, setRevokeOpen] = useState(false);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -39,7 +41,6 @@ export default function DigitalCardClient({
   };
 
   const handleRevoke = async () => {
-    if (!confirm("Tem certeza que deseja revogar esta carteirinha? Ela deixará de funcionar imediatamente.")) return;
     setIsRevoking(true);
     setErrorMsg(null);
     try {
@@ -48,6 +49,7 @@ export default function DigitalCardClient({
       setErrorMsg(err.message || "Erro desconhecido.");
     } finally {
       setIsRevoking(false);
+      setRevokeOpen(false);
     }
   };
 
@@ -98,7 +100,7 @@ export default function DigitalCardClient({
 
       {token && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={handleRevoke} disabled={isRevoking || isGenerating} style={{ background: "transparent", border: "none", color: "var(--danger)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
+          <button onClick={() => setRevokeOpen(true)} disabled={isRevoking || isGenerating} style={{ background: "transparent", border: "none", color: "var(--danger)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
             <XCircle size={12} /> {isRevoking ? "Revogando..." : "Apenas Revogar"}
           </button>
           <button onClick={handleGenerate} disabled={isGenerating || isRevoking} style={{ background: "transparent", border: "none", color: "var(--brand)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }}>
@@ -106,6 +108,15 @@ export default function DigitalCardClient({
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={revokeOpen}
+        onClose={() => setRevokeOpen(false)}
+        onConfirm={handleRevoke}
+        title="Revogar carteirinha digital?"
+        description="A carteirinha atual deixará de funcionar imediatamente. Uma nova poderá ser emitida depois."
+        confirmLabel="Revogar carteirinha"
+        pending={isRevoking}
+      />
     </div>
   );
 }

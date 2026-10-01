@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent, linkOwnUserToBrother } from "./actions";
 import { Trash, Pencil, Link as LinkIcon, CheckCircle } from "lucide-react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; cim: string | null; degree: string; office: string | null; phone: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
@@ -10,6 +11,10 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
   }, null);
 
   const [editingDep, setEditingDep] = useState<{ id: string; name: string; relationship: string; birthdate: string | null; } | null>(null);
+  const [deleteBrotherOpen, setDeleteBrotherOpen] = useState(false);
+  const [dependentToDelete, setDependentToDelete] = useState<{ id: string; name: string } | null>(null);
+  const deleteBrotherFormId = `delete-brother-${brother.id}`;
+  const deleteDependentFormId = `delete-dependent-${brother.id}`;
 
   const dependents = brother.dependents || [];
 
@@ -96,12 +101,8 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           </button>
 
           <button 
-            type="submit" 
-            formAction={async (formData) => {
-              if (confirm("Tem certeza que deseja excluir esta ficha? Essa ação não pode ser desfeita.")) {
-                await deleteBrother(formData);
-              }
-            }}
+            type="button"
+            onClick={() => setDeleteBrotherOpen(true)}
             className="subtle" 
             style={{ background: "transparent", border: "none", color: "var(--destructive)", textDecoration: "underline", cursor: "pointer", fontSize: 14 }}
           >
@@ -109,6 +110,20 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           </button>
         </div>
       </form>
+
+      <form id={deleteBrotherFormId} action={async (formData) => { await deleteBrother(formData); }}>
+        <input type="hidden" name="store_id" value={storeId} />
+        <input type="hidden" name="brother_id" value={brother.id} />
+      </form>
+
+      <ConfirmDialog
+        open={deleteBrotherOpen}
+        onClose={() => setDeleteBrotherOpen(false)}
+        title="Excluir ficha do Irmão?"
+        description="A ficha e seus dados vinculados serão excluídos. Esta ação é permanente e não poderá ser desfeita."
+        confirmLabel="Excluir ficha"
+        formId={deleteBrotherFormId}
+      />
 
       <hr style={{ border: "0", borderTop: "1px solid var(--border)", margin: "32px 0" }} />
 
@@ -126,16 +141,11 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
                 <button type="button" onClick={() => setEditingDep(dep)} style={{ background: "transparent", border: "none", color: "var(--brand)", cursor: "pointer", padding: 4 }} title="Editar">
                   <Pencil size={16} />
                 </button>
-                <form action={deleteDependent}>
-                  <input type="hidden" name="id" value={dep.id} />
-                  <input type="hidden" name="store_id" value={storeId} />
-                  <input type="hidden" name="brother_id" value={brother.id} />
-                  <button type="submit" style={{ background: "transparent", border: "none", color: "var(--destructive)", cursor: "pointer", padding: 4 }} title="Remover" onClick={(e) => {
-                    if (!confirm("Remover familiar?")) e.preventDefault();
-                  }}>
+                <div>
+                  <button type="button" style={{ background: "transparent", border: "none", color: "var(--destructive)", cursor: "pointer", padding: 4 }} title="Remover" onClick={() => setDependentToDelete({ id: dep.id, name: dep.name })}>
                     <Trash size={16} />
                   </button>
-                </form>
+                </div>
               </div>
             </li>
           ))}
@@ -143,6 +153,21 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
       ) : (
         <p className="subtle" style={{ fontSize: 14, marginBottom: 24 }}>Nenhum familiar cadastrado.</p>
       )}
+
+      <form id={deleteDependentFormId} action={deleteDependent}>
+        <input type="hidden" name="id" value={dependentToDelete?.id ?? ""} />
+        <input type="hidden" name="store_id" value={storeId} />
+        <input type="hidden" name="brother_id" value={brother.id} />
+      </form>
+
+      <ConfirmDialog
+        open={Boolean(dependentToDelete)}
+        onClose={() => setDependentToDelete(null)}
+        title="Remover familiar?"
+        description={`${dependentToDelete?.name ?? "Este familiar"} será removido da ficha do Irmão. Esta ação não poderá ser desfeita.`}
+        confirmLabel="Remover familiar"
+        formId={deleteDependentFormId}
+      />
 
       <form 
         action={async (formData) => {

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { QrCode, Play, Square, ExternalLink, Clock } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { openCheckinWindow, closeCheckinWindow } from "./actions";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function CheckinWindowControl({ 
   sessionId, 
@@ -15,6 +16,8 @@ export function CheckinWindowControl({
   const [activeWindow, setActiveWindow] = useState(initialWindow);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeWindow?.status !== "open" || !activeWindow.expires_at) {
@@ -43,25 +46,27 @@ export function CheckinWindowControl({
 
   const handleOpen = async () => {
     setLoading(true);
+    setMessage(null);
     const res = await openCheckinWindow(sessionId, 4);
     if (res.success) {
       setActiveWindow({ qr_token: res.qr_token, short_code: res.short_code, expires_at: res.expires_at, status: "open" });
     } else {
-      alert(res.message);
+      setMessage(res.message);
     }
     setLoading(false);
   };
 
   const handleClose = async () => {
-    if (!confirm("Tem certeza que deseja encerrar o check-in?")) return;
     setLoading(true);
+    setMessage(null);
     const res = await closeCheckinWindow(sessionId);
     if (res.success) {
       setActiveWindow(null);
     } else {
-      alert(res.message);
+      setMessage(res.message);
     }
     setLoading(false);
+    setCloseOpen(false);
   };
 
   return (
@@ -80,7 +85,7 @@ export function CheckinWindowControl({
         </div>
         <div>
           {activeWindow?.status === "open" ? (
-            <button onClick={handleClose} disabled={loading} className="button" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--danger)", color: "#fff" }}>
+            <button onClick={() => setCloseOpen(true)} disabled={loading} className="button" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--danger)", color: "#fff" }}>
               <Square size={16} fill="currentColor" /> {loading ? "Fechando..." : "Encerrar Check-in"}
             </button>
           ) : (
@@ -90,6 +95,8 @@ export function CheckinWindowControl({
           )}
         </div>
       </div>
+
+      {message && <div className="message error" style={{ marginBottom: 16 }}>{message}</div>}
 
       {activeWindow?.status === "open" && (
         <div style={{ display: "flex", gap: 24, alignItems: "center", background: "#fff", padding: 24, borderRadius: 12, border: "1px solid #34d399" }}>
@@ -112,6 +119,15 @@ export function CheckinWindowControl({
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={closeOpen}
+        onClose={() => setCloseOpen(false)}
+        onConfirm={handleClose}
+        title="Encerrar o check-in?"
+        description="Novas presenças por QR Code ou código numérico não serão aceitas após o encerramento."
+        confirmLabel="Encerrar check-in"
+        pending={loading}
+      />
     </div>
   );
 }

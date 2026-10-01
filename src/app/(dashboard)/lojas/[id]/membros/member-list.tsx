@@ -2,10 +2,13 @@
 
 import { useActionState, useState } from "react";
 import { updateRole, removeMember } from "./actions";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function MemberList({ member, isAdmin, storeId, currentUserId }: { member: { id: string; user_id: string; role: string; profiles: { full_name: string; email: string } | { full_name: string; email: string }[] }, isAdmin: boolean, storeId: string, currentUserId: string }) {
   const isMe = member.user_id === currentUserId;
   const [isEditing, setIsEditing] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const removeFormId = `remove-member-${member.user_id}`;
 
   const [updateState, updateAction, isUpdating] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     const res = await updateRole(data);
@@ -14,10 +17,7 @@ export function MemberList({ member, isAdmin, storeId, currentUserId }: { member
   }, null);
 
   const [, removeAction, isRemoving] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
-    if (confirm("Tem certeza que deseja remover este membro da loja?")) {
-      return await removeMember(data);
-    }
-    return null;
+    return await removeMember(data);
   }, null);
 
   if (!isAdmin) {
@@ -51,13 +51,22 @@ export function MemberList({ member, isAdmin, storeId, currentUserId }: { member
         <div style={{ display: "flex", gap: 12 }}>
           <button type="button" onClick={() => setIsEditing(true)} style={{ background: "transparent", color: "var(--subtle)", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: 13 }}>Alterar</button>
           
-          <form action={removeAction}>
+          <form id={removeFormId} action={removeAction}>
             <input type="hidden" name="store_id" value={storeId} />
             <input type="hidden" name="user_id" value={member.user_id} />
-            <button type="submit" disabled={isRemoving} style={{ background: "transparent", color: "var(--destructive)", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: 13 }}>
+            <button type="button" disabled={isRemoving} onClick={() => setRemoveOpen(true)} style={{ background: "transparent", color: "var(--destructive)", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: 13 }}>
               {isRemoving ? "..." : "Remover"}
             </button>
           </form>
+          <ConfirmDialog
+            open={removeOpen}
+            onClose={() => setRemoveOpen(false)}
+            title="Remover membro da Loja?"
+            description="Este usuário perderá o acesso à Loja e aos módulos vinculados ao seu cargo. O cadastro do Irmão não será excluído."
+            confirmLabel="Remover membro"
+            pending={isRemoving}
+            formId={removeFormId}
+          />
         </div>
       )}
     </div>
