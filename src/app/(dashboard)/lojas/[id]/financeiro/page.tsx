@@ -67,6 +67,11 @@ export default async function FinanceiroPage({ params }: { params: Promise<{ id:
             <p className="subtle">Crie a primeira conta (ex: Conta Corrente ou Caixa) para começar a lançar transações.</p>
           </div>
         )}
+        
+        <Link href={`/lojas/${storeId}/financeiro/inadimplencia`} className="card" style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "var(--page)", border: "1px dashed var(--border)" }}>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Mensalidades e Inadimplência</h3>
+          <p className="subtle" style={{ textAlign: "center" }}>Gerar boletos em lote e ver atrasos</p>
+        </Link>
       </div>
       
       {/* TODO: Add transactions list and action buttons */}
