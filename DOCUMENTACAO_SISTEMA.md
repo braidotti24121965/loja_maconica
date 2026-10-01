@@ -106,8 +106,9 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
   - **Prancha de Efemérides da Sessão (Ferramenta do Chanceler - `/lojas/[id]/efemerides/relatorio`)**:
     - Cálculo automático do período da sessão (da data da reunião até 1 dia antes da próxima sessão).
     - Pré-visualização do PDF na tela formatado como boletim oficial maçônico (cabeçalho da A.R.L.S., 4 seções organizadas e campo para assinatura do Ir. Chanceler).
-    - Impressão / Salvar em PDF otimizado para A4 via CSS `@media print`.
+    - Impressão / Salvar em PDF otimizado para A4 via CSS `@media print` com botão estilizado em verde de alta visibilidade (`#0f766e`).
     - Envio do relatório por e-mail via leitor padrão (`mailto`) ou para os irmãos cadastrados.
+    - Edição e exclusão de efemérides locais da loja diretamente pela Central de Efemérides.
 
 ---
 

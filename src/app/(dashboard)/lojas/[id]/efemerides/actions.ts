@@ -54,6 +54,62 @@ export async function createEphemeris(data: FormData) {
   }
 
   revalidatePath(`/lojas/${storeId}/efemerides`);
+  revalidatePath(`/lojas/${storeId}/efemerides/relatorio`);
+  revalidatePath(`/lojas/${storeId}`);
+  return { success: true };
+}
+
+export async function updateEphemeris(data: FormData) {
+  const storeId = String(data.get("store_id") ?? "");
+  const ephemerisId = String(data.get("ephemeris_id") ?? "");
+  const title = String(data.get("title") ?? "").trim();
+  const description = String(data.get("description") ?? "").trim();
+  const day = Number(data.get("day"));
+  const month = Number(data.get("month"));
+  const yearStr = data.get("year") ? String(data.get("year")) : null;
+  const category = String(data.get("category") ?? "other");
+
+  if (!UUID_PATTERN.test(storeId) || !UUID_PATTERN.test(ephemerisId)) return { error: "Dados inválidos." };
+  if (!title || title.length < 2 || title.length > 150) return { error: "Título inválido." };
+  if (isNaN(day) || day < 1 || day > 31 || isNaN(month) || month < 1 || month > 12) {
+    return { error: "Dia ou mês inválido." };
+  }
+  if (!CATEGORIES.has(category)) return { error: "Categoria inválida." };
+
+  const year = yearStr ? Number(yearStr) : null;
+  if (year !== null && (isNaN(year) || year < 1700 || year > 2100)) {
+    return { error: "Ano inválido." };
+  }
+
+  try {
+    await requireStoreAdmin(storeId);
+  } catch {
+    return { error: "Não autorizado" };
+  }
+
+  const supabase = await createClient();
+  const { data: updated, error } = await supabase
+    .from("ephemerides")
+    .update({
+      title,
+      description: description || null,
+      day,
+      month,
+      year,
+      category,
+    })
+    .eq("id", ephemerisId)
+    .eq("store_id", storeId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !updated) {
+    console.error("Erro ao atualizar efeméride:", error);
+    return { error: "Não foi possível atualizar a efeméride." };
+  }
+
+  revalidatePath(`/lojas/${storeId}/efemerides`);
+  revalidatePath(`/lojas/${storeId}/efemerides/relatorio`);
   revalidatePath(`/lojas/${storeId}`);
   return { success: true };
 }
@@ -86,6 +142,7 @@ export async function deleteEphemeris(data: FormData) {
   }
 
   revalidatePath(`/lojas/${storeId}/efemerides`);
+  revalidatePath(`/lojas/${storeId}/efemerides/relatorio`);
   revalidatePath(`/lojas/${storeId}`);
   return { success: true };
 }

@@ -222,18 +222,18 @@ export function EphemeridesReportClient({
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button
               onClick={handlePrint}
               className="button"
-              style={{ background: "var(--brand)", color: "#fff", gap: 8 }}
+              style={{ background: "#0f766e", color: "#ffffff", gap: 8, fontWeight: 700, boxShadow: "0 2px 6px rgba(15, 118, 110, 0.25)", border: "none" }}
             >
               <Printer size={16} /> Imprimir / Baixar PDF
             </button>
             <button
               onClick={() => setEmailModalOpen(true)}
               className="button"
-              style={{ background: "#2563eb", color: "#fff", gap: 8 }}
+              style={{ background: "#2563eb", color: "#ffffff", gap: 8, fontWeight: 700, boxShadow: "0 2px 6px rgba(37, 99, 235, 0.25)", border: "none" }}
             >
               <Mail size={16} /> Enviar por E-mail
             </button>

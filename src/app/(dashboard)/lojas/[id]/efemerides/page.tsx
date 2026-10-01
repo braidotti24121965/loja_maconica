@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Cake, Award, Sparkles, MessageSquare, Heart } from "lucide-react";
-import { createEphemeris, deleteEphemeris } from "./actions";
+import { createEphemeris } from "./actions";
+import { EphemerisActions } from "./ephemeris-actions";
 
 interface EphemerisItem {
   item_type: string;
@@ -223,13 +224,7 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
                 {e.description && <p className="subtle" style={{ fontSize: 13, margin: 0 }}>{e.description}</p>}
 
                 {isAdmin && !e.is_global && (
-                  <form action={async (formData) => { "use server"; await deleteEphemeris(formData); }} style={{ marginTop: 12 }}>
-                    <input type="hidden" name="store_id" value={storeId} />
-                    <input type="hidden" name="ephemeris_id" value={e.item_id} />
-                    <button type="submit" className="button" style={{ background: "transparent", color: "var(--danger)", padding: "4px 8px", fontSize: 12, border: "1px solid var(--danger)" }}>
-                      Excluir
-                    </button>
-                  </form>
+                  <EphemerisActions storeId={storeId} ephemeris={e} />
                 )}
               </div>
             ))}
