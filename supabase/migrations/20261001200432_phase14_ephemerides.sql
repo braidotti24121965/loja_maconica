@@ -37,25 +37,25 @@ CREATE POLICY ephemerides_select ON public.ephemerides
 CREATE POLICY ephemerides_insert ON public.ephemerides
   FOR INSERT TO authenticated
   WITH CHECK (
-    (store_id IS NULL AND private.is_platform_admin()) OR
+    (store_id IS NULL AND public.is_platform_admin()) OR
     (store_id IS NOT NULL AND private.is_store_admin(store_id))
   );
 
 CREATE POLICY ephemerides_update ON public.ephemerides
   FOR UPDATE TO authenticated
   USING (
-    (store_id IS NULL AND private.is_platform_admin()) OR
+    (store_id IS NULL AND public.is_platform_admin()) OR
     (store_id IS NOT NULL AND private.is_store_admin(store_id))
   )
   WITH CHECK (
-    (store_id IS NULL AND private.is_platform_admin()) OR
+    (store_id IS NULL AND public.is_platform_admin()) OR
     (store_id IS NOT NULL AND private.is_store_admin(store_id))
   );
 
 CREATE POLICY ephemerides_delete ON public.ephemerides
   FOR DELETE TO authenticated
   USING (
-    (store_id IS NULL AND private.is_platform_admin()) OR
+    (store_id IS NULL AND public.is_platform_admin()) OR
     (store_id IS NOT NULL AND private.is_store_admin(store_id))
   );
 
