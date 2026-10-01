@@ -28,3 +28,33 @@ export async function saveAttendance(storeId: string, sessionId: string, data: R
   revalidatePath(`/lojas/${storeId}/sessoes/${sessionId}/frequencia`);
   return { success: true };
 }
+
+export async function openCheckinWindow(sessionId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, message: "Não autenticado." };
+
+  const { data, error } = await supabase.rpc("open_checkin_window", {
+    p_session_id: sessionId
+  });
+
+  if (error) return { success: false, message: "Erro ao abrir janela: " + error.message };
+
+  return { success: true, challenge_code: data };
+}
+
+export async function closeCheckinWindow(sessionId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, message: "Não autenticado." };
+
+  const { error } = await supabase.rpc("close_checkin_window", {
+    p_session_id: sessionId
+  });
+
+  if (error) return { success: false, message: "Erro ao fechar janela: " + error.message };
+
+  return { success: true };
+}

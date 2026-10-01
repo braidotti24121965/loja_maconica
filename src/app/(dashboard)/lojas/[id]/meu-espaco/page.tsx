@@ -168,8 +168,8 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
               </div>
             </div>
             <div style={{ marginTop: 16, textAlign: "center" }}>
-               <Link href={`/lojas/${storeId}/checkin`} className="button" style={{ display: "inline-flex", background: "var(--brand)", color: "#fff", width: "100%", justifyContent: "center" }}>
-                 Fazer Check-in de Presença
+               <Link href="/checkin" className="button" style={{ display: "inline-flex", background: "var(--brand)", color: "#fff", width: "100%", justifyContent: "center" }}>
+                 Informar Código de Presença
                </Link>
             </div>
           </div>

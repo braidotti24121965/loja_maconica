@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { EditStoreForm } from "./edit-store-form";
-import { CheckinQrCode } from "./checkin-qr-code";
 
 export default async function ConfigStorePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -50,7 +49,7 @@ export default async function ConfigStorePage({ params }: { params: Promise<{ id
         <Link href={`/lojas/${storeId}/configuracoes/importar`} className="button" style={{ display: "inline-block", background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)" }}>
           Acessar Importação em Lote
         </Link>
-        <CheckinQrCode storeId={storeId} storeName={store.name} />
+        
       </div>
     </div>
   );

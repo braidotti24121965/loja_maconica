@@ -5,6 +5,7 @@ import { ArrowLeft, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FrequenciaList } from "./frequencia-list";
+import { CheckinWindowControl } from "./checkin-window-control";
 
 export default async function FrequenciaPage({ params }: { params: Promise<{ id: string, sessionId: string }> }) {
   const { id: storeId, sessionId } = await params;
@@ -41,6 +42,16 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
     .eq("store_id", storeId)
     .order("full_name");
 
+
+  // Fetch active checkin window
+  const { data: windowData } = await supabase
+    .from("session_checkin_windows")
+    .select("challenge_code, status")
+    .eq("session_id", sessionId)
+    .eq("status", "open")
+    .single();
+
+
   // Fetch existing attendance
   const { data: attendances } = await supabase
     .from("session_attendances")
@@ -63,6 +74,11 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
           </p>
         </div>
       </div>
+
+
+      {isAdmin && (
+        <CheckinWindowControl storeId={storeId} sessionId={sessionId} initialWindow={windowData || null} />
+      )}
 
       <div className="card">
         {brothers && brothers.length > 0 ? (
