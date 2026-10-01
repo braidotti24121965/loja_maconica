@@ -27,18 +27,25 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
           
           <input type="hidden" name="store_id" value={storeId} />
 
-          <div className="field">
-            <label htmlFor="full_name">Nome Completo</label>
-            <input id="full_name" name="full_name" type="text" required />
+          <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+            <div className="field" style={{ flex: 1 }}>
+              <label htmlFor="full_name">Nome Completo</label>
+              <input id="full_name" name="full_name" type="text" required />
+            </div>
+
+            <div className="field" style={{ flex: "0 0 190px" }}>
+              <label htmlFor="cim">CIM (7 dígitos)</label>
+              <input id="cim" name="cim" type="text" pattern="\d{7}" maxLength={7} title="O CIM deve conter exatamente 7 números." placeholder="Ex: 1234567" />
+            </div>
           </div>
 
           <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
             <div className="field" style={{ flex: 1 }}>
-              <label htmlFor="cim">CIM (Exatamente 7 dígitos)</label>
-              <input id="cim" name="cim" type="text" pattern="\d{7}" maxLength={7} title="O CIM deve conter exatamente 7 números." placeholder="Ex: 1234567" />
+              <label htmlFor="email">E-mail</label>
+              <input id="email" name="email" type="email" placeholder="email@exemplo.com.br" />
             </div>
 
-            <div className="field" style={{ flex: 1 }}>
+            <div className="field" style={{ flex: "0 0 190px" }}>
               <label htmlFor="degree">Grau</label>
               <select id="degree" name="degree" required style={{ width: "100%", height: "42px", padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
                 <option value="Aprendiz">Aprendiz</option>

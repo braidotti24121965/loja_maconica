@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 export async function createBrother(data: FormData) {
   const storeId = data.get("store_id") as string;
   const fullName = data.get("full_name") as string;
+  const email = data.get("email") ? String(data.get("email")).trim() : null;
   const cim = data.get("cim") as string;
   const degree = data.get("degree") as string;
   const phone = data.get("phone") as string;
@@ -33,6 +34,7 @@ export async function createBrother(data: FormData) {
     .insert({
       store_id: storeId,
       full_name: fullName,
+      email: email || null,
       cim: cim || null,
       degree,
       phone: phone || null,

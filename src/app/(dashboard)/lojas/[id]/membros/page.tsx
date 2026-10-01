@@ -69,13 +69,16 @@ export default async function MembrosPage({ params }: { params: Promise<{ id: st
       <div className="card" style={{ padding: 0, overflow: "hidden", marginBottom: 32 }}>
         {brothers && brothers.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {brothers.map((b: { id: string; full_name: string; cim: string | null; degree: string; office: string | null }, index: number) => (
+            {brothers.map((b: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null }, index: number) => (
               <div key={b.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: index < brothers.length - 1 ? "1px solid var(--border)" : "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <UserCircle size={40} color="var(--subtle)" />
                   <div>
                     <h4 style={{ margin: 0 }}>{b.full_name}</h4>
-                    {b.cim && <span className="subtle" style={{ fontSize: 13 }}>CIM: {b.cim}</span>}
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      {b.cim && <span className="subtle" style={{ fontSize: 13 }}>CIM: {b.cim}</span>}
+                      {b.email && <span className="subtle" style={{ fontSize: 13 }}>{b.email}</span>}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
