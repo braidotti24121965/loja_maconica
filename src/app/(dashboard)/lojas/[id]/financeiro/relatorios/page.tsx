@@ -38,7 +38,7 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
   // Calculate totals
   const totalReceitas = (transactions || []).filter(t => t.type === 'income' && t.status === 'paid').reduce((acc, t) => acc + Number(t.amount), 0);
   const totalDespesas = (transactions || []).filter(t => t.type === 'expense' && t.status === 'paid').reduce((acc, t) => acc + Number(t.amount), 0);
-  const totalPendente = (transactions || []).filter(t => t.status === 'pending').reduce((acc, t) => acc + Number(t.amount), 0);
+  let totalPendente = (transactions || []).filter(t => t.status === 'pending').reduce((acc, t) => acc + Number(t.amount), 0);
 
   // Group by month for chart
   const monthlyData: Record<string, { month: string, receitas: number, despesas: number, inadimplencias: number }> = {};
@@ -72,19 +72,22 @@ export default async function RelatoriosFinanceirosPage({ params }: { params: Pr
   let totalInadimplencia = 0;
 
   (dues || []).forEach(due => {
-    const m = due.due_date.substring(5, 7);
-    if (monthlyData[m]) {
-      let isOverdue = due.status === 'overdue';
-      if (due.status === 'pending') {
-        const dueDate = new Date(due.due_date);
-        dueDate.setHours(0, 0, 0, 0);
-        if (dueDate < today) isOverdue = true;
-      }
-      if (isOverdue) {
-        const amt = Number(due.amount);
+    let isOverdue = due.status === 'overdue';
+    if (due.status === 'pending') {
+      const dueDate = new Date(due.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today) isOverdue = true;
+    }
+    
+    if (isOverdue) {
+      const amt = Number(due.amount);
+      totalInadimplencia += amt;
+      const m = due.due_date.substring(5, 7);
+      if (monthlyData[m]) {
         monthlyData[m].inadimplencias += amt;
-        totalInadimplencia += amt;
       }
+    } else if (due.status === 'pending') {
+      totalPendente += Number(due.amount);
     }
   });
 
