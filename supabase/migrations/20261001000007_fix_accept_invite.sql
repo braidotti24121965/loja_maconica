@@ -1,4 +1,4 @@
--- Fase 13: Correção do Accept Invite para Isolamento de Tenant
+-- Fase 13: Correção do Accept Invite para Isolamento de Tenant (Revisada)
 
 CREATE OR REPLACE FUNCTION public.accept_invite(invite_token uuid)
 RETURNS boolean
@@ -8,49 +8,64 @@ SET search_path = ''
 AS $$
 DECLARE
   v_invite public.store_invites%rowtype;
-  v_uid uuid := (select auth.uid());
-  v_email text := lower(trim(coalesce((select auth.jwt() ->> 'email'), '')));
+  v_uid uuid := (SELECT auth.uid());
+  v_email text := lower(trim(coalesce((SELECT auth.jwt() ->> 'email'), '')));
   v_tenant_id uuid;
 BEGIN
+  -- 1. Usuário autenticado obrigatório
   IF v_uid IS NULL OR v_email = '' THEN
     RETURN false;
   END IF;
 
+  -- 2. Busca o convite com bloqueio transacional FOR UPDATE
   SELECT * INTO v_invite
   FROM public.store_invites
   WHERE token = invite_token
   FOR UPDATE;
 
+  -- 3. Validações estritas: não utilizado, não revogado, não expirado, e-mail normalizado igual
   IF NOT FOUND
     OR v_invite.email IS NULL
     OR v_invite.used_at IS NOT NULL
     OR v_invite.revoked_at IS NOT NULL
-    OR v_invite.expires_at <= now()
+    OR v_invite.expires_at <= pg_catalog.now()
     OR v_invite.email <> v_email THEN
     RETURN false;
   END IF;
 
-  -- Obter o tenant_id da loja do convite
+  -- 4. Valida se a loja existe e descobre seu tenant
   SELECT tenant_id INTO v_tenant_id
   FROM public.stores
   WHERE id = v_invite.store_id;
 
-  -- Insere o usuário como 'member' no tenant (se já não estiver lá)
-  -- Para que o usuário possa acessar a loja via RLS (is_tenant_member)
+  IF v_tenant_id IS NULL THEN
+    RETURN false;
+  END IF;
+
+  -- Valida se o tenant existe de fato
+  IF NOT EXISTS (SELECT 1 FROM public.tenants WHERE id = v_tenant_id) THEN
+    RETURN false;
+  END IF;
+
+  -- 5. Insere o usuário como 'viewer' no tenant (se já não estiver lá)
+  -- Permite que o RLS is_tenant_member autorize a leitura dos dados da Loja
   INSERT INTO public.tenant_memberships (tenant_id, user_id, role)
-  VALUES (v_tenant_id, v_uid, 'member')
+  VALUES (v_tenant_id, v_uid, 'viewer'::public.tenant_role)
   ON CONFLICT (tenant_id, user_id) DO NOTHING;
 
-  -- Insere o usuário na store_memberships
+  -- 6. Insere o usuário na loja com o papel definido no convite
   INSERT INTO public.store_memberships (store_id, user_id, role)
   VALUES (v_invite.store_id, v_uid, v_invite.role)
   ON CONFLICT (store_id, user_id) DO UPDATE SET role = excluded.role;
 
-  -- Marca o convite como aceito
+  -- 7. Marca o convite como aceito protegendo contra reutilização
   UPDATE public.store_invites
-  SET used_at = now(), accepted_by = v_uid
+  SET used_at = pg_catalog.now(), accepted_by = v_uid
   WHERE id = v_invite.id;
 
   RETURN true;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.accept_invite(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.accept_invite(uuid) TO authenticated;
