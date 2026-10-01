@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet, UserCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet, UserCircle, MessageSquare } from "lucide-react";
 
 export default async function LojaDashboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -151,6 +151,17 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
           </Link>
         )}
         
+
+        {isAdmin && (
+          <Link href={`/lojas/${storeId}/comunicacao`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div className="icon" style={{ background: "#e0f2fe", color: "#0369a1" }}><MessageSquare size={20} /></div>
+              <h3 style={{ margin: 0 }}>Comunicados</h3>
+            </div>
+            <p className="subtle">Gerador de comunicados para o WhatsApp da Loja.</p>
+          </Link>
+        )}
+
         {isAdmin && (
           <Link href={`/lojas/${storeId}/configuracoes`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>

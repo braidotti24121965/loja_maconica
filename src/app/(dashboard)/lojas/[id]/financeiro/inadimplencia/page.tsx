@@ -30,7 +30,7 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
   // Fetch all brothers and their dues
   const { data: brothers } = await supabase
     .from("brothers")
-    .select("id, full_name")
+    .select("id, full_name, phone")
     .eq("store_id", storeId)
     .order("full_name");
 
@@ -40,6 +40,7 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
     .eq("store_id", storeId)
     .order("competence", { ascending: false });
 
+  const { data: store } = await supabase.from("stores").select("name").eq("id", storeId).single();
   const { data: accounts } = await supabase
     .from("financial_accounts")
     .select("id, name")
@@ -58,7 +59,7 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
         currentStatus = "overdue";
       }
     }
-    return { ...due, status: currentStatus, brotherName: brother?.full_name || "Desconhecido" };
+    return { ...due, status: currentStatus, brotherName: brother?.full_name || "Desconhecido", brotherPhone: brother?.phone || null };
   });
 
   const totalOverdue = enrichedDues.filter(d => d.status === "overdue").reduce((acc, curr) => acc + Number(curr.amount), 0);
@@ -94,7 +95,7 @@ export default async function InadimplenciaPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <DuesListClient storeId={storeId} dues={enrichedDues} accounts={accounts || []} />
+      <DuesListClient storeId={storeId} dues={enrichedDues} accounts={accounts || []} storeName={store?.name || "Loja"} />
 
     </div>
   );

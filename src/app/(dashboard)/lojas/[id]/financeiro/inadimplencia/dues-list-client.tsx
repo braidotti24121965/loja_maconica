@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { MessageCircle } from "lucide-react";
 import { generateMonthlyDues, payMonthlyDue } from "../mensalidades/actions";
 
 type Due = {
   id: string;
   brother_id: string;
   brotherName: string;
+  brotherPhone?: string | null;
   competence: string;
   due_date: string;
   amount: number;
@@ -21,7 +23,7 @@ type Account = {
   name: string;
 };
 
-export default function DuesListClient({ storeId, dues, accounts }: { storeId: string, dues: Due[], accounts: Account[] }) {
+export default function DuesListClient({ storeId, dues, accounts, storeName }: { storeId: string, dues: Due[], accounts: Account[], storeName: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [payModal, setPayModal] = useState<Due | null>(null);
   const [message, setMessage] = useState("");
@@ -155,7 +157,20 @@ export default function DuesListClient({ storeId, dues, accounts }: { storeId: s
                   <Link href={`/lojas/${storeId}/membros/${due.brother_id}/extrato`} className="button" style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", fontSize: 12, padding: "4px 8px", marginRight: 8, textDecoration: "none" }}>
                     Extrato
                   </Link>
+                  
+                  {due.status === 'overdue' && due.brotherPhone && (
+                    <a 
+                      href={`https://wa.me/55${due.brotherPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`Meu Irmão ${due.brotherName.split(' ')[0]}, tudo bem? Aqui é da Tesouraria da ${storeName}. Consta em aberto um saldo de R$ ${Number(due.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} referente à mensalidade de ${due.competence}. Caso precise de auxílio ou da chave PIX da Loja, estou à disposição!`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="button" 
+                      style={{ background: "#25D366", color: "white", border: "none", fontSize: 12, padding: "4px 8px", marginRight: 8, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
+                      <MessageCircle size={12} /> Cobrar
+                    </a>
+                  )}
                   {due.status !== 'paid' && (
+
                     <button className="button" style={{ fontSize: 12, padding: "4px 8px" }} onClick={() => setPayModal(due)}>
                       Dar Baixa
                     </button>
