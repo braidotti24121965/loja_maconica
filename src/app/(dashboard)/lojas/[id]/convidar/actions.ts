@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -12,6 +11,32 @@ type StoreRole = (typeof STORE_ROLES)[number];
 
 function allowedInviteRoles(actorRole: string): readonly StoreRole[] {
   return actorRole === "admin" ? STORE_ROLES : ["treasurer", "member", "viewer"];
+}
+
+async function revokeFailedInvite(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  inviteId: string,
+  storeId: string,
+  userId: string
+) {
+  const { error } = await supabase
+    .from("store_invites")
+    .update({
+      revoked_at: new Date().toISOString(),
+      revoked_by: userId,
+    })
+    .eq("id", inviteId)
+    .eq("store_id", storeId)
+    .is("used_at", null)
+    .is("revoked_at", null);
+
+  if (error) {
+    console.error("[invites] Falha ao revogar convite incompleto", {
+      inviteId,
+      storeId,
+      error: error.message,
+    });
+  }
 }
 
 export async function generateInvite(data: FormData) {
@@ -37,7 +62,11 @@ export async function generateInvite(data: FormData) {
     .eq("user_id", userData.user.id)
     .maybeSingle();
 
-  if (!membership || !allowedInviteRoles(membership.role).includes(role as StoreRole)) {
+  if (
+    !membership ||
+    !["admin", "secretary"].includes(membership.role) ||
+    !allowedInviteRoles(membership.role).includes(role as StoreRole)
+  ) {
     return { error: "Você não pode conceder esta função." };
   }
 
@@ -50,7 +79,7 @@ export async function generateInvite(data: FormData) {
       email: email,
       created_by: userData.user.id
     })
-    .select("token")
+    .select("id, token")
     .single();
 
   if (error || !invite) {
@@ -58,17 +87,39 @@ export async function generateInvite(data: FormData) {
     return { error: "Não foi possível gerar o convite interno." };
   }
 
-  const headersList = await headers();
-  const origin = headersList.get("origin");
-  const fallbackHost = headersList.get("x-forwarded-host") || headersList.get("host") || "localhost:3000";
-  const fallbackProtocol = fallbackHost.includes("localhost") ? "http" : "https";
-  
-  // The redirect URL that the user will land on after clicking the email link
-  const redirectTo = new URL(`/auth/confirm?type=invite&next=/invite/${invite.token}`, origin || `${fallbackProtocol}://${fallbackHost}`).toString();
+  const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!secretKey || !appUrl) {
+    await revokeFailedInvite(supabase, invite.id, storeId, userData.user.id);
+    console.error("[invites] Configuração ausente", {
+      hasSecretKey: Boolean(secretKey),
+      hasAppUrl: Boolean(appUrl),
+    });
+    return { error: "O envio de convites ainda não está configurado no servidor." };
+  }
+
+  let redirectTo: string;
+  try {
+    redirectTo = new URL(
+      `/auth/confirm?type=invite&next=/invite/${invite.token}`,
+      appUrl
+    ).toString();
+  } catch {
+    await revokeFailedInvite(supabase, invite.id, storeId, userData.user.id);
+    console.error("[invites] NEXT_PUBLIC_APP_URL inválida");
+    return { error: "A URL pública do sistema está configurada incorretamente." };
+  }
 
   const supabaseAdmin = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    secretKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
   );
 
   // Send official Supabase Invite
@@ -77,13 +128,17 @@ export async function generateInvite(data: FormData) {
   });
 
   if (inviteError) {
-    console.error("Erro ao enviar convite do Supabase Auth:", inviteError);
-    // If auth fails to send, we might want to revoke the internal invite or inform the user, but for now we just return error
-    return { error: "Erro no provedor de e-mail ao disparar o convite oficial." };
+    await revokeFailedInvite(supabase, invite.id, storeId, userData.user.id);
+    console.error("[invites] Supabase Auth recusou o envio", {
+      status: inviteError.status,
+      code: inviteError.code,
+      message: inviteError.message,
+    });
+    return { error: "Não foi possível enviar o convite. Tente novamente em alguns minutos." };
   }
 
-  // Return empty URL to prevent showing it in the UI (since Supabase sends it)
-  return { inviteUrl: "E-mail de convite enviado oficialmente via Supabase!" };
+  revalidatePath(`/lojas/${storeId}/convidar`);
+  return { success: "E-mail de convite enviado com sucesso." };
 }
 
 export async function revokeInvite(data: FormData) {
