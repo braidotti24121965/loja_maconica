@@ -24,9 +24,13 @@ type Account = {
 export default function DuesListClient({ storeId, dues, accounts }: { storeId: string, dues: Due[], accounts: Account[] }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [payModal, setPayModal] = useState<Due | null>(null);
+  const [message, setMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setMessage("");
+    setErrorMsg("");
     const formData = new FormData(e.currentTarget);
     const competence = formData.get("competence") as string;
     const amount = Number(formData.get("amount"));
@@ -34,13 +38,15 @@ export default function DuesListClient({ storeId, dues, accounts }: { storeId: s
 
     setIsGenerating(false);
     const res = await generateMonthlyDues(storeId, competence, amount, dueDate);
-    if (res.error) alert(res.error);
-    else alert("Mensalidades geradas com sucesso para todos os irmãos!");
+    if (res.error) setErrorMsg(res.error);
+    else setMessage("Mensalidades geradas com sucesso para todos os irmãos!");
   };
 
   const handlePay = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!payModal) return;
+    setMessage("");
+    setErrorMsg("");
     
     const formData = new FormData(e.currentTarget);
     const accountId = formData.get("account_id") as string;
@@ -48,17 +54,20 @@ export default function DuesListClient({ storeId, dues, accounts }: { storeId: s
     const paymentMethod = formData.get("payment_method") as string;
 
     const res = await payMonthlyDue(payModal.id, storeId, paymentMethod, paymentDate, accountId);
-    if (res.error) alert(res.error);
-    else alert("Pagamento registrado com sucesso!");
+    if (res.error) setErrorMsg(res.error);
+    else setMessage("Pagamento registrado com sucesso!");
     setPayModal(null);
   };
 
   return (
-    <div className="card" style={{ padding: 0 }}>
-      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0, fontSize: 16 }}>Mensalidades Lançadas</h3>
-        <button className="button" onClick={() => setIsGenerating(true)}>+ Gerar Mensalidades em Lote</button>
-      </div>
+    <>
+      {message && <div style={{ background: "var(--green-soft)", color: "var(--green-dark)", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{message}</div>}
+      {errorMsg && <div style={{ background: "#fee2e2", color: "var(--danger)", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{errorMsg}</div>}
+      <div className="card" style={{ padding: 0 }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0, fontSize: 16 }}>Mensalidades Lançadas</h3>
+          <button className="button" onClick={() => setIsGenerating(true)}>+ Gerar Mensalidades em Lote</button>
+        </div>
 
       {isGenerating && (
         <div style={{ padding: 24, borderBottom: "1px solid var(--border)", background: "var(--page)" }}>
@@ -163,5 +172,6 @@ export default function DuesListClient({ storeId, dues, accounts }: { storeId: s
         </table>
       </div>
     </div>
+    </>
   );
 }
