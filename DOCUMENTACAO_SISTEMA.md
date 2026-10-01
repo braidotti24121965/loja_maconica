@@ -17,6 +17,7 @@ O **Controle de Lojas Maçônicas** é um sistema web SaaS Multi-Tenant desenvol
 3. **Privacidade e Proteção de Dados de Menores:** Ocultação automática de sobrenomes e anos de nascimento de dependentes para membros comuns.
 4. **Comunicação Agilizada via WhatsApp:** Geradores inteligentes de mensagens formatadas com emojis para aniversariantes, convocações e cobranças.
 5. **Gestão Ritualística e Frequência Digital:** Registro de sessões, upload de atas validadas por QR Code e check-in presencial com geofencing.
+6. **Autenticação & Recuperação de Acesso:** Fluxo de convites por e-mail, autovinculação à ficha de membro e redefinição de senha via e-mail (`/esqueci-senha` e `/redefinir-senha`).
 
 ---
 
@@ -24,7 +25,7 @@ O **Controle de Lojas Maçônicas** é um sistema web SaaS Multi-Tenant desenvol
 
 - **Framework Web:** Next.js 16 (App Router com Turbopack e React 19).
 - **Linguagem:** TypeScript (Strict Mode).
-- **Estilização:** CSS Custom Properties (Design Token System com suporte a tema claro e escuro, responsivo).
+- **Estilização:** CSS Custom Properties (Design Token System responsivo e padronizado).
 - **Backend & Banco de Dados:** Supabase Postgres com Row Level Security (RLS) habilitado em 100% das tabelas.
 - **Autenticação:** Supabase Auth com sessão SSR via Cookies seguros (`@supabase/ssr`).
 - **Funções de Segurança:** Schemas isolados (`private` para funções de verificação de permissão e `public` para RPCs com `SET search_path = ''`).
@@ -81,14 +82,20 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 - RPC `get_upcoming_ephemerides` com busca consolidada de eventos nos próximos 30/60 dias.
 - Gestão global no painel `/admin/efemerides`.
 
-### Fase 14 (Parte 2) — Aniversariantes Dependentes e Privacidade Estrita
+### Fase 14 (Parte 2) — Aniversariantes Dependentes, Privacidade e Fluxo de Autenticação
 - Tabela `dependents` com coluna `store_id` e data de nascimento (`birthdate`).
 - **Regra de Privacidade de Menores**:
   - Para **Membros Comuns**: RPC retorna apenas o **Primeiro Nome** do dependente (ex: *"Maria (Esposa do Ir. Luiz Marcelo)"*) e oculta o ano de nascimento (`year = NULL`).
   - Para **Administradores/Secretários**: Exibição completa de nome e data integral.
-- Cadastro, edição e exclusão de dependentes restritos a Administradores e Secretários (`requireStoreAdmin`).
-- Gerador de mensagem para WhatsApp com seções separadas para Irmãos e Dependentes.
-- Suíte de testes transacionais automatizados (`supabase/tests/dependents_ephemerides_test.sql`).
+- **Associação de E-mail de Membro (`brothers.email`)**:
+  - Adicionada coluna `email` em `brothers` com gatilho de sincronização automática (`trg_sync_brother_email_from_auth`) e preenchimento na RPC `link_own_user_to_brother`.
+  - Formulário de Edição com atalho direto **"Enviar Convite"** apontando para o e-mail do irmão.
+- **Fluxo de Recuperação de Senha**:
+  - Páginas `/esqueci-senha` (solicitação por e-mail) e `/redefinir-senha` (redefinição de senha com validação de token OTP).
+- **Ajustes Finais de Usabilidade & Layout**:
+  - Exibição do Nome Completo do Usuário e Perfil/Papel na barra superior (`topbar`) ao lado das iniciais.
+  - Alinhamento de campos no formulário (Linha 1: *Nome Completo* + *CIM*, Linha 2: *E-mail* + *Grau*).
+  - Padronização dos graus oficiais: `Aprendiz Maçom`, `Companheiro Maçom`, `Mestre Maçom` e `Mestre Instalado`, com migração transacional no banco de dados.
 
 ---
 
@@ -99,7 +106,7 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 1. **`organizations`**: Organizações/Potências (ex: GLESP, GOB, COMAB).
 2. **`stores`**: Lojas Maçônicas (ex: Salto Moutonnee, Paula Sousa). Contém `id`, `name`, `number`, `tenant_id`, `created_at`.
 3. **`store_memberships`**: Vínculo entre `auth.users` e `stores`. Contém `user_id`, `store_id`, `role` (`admin`, `secretary`, `treasurer`, `member`, `viewer`).
-4. **`brothers`**: Ficha cadastral do obreiro. Contém `id`, `store_id`, `user_id`, `full_name`, `cim`, `degree`, `office`, `phone`, `birthdate`, `initiation_date`, `elevation_date`, `exaltation_date`.
+4. **`brothers`**: Ficha cadastral do obreiro. Contém `id`, `store_id`, `user_id`, `full_name`, `email`, `cim`, `degree`, `office`, `phone`, `birthdate`, `initiation_date`, `elevation_date`, `exaltation_date`.
 5. **`dependents`**: Familiares do obreiro. Contém `id`, `brother_id`, `store_id`, `name`, `relationship`, `birthdate`, `created_at`.
 6. **`invites`**: Convites de acesso pendentes. Contém `id`, `store_id`, `email`, `role`, `token`, `expires_at`.
 7. **`sessions` & `session_documents`**: Atas e sessões ritualísticas da loja.
@@ -109,20 +116,14 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 11. **`ephemerides`**: Comemorações históricas e efemérides (locais ou globais do SaaS).
 12. **`platform_admins`**: Tabela de administradores globais da plataforma SaaS.
 
-### Funções e RPCs Principais:
-
-- **`private.is_store_member(target_store_id uuid)`**: Retorna `boolean`. Valida se `auth.uid()` tem vínculo ativo na loja.
-- **`private.is_store_admin(target_store_id uuid)`**: Retorna `boolean`. Valida se `auth.uid()` possui papel `admin` ou `secretary` na loja.
-- **`public.is_platform_admin()`**: Retorna `boolean`. Valida se `auth.uid()` é administrador global do SaaS.
-- **`public.get_upcoming_ephemerides(p_store_id uuid, p_days_ahead int)`**: RPC `SECURITY DEFINER` com `SET search_path = ''` que consolida aniversários de irmãos, aniversários de dependentes (com filtro de privacidade por papel), datas maçônicas e efemérides históricas.
-- **`public.link_own_user_to_brother(p_store_id uuid, p_brother_id uuid)`**: Permite a autovinculação segura da ficha do irmão ao seu usuário logado.
-
 ---
 
 ## 🗺️ 6. Mapa de Rotas e Páginas da Aplicação
 
 ### Rotas Públicas & Autenticação:
-- `/login` — Formulario de autenticação.
+- `/login` — Formulário de autenticação com atalho "Esqueci minha senha".
+- `/esqueci-senha` — Solicitação de e-mail para redefinição de senha.
+- `/redefinir-senha` — Formulário de redefinição de nova senha.
 - `/invite/[token]` — Tela de aceite de convite.
 - `/validar/[token]` — Validação pública de autenticidade de atas via QR Code.
 - `/checkin` / `/checkin/code/[code]` / `/checkin/qr/[token]` — Check-in de presença.
@@ -134,18 +135,18 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
 ### Rotas do Dashboard da Loja (`/lojas/[id]`):
 - `/lojas` — Seleção de loja ativa.
 - `/lojas/[id]` — Visão Geral / Dashboard principal da loja.
-- `/lojas/[id]/meu-espaco` — Painel pessoal do Irmão (dados pessoais, presença e resumo).
+- `/lojas/[id]/meu-espaco` — Painel pessoal do Irmão.
 - `/lojas/[id]/meu-extrato` — Extrato financeiro individual do Irmão.
 - `/lojas/[id]/membros` — Lista de Obreiros e busca.
-- `/lojas/[id]/membros/[brotherId]` — Ficha do Obreiro + Cadastro e Edição de Familiares/Dependentes.
-- `/lojas/[id]/membros/[brotherId]/extrato` — Extrato financeiro detalhado de um Obreiro (uso da Tesouraria/Admin).
+- `/lojas/[id]/membros/[brotherId]` — Ficha do Obreiro + E-mail + Familiares/Dependentes.
+- `/lojas/[id]/membros/[brotherId]/extrato` — Extrato financeiro detalhado de um Obreiro.
 - `/lojas/[id]/sessoes` — Calendário de Sessões e upload de Atas.
 - `/lojas/[id]/financeiro` — Painel Financeiro, Lançamentos, Inadimplência e Relatórios.
 - `/lojas/[id]/eventos` — Gestão de Eventos e Galeria de Fotos.
 - `/lojas/[id]/efemerides` — Calendário de Efemérides, Aniversariantes e Mensagem para WhatsApp.
 - `/lojas/[id]/comunicacao` — Central de Mensagens e Convocações.
 - `/lojas/[id]/configuracoes/importar` — Importador de planilhas de obreiros em lote via CSV.
-- `/lojas/[id]/convidar` — Envio de convites por e-mail para novos usuários.
+- `/lojas/[id]/convidar` — Envio de convites por e-mail para novos usuários (com suporte a preenchimento `?email=...`).
 
 ---
 
@@ -180,7 +181,7 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
    npx supabase db push
    ```
 3. **Deploy na Vercel:** O deploy é acionado automaticamente a cada push na branch `main`.
-4. **Arquivo Confidencial:** O arquivo `lista_obreiros_salto_moutonnee.csv` contém dados reais e deve permanecer 100% **fora do Git** (untracked no `.gitignore`).
+4. **Arquivo Confidencial:** O arquivo `lista_obreiros_salto_moutonnee.csv` contém dados reais e permanece 100% **fora do Git** (`untracked` no `.gitignore`).
 
 ---
 *Documentação gerada e sincronizada no repositório oficial.*
