@@ -39,7 +39,7 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
       )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 24, marginBottom: 8 }}>Minhas Lojas</h1>
+          <h1 style={{ fontSize: 24, marginBottom: 8 }}>Loja</h1>
           <p className="subtle">Lojas nas quais você possui vínculo.</p>
         </div>
         {canCreate && (

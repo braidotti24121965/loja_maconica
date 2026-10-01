@@ -59,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="brand"><div className="brand-mark">CL</div><div className="brand-copy"><strong>Controle de Lojas</strong><small>Administração</small></div></div>
         <nav className="nav" aria-label="Navegação principal">
           <Link href="/"><LayoutDashboard size={18}/><span>Visão geral</span></Link>
-          <Link href="/lojas"><Store size={18}/><span>Minhas Lojas</span></Link>
+          <Link href="/lojas"><Store size={18}/><span>Loja</span></Link>
           <Link href="/perfil"><User size={18}/><span>Meu Perfil</span></Link>
         </nav>
         <StoreSwitcher stores={userStores} activeId={activeStoreId} />
