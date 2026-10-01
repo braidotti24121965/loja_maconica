@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, FileText, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Plus, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -73,9 +73,14 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
                 
-                <Link href={`/lojas/${storeId}/sessoes/${session.id}/ata`} className="button" style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
-                  <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
-                </Link>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/ata`} className="button" style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
+                    <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
+                  </Link>
+                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/frequencia`} className="button" style={{ background: "var(--brand)", color: "white", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
+                    <Users size={14} /> Frequência
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
