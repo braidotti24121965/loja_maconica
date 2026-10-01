@@ -37,27 +37,65 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
 
   const isAdmin = ["admin", "secretary"].includes(membership.role);
 
-  // Fetch upcoming ephemerides and anniversaries from RPC
+  // Fetch upcoming ephemerides and anniversaries from RPC (365 days)
   const { data: items } = await supabase.rpc("get_upcoming_ephemerides", {
     p_store_id: storeId,
-    p_days_ahead: 60,
+    p_days_ahead: 365,
   });
+
+  // Fetch next session date to check if it falls in a subsequent month
+  const todayStr = new Date().toISOString().split("T")[0];
+  const { data: nextSession } = await supabase
+    .from("sessions")
+    .select("date")
+    .eq("store_id", storeId)
+    .gte("date", todayStr)
+    .order("date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
   const MONTH_NAMES = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
     "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
   ];
 
-  const currentMonth = new Date().getMonth() + 1;
-  const currentDay = new Date().getDate();
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentDay = now.getDate();
+
+  let nextSessionDateObj: Date | null = null;
+  if (nextSession?.date) {
+    const parts = nextSession.date.split("-").map(Number);
+    if (parts.length === 3) {
+      nextSessionDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+  }
+
+  const isItemInScope = (item: EphemerisItem): boolean => {
+    // 1. Mostrar datas dentro do mês vigente
+    if (item.month === currentMonth) return true;
+
+    // 2. Se a próxima sessão for no mês subsequente, mostrar até a data dessa próxima sessão
+    if (nextSessionDateObj) {
+      const nextSessionMonth = nextSessionDateObj.getMonth() + 1;
+      const nextSessionDay = nextSessionDateObj.getDate();
+
+      if (item.month === nextSessionMonth && item.day <= nextSessionDay) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   const allItems: EphemerisItem[] = (items as EphemerisItem[]) || [];
+  const inScopeItems = allItems.filter(isItemInScope);
   
   // Categorize
-  const birthdays = allItems.filter((i: EphemerisItem) => i.item_type === "birthday");
-  const dependentBirthdays = allItems.filter((i: EphemerisItem) => i.item_type === "dependent_birthday");
-  const masonicAnniversaries = allItems.filter((i: EphemerisItem) => ["initiation", "elevation", "exaltation"].includes(i.item_type));
-  const ephemerides = allItems.filter((i: EphemerisItem) => i.item_type === "ephemeris");
+  const birthdays = inScopeItems.filter((i: EphemerisItem) => i.item_type === "birthday");
+  const dependentBirthdays = inScopeItems.filter((i: EphemerisItem) => i.item_type === "dependent_birthday");
+  const masonicAnniversaries = inScopeItems.filter((i: EphemerisItem) => ["initiation", "elevation", "exaltation"].includes(i.item_type));
+  const ephemerides = inScopeItems.filter((i: EphemerisItem) => i.item_type === "ephemeris");
 
   // Aniversariantes da semana/mês para copiar mensagem WhatsApp
   const whatsappBirthdaysText = birthdays

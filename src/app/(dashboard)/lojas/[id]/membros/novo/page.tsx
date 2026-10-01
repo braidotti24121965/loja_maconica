@@ -56,7 +56,7 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", gap: 12, marginBottom: 16, alignItems: "flex-end" }}>
             <div className="field" style={{ flex: "1 1 200px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="office">Cargo Atual na Loja</label>
               <select id="office" name="office" style={{ width: "100%", height: "42px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
@@ -82,6 +82,23 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
             <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="birthdate">Data de Nasc.</label>
               <input id="birthdate" name="birthdate" type="date" style={{ height: "42px" }} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+            <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+              <label htmlFor="initiation_date">Iniciação (Aprendiz)</label>
+              <input id="initiation_date" name="initiation_date" type="date" style={{ height: "42px" }} />
+            </div>
+
+            <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+              <label htmlFor="elevation_date">Elevação (Companheiro)</label>
+              <input id="elevation_date" name="elevation_date" type="date" style={{ height: "42px" }} />
+            </div>
+
+            <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+              <label htmlFor="exaltation_date">Exaltação (Mestre)</label>
+              <input id="exaltation_date" name="exaltation_date" type="date" style={{ height: "42px" }} />
             </div>
           </div>
 

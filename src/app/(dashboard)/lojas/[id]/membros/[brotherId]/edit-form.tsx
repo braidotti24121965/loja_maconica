@@ -6,7 +6,7 @@ import { Trash, Pencil, Link as LinkIcon, CheckCircle, Mail } from "lucide-react
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; birthdate?: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
+export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; birthdate?: string | null; initiation_date?: string | null; elevation_date?: string | null; exaltation_date?: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
   }, null);
@@ -94,7 +94,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 16, alignItems: "flex-end" }}>
           <div className="field" style={{ flex: "1 1 200px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="office">Cargo Atual na Loja</label>
             <select id="office" name="office" defaultValue={brother.office || ""} style={{ width: "100%", height: "42px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
@@ -120,6 +120,23 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="birthdate">Data de Nasc.</label>
             <input id="birthdate" name="birthdate" type="date" defaultValue={brother.birthdate || ""} style={{ height: "42px" }} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+          <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+            <label htmlFor="initiation_date">Iniciação (Aprendiz)</label>
+            <input id="initiation_date" name="initiation_date" type="date" defaultValue={brother.initiation_date || ""} style={{ height: "42px" }} />
+          </div>
+
+          <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+            <label htmlFor="elevation_date">Elevação (Companheiro)</label>
+            <input id="elevation_date" name="elevation_date" type="date" defaultValue={brother.elevation_date || ""} style={{ height: "42px" }} />
+          </div>
+
+          <div className="field" style={{ flex: 1, minWidth: 0, marginBottom: 0 }}>
+            <label htmlFor="exaltation_date">Exaltação (Mestre)</label>
+            <input id="exaltation_date" name="exaltation_date" type="date" defaultValue={brother.exaltation_date || ""} style={{ height: "42px" }} />
           </div>
         </div>
 
