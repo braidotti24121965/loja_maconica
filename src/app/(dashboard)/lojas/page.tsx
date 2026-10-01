@@ -23,15 +23,8 @@ export default async function LojasPage({ searchParams }: { searchParams: Promis
 
   if (storesError) throw new Error("Stores Error: " + storesError.message);
 
-  const { data: tenantMemberships, error: tenantError } = await supabase
-    .from("tenant_memberships")
-    .select("role")
-    .eq("user_id", user.id)
-    .in("role", ["owner", "admin"]);
-
-  if (tenantError) throw new Error("Tenant Error: " + tenantError.message);
-
-  const canCreate = tenantMemberships && tenantMemberships.length > 0;
+  const { data: isAdmin } = await supabase.rpc("is_platform_admin");
+  const canCreate = !!isAdmin;
 
   return (
     <div>
