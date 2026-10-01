@@ -105,7 +105,7 @@ export async function generateInvite(data: FormData) {
   let redirectTo: string;
   try {
     redirectTo = new URL(
-      `/auth/confirm?type=invite&next=/invite/${invite.token}`,
+      `/auth/callback?next=/invite/${invite.token}`,
       appUrl
     ).toString();
   } catch {
