@@ -5,17 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-async function brotherBelongsToStore(storeId: string, brotherId: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("brothers")
-    .select("id")
-    .eq("id", brotherId)
-    .eq("store_id", storeId)
-    .maybeSingle();
-  return Boolean(data);
-}
-
 export async function updateBrother(data: FormData) {
   const storeId = data.get("store_id") as string;
   const brotherId = data.get("brother_id") as string;
@@ -100,6 +89,32 @@ export async function deleteBrother(data: FormData) {
   redirect(`/lojas/${storeId}/membros`);
 }
 
+async function canManageBrotherDependents(storeId: string, brotherId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: membership } = await supabase
+    .from("store_memberships")
+    .select("role")
+    .eq("store_id", storeId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (membership && ["admin", "secretary"].includes(membership.role)) {
+    return true;
+  }
+
+  const { data: brother } = await supabase
+    .from("brothers")
+    .select("id, user_id")
+    .eq("id", brotherId)
+    .eq("store_id", storeId)
+    .maybeSingle();
+
+  return Boolean(brother && brother.user_id === user.id);
+}
+
 export async function addDependent(formData: FormData) {
   const brotherId = formData.get("brother_id") as string;
   const storeId = formData.get("store_id") as string;
@@ -109,15 +124,10 @@ export async function addDependent(formData: FormData) {
   const birthdate = birthdateStr || null;
 
   if (!name || !relationship) throw new Error("Nome e parentesco são obrigatórios");
-  if (!storeId) throw new Error("Não autorizado");
+  if (!storeId || !brotherId) throw new Error("Não autorizado");
 
-  try {
-    await requireStoreAdmin(storeId);
-  } catch {
-    throw new Error("Não autorizado");
-  }
-  if (!(await brotherBelongsToStore(storeId, brotherId))) {
-    throw new Error("Irmão não encontrado nesta loja");
+  if (!(await canManageBrotherDependents(storeId, brotherId))) {
+    throw new Error("Não autorizado a alterar dependentes deste irmão.");
   }
 
   const supabase = await createClient();
@@ -130,6 +140,7 @@ export async function addDependent(formData: FormData) {
     throw new Error("Não foi possível adicionar o dependente.");
   }
 
+  revalidatePath(`/lojas/${storeId}/meu-espaco`);
   revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
 }
 
@@ -138,15 +149,10 @@ export async function deleteDependent(formData: FormData) {
   const storeId = formData.get("store_id") as string;
   const brotherId = formData.get("brother_id") as string;
 
-  if (!storeId) throw new Error("Não autorizado");
+  if (!storeId || !brotherId || !id) throw new Error("Não autorizado");
 
-  try {
-    await requireStoreAdmin(storeId);
-  } catch {
-    throw new Error("Não autorizado");
-  }
-  if (!(await brotherBelongsToStore(storeId, brotherId))) {
-    throw new Error("Irmão não encontrado nesta loja");
+  if (!(await canManageBrotherDependents(storeId, brotherId))) {
+    throw new Error("Não autorizado a alterar dependentes deste irmão.");
   }
 
   const supabase = await createClient();
@@ -164,9 +170,8 @@ export async function deleteDependent(formData: FormData) {
   }
   if (!removedDependent) throw new Error("Dependente não encontrado");
 
-  if (storeId && brotherId) {
-    revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
-  }
+  revalidatePath(`/lojas/${storeId}/meu-espaco`);
+  revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
 }
 
 export async function editDependent(formData: FormData) {
@@ -178,16 +183,10 @@ export async function editDependent(formData: FormData) {
   const birthdateStr = formData.get("birthdate") as string;
   const birthdate = birthdateStr || null;
 
-  if (!name || !relationship || !id) throw new Error("Dados obrigatórios faltando");
-  if (!storeId) throw new Error("Não autorizado");
+  if (!name || !relationship || !id || !storeId || !brotherId) throw new Error("Dados obrigatórios faltando");
 
-  try {
-    await requireStoreAdmin(storeId);
-  } catch {
-    throw new Error("Não autorizado");
-  }
-  if (!(await brotherBelongsToStore(storeId, brotherId))) {
-    throw new Error("Irmão não encontrado nesta loja");
+  if (!(await canManageBrotherDependents(storeId, brotherId))) {
+    throw new Error("Não autorizado a alterar dependentes deste irmão.");
   }
 
   const supabase = await createClient();
@@ -205,9 +204,8 @@ export async function editDependent(formData: FormData) {
   }
   if (!updatedDependent) throw new Error("Dependente não encontrado");
 
-  if (storeId && brotherId) {
-    revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
-  }
+  revalidatePath(`/lojas/${storeId}/meu-espaco`);
+  revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
 }
 
 // linkOwnUserToBrother: autovinculação — não exige papel admin, apenas autenticação

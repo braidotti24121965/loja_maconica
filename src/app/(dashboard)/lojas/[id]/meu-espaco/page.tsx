@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Calendar, UserCircle, Wallet, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, UserCircle, Wallet, FileText } from "lucide-react";
 import DigitalCardClient from "./digital-card";
+import { MyDependentsSection } from "./dependents-form";
 
 export const revalidate = 0;
 
@@ -44,6 +45,13 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
     );
   }
 
+  // Fetch dependents for this brother
+  const { data: dependents } = await supabase
+    .from("dependents")
+    .select("id, name, relationship, birthdate")
+    .eq("brother_id", brother.id)
+    .order("created_at", { ascending: true });
+
   // Get active digital card
   const { data: activeCard } = await supabase
     .from("digital_cards")
@@ -77,7 +85,6 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
     else if (due.status === 'pending') pendingCount++;
   });
 
-  
   // Get events overview (next 3)
   const { data: events } = await supabase
     .from("events")
@@ -111,15 +118,18 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
     ? Math.round(((totalAttendances || 0) / totalSessions) * 100)
     : 100;
 
-
   return (
     <div>
+      <Link href={`/lojas/${storeId}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
+        <ArrowLeft size={16} /> Voltar para Visão Geral
+      </Link>
+
       <h1 style={{ fontSize: 24, margin: "0 0 8px 0" }}>Meu Espaço</h1>
       <p className="subtle" style={{ marginBottom: 32 }}>Portal exclusivo para o obreiro: {brother.full_name}</p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
         
-        {/* Coluna 1: Carteirinha e Perfil */}
+        {/* Coluna 1: Carteirinha, Financeiro e Dependentes */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div className="card">
             <h2 style={{ fontSize: 16, margin: "0 0 16px 0", display: "flex", alignItems: "center", gap: 8 }}>
@@ -154,6 +164,12 @@ export default async function MeuEspacoPage({ params }: { params: Promise<{ id: 
               Ver Meu Extrato <ArrowRight size={16} />
             </Link>
           </div>
+
+          <MyDependentsSection
+            storeId={storeId}
+            brotherId={brother.id}
+            dependents={dependents || []}
+          />
         </div>
 
         {/* Coluna 2: Frequencia e Eventos */}
