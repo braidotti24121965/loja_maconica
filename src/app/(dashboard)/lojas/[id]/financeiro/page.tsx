@@ -68,13 +68,13 @@ export default async function FinanceiroPage({ params }: { params: Promise<{ id:
           </div>
         )}
         
-        <Link href={`/lojas/${storeId}/financeiro/inadimplencia`} className="card" style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "var(--page)", border: "1px dashed var(--border)" }}>
+        <Link href={`/lojas/${storeId}/financeiro/inadimplencia`} className="card" style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Mensalidades e Inadimplência</h3>
-          <p className="subtle" style={{ textAlign: "center" }}>Gerar boletos em lote e ver atrasos</p>
+          <p className="subtle" style={{ textAlign: "center", margin: 0 }}>Gerar boletos em lote e ver atrasos</p>
         </Link>
-        <Link href={`/lojas/${storeId}/financeiro/relatorios`} className="card" style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "var(--page)", border: "1px dashed var(--border)" }}>
+        <Link href={`/lojas/${storeId}/financeiro/relatorios`} className="card" style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Gráficos e Relatórios</h3>
-          <p className="subtle" style={{ textAlign: "center" }}>Receitas, despesas e evolução anual</p>
+          <p className="subtle" style={{ textAlign: "center", margin: 0 }}>Receitas, despesas e evolução anual</p>
         </Link>
       </div>
       
