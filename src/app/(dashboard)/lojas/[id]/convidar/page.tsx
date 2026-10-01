@@ -7,8 +7,10 @@ import { RevokeButton } from "./revoke-button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export default async function ConvidarPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ConvidarPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ email?: string }> }) {
   const { id: storeId } = await params;
+  const search = await searchParams;
+  const initialEmail = search?.email;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -51,7 +53,7 @@ export default async function ConvidarPage({ params }: { params: Promise<{ id: s
       <p className="subtle" style={{ marginBottom: 32 }}>Crie um link seguro para convidar um novo membro para a <strong>{storeName}</strong>.</p>
       
       <div className="card" style={{ marginBottom: 32 }}>
-        <InviteForm storeId={storeId} actorRole={membership.role} />
+        <InviteForm storeId={storeId} actorRole={membership.role} initialEmail={initialEmail} />
       </div>
 
       <h2 style={{ fontSize: 20, marginBottom: 16 }}>Histórico de Convites</h2>

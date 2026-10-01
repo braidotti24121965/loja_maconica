@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { updateBrother, deleteBrother, addDependent, deleteDependent, editDependent, linkOwnUserToBrother } from "./actions";
-import { Trash, Pencil, Link as LinkIcon, CheckCircle } from "lucide-react";
+import { Trash, Pencil, Link as LinkIcon, CheckCircle, Mail } from "lucide-react";
+import Link from "next/link";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
@@ -30,18 +31,33 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           <div>
             <h4 style={{ margin: "0 0 4px 0" }}>Vínculo de Acesso</h4>
             <p className="subtle" style={{ margin: 0, fontSize: 13 }}>
-              {brother.user_id ? "Esta ficha já está vinculada a um login de usuário." : "Esta ficha não possui um login vinculado. O membro não poderá acessar seu próprio extrato."}
+              {brother.user_id 
+                ? "Esta ficha já está vinculada a um login de usuário." 
+                : brother.email 
+                  ? `Ficha pronta para convite via e-mail (${brother.email}).`
+                  : "Esta ficha não possui um e-mail cadastrado. Preencha o e-mail abaixo para poder enviar o convite de acesso."}
             </p>
           </div>
           {!brother.user_id ? (
-            <button 
-              type="submit" 
-              formAction={async (formData) => { await linkOwnUserToBrother(formData); }} 
-              className="button" 
-              style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13 }}
-            >
-              <LinkIcon size={14} /> Sou eu (Vincular)
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              {brother.email && (
+                <Link
+                  href={`/lojas/${storeId}/convidar?email=${encodeURIComponent(brother.email)}`}
+                  className="button"
+                  style={{ background: "var(--brand)", color: "#fff", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                >
+                  <Mail size={14} /> Enviar Convite
+                </Link>
+              )}
+              <button 
+                type="submit" 
+                formAction={async (formData) => { await linkOwnUserToBrother(formData); }} 
+                className="button" 
+                style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13 }}
+              >
+                <LinkIcon size={14} /> Sou eu (Vincular)
+              </button>
+            </div>
           ) : (
             <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--green-dark)", fontSize: 13, fontWeight: 600 }}>
               <CheckCircle size={14} /> Vinculado

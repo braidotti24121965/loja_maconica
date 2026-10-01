@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const requestedNext = searchParams.get("next");
-  const next = requestedNext?.startsWith("/invite/")
+  const next = (requestedNext?.startsWith("/invite/") || requestedNext === "/redefinir-senha")
     ? requestedNext
     : "/";
 

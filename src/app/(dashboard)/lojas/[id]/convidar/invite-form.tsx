@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { generateInvite } from "./actions";
 
-export function InviteForm({ storeId, actorRole }: { storeId: string; actorRole: string }) {
+export function InviteForm({ storeId, actorRole, initialEmail }: { storeId: string; actorRole: string; initialEmail?: string }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string; success?: string } | null | undefined, data: FormData) => {
     return await generateInvite(data);
   }, null);
@@ -28,6 +28,7 @@ export function InviteForm({ storeId, actorRole }: { storeId: string; actorRole:
               id="email" 
               name="email" 
               required 
+              defaultValue={initialEmail || ""}
               placeholder="email@exemplo.com" 
               style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid var(--border)", marginBottom: 16 }}
             />
