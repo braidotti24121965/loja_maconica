@@ -62,16 +62,36 @@ export async function uploadAta(data: FormData) {
     return { error: "Erro ao enviar arquivo para o cofre." };
   }
 
-  // 2. Insert metadata into documents table
-  const { error: dbError } = await supabase
+  // 2. Insert or update metadata into documents table
+  const { data: existingDoc } = await supabase
     .from("documents")
-    .upsert({
-      store_id: storeId,
-      session_id: sessionId,
-      title: "Ata da Sessão",
-      file_path: filePath,
-      uploaded_by: userData.user.id
-    }, { onConflict: "session_id" });
+    .select("id")
+    .eq("session_id", sessionId)
+    .maybeSingle();
+
+  let dbError;
+  if (existingDoc) {
+    const { error } = await supabase
+      .from("documents")
+      .update({
+        title: "Ata da Sessão",
+        file_path: filePath,
+        uploaded_by: userData.user.id
+      })
+      .eq("id", existingDoc.id);
+    dbError = error;
+  } else {
+    const { error } = await supabase
+      .from("documents")
+      .insert({
+        store_id: storeId,
+        session_id: sessionId,
+        title: "Ata da Sessão",
+        file_path: filePath,
+        uploaded_by: userData.user.id
+      });
+    dbError = error;
+  }
 
   if (dbError) {
     console.error("DB Error:", dbError);
