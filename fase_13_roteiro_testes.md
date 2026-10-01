@@ -32,7 +32,7 @@
   *Observação: A `tenant_memberships` exige papel `admin` (e não `owner`) para poder editar configurações da loja (como nome e número).*
   ```sql
   -- 1. Diagnóstico (deve retornar 1 linha):
-  SELECT id, role, tenant_id FROM public.tenant_memberships 
+  SELECT user_id, role, tenant_id FROM public.tenant_memberships 
   WHERE user_id = (SELECT id FROM auth.users WHERE lower(email) = 'lsm@maconaria360.com.br')
     AND tenant_id = 'ea88ae27-674a-46e1-bbcc-c73fcf6b2a30';
 
@@ -51,7 +51,7 @@
 - **SQL de Elevação:**
   ```sql
   -- 1. Diagnóstico (deve retornar 1 linha):
-  SELECT id, role, tenant_id FROM public.tenant_memberships 
+  SELECT user_id, role, tenant_id FROM public.tenant_memberships 
   WHERE user_id = (SELECT id FROM auth.users WHERE lower(email) = 'lpsm@maconaria360.com.br')
     AND tenant_id = '179c4833-ad24-46e3-a576-84c16257e58a';
 
