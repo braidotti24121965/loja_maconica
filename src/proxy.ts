@@ -3,17 +3,25 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseEnv } from '@/lib/supabase/env'
 
-// Rotas que exigem papel admin ou treasurer na loja
+// Rotas que exigem papel admin ou secretary na loja
+// Membros podem LER sessoes e eventos — protege somente mutações
 const ADMIN_SUBROUTES = [
   'comunicacao',
   'convidar',
-  'sessoes',
-  'eventos',
   'membros',
   'configuracoes',
 ]
 const TREASURER_SUBROUTES = ['financeiro']
-const ADMIN_EXACT = ['membros/novo', 'sessoes/nova', 'eventos/novo']
+// Subrotas exatas de mutação (criação, edição, frequência, upload de ata)
+const ADMIN_EXACT = [
+  'membros/novo',
+  'sessoes/nova',
+  'eventos/novo',
+]
+const ADMIN_SUBROUTE_PATTERNS = [
+  /^sessoes\/[^/]+\/frequencia(\/.*)?$/,  // frequência administrativa
+  /^eventos\/[^/]+\/editar$/,             // edição de evento
+]
 
 function log(
   level: 'warn' | 'error',
@@ -47,6 +55,7 @@ export async function proxy(request: NextRequest) {
   const needsAdmin =
     ADMIN_SUBROUTES.some(r => subroute === r || subroute.startsWith(r + '/')) ||
     ADMIN_EXACT.some(r => subroute === r) ||
+    ADMIN_SUBROUTE_PATTERNS.some(p => p.test(subroute)) ||
     isEditing
 
   const needsTreasurer =

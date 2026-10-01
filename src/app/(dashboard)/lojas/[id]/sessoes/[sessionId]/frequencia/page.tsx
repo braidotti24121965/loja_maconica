@@ -23,7 +23,7 @@ export default async function FrequenciaPage({ params }: { params: Promise<{ id:
     .single();
 
   if (!membership) redirect("/lojas");
-  const isAdmin = ["admin", "secretary", "treasurer"].includes(membership.role);
+  const isAdmin = ["admin", "secretary"].includes(membership.role);
 
   // Fetch session
   const { data: session } = await supabase

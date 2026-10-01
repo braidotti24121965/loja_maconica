@@ -24,7 +24,7 @@ export function FrequenciaList({
     const refreshInterval = window.setInterval(async () => {
       if (hasUnsavedChanges) return;
 
-      const result = await getSessionAttendances(sessionId);
+      const result = await getSessionAttendances(storeId, sessionId);
       if (result.error) return;
 
       setAttendances(
@@ -36,7 +36,7 @@ export function FrequenciaList({
     }, 4000);
 
     return () => window.clearInterval(refreshInterval);
-  }, [autoRefresh, hasUnsavedChanges, sessionId]);
+  }, [autoRefresh, hasUnsavedChanges, sessionId, storeId]);
 
   const handleStatusChange = (brotherId: string, status: string) => {
     setHasUnsavedChanges(true);

@@ -37,40 +37,21 @@ export async function addTransaction(
   await requireStoreTreasurer(storeId);
 
   const supabase = await createClient();
+  const { error } = await supabase.rpc("add_financial_transaction", {
+    p_store_id: storeId,
+    p_account_id: data.account_id,
+    p_category_id: data.category_id,
+    p_brother_id: data.brother_id || null,
+    p_type: data.type,
+    p_amount: data.amount,
+    p_transaction_date: data.transaction_date,
+    p_description: data.description,
+    p_status: data.status,
+  });
 
-  const { error: txError } = await supabase
-    .from("financial_transactions")
-    .insert({
-      store_id: storeId,
-      account_id: data.account_id,
-      category_id: data.category_id,
-      type: data.type,
-      amount: data.amount,
-      transaction_date: data.transaction_date,
-      description: data.description,
-      status: data.status,
-      brother_id: data.brother_id || null,
-    });
-
-  if (txError) throw new Error(txError.message);
-
-  if (data.status === "paid") {
-    const { data: account } = await supabase
-      .from("financial_accounts")
-      .select("balance")
-      .eq("id", data.account_id)
-      .single();
-    if (account) {
-      const newBalance =
-        data.type === "income"
-          ? Number(account.balance) + Number(data.amount)
-          : Number(account.balance) - Number(data.amount);
-
-      await supabase
-        .from("financial_accounts")
-        .update({ balance: newBalance })
-        .eq("id", data.account_id);
-    }
+  if (error) {
+    console.error("Erro ao criar lançamento financeiro:", error.code);
+    throw new Error("Não foi possível salvar o lançamento financeiro.");
   }
 
   revalidatePath(`/lojas/${storeId}/financeiro`);

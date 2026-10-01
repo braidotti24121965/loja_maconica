@@ -5,6 +5,17 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+async function brotherBelongsToStore(storeId: string, brotherId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("brothers")
+    .select("id")
+    .eq("id", brotherId)
+    .eq("store_id", storeId)
+    .maybeSingle();
+  return Boolean(data);
+}
+
 export async function updateBrother(data: FormData) {
   const storeId = data.get("store_id") as string;
   const brotherId = data.get("brother_id") as string;
@@ -24,7 +35,7 @@ export async function updateBrother(data: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: updatedBrother, error } = await supabase
     .from("brothers")
     .update({
       full_name: fullName,
@@ -34,12 +45,15 @@ export async function updateBrother(data: FormData) {
       office: office || null,
     })
     .eq("id", brotherId)
-    .eq("store_id", storeId);
+    .eq("store_id", storeId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("Erro ao atualizar obreiro:", error);
     return { error: "Falha ao atualizar irmão. Verifique suas permissões." };
   }
+  if (!updatedBrother) return { error: "Irmão não encontrado nesta loja." };
 
   revalidatePath(`/lojas/${storeId}/membros`);
   redirect(`/lojas/${storeId}/membros`);
@@ -58,16 +72,19 @@ export async function deleteBrother(data: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: deletedBrother, error } = await supabase
     .from("brothers")
     .delete()
     .eq("id", brotherId)
-    .eq("store_id", storeId);
+    .eq("store_id", storeId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("Erro ao excluir obreiro:", error);
     return { error: "Falha ao excluir irmão. Verifique suas permissões." };
   }
+  if (!deletedBrother) return { error: "Irmão não encontrado nesta loja." };
 
   revalidatePath(`/lojas/${storeId}/membros`);
   redirect(`/lojas/${storeId}/membros`);
@@ -88,6 +105,9 @@ export async function addDependent(formData: FormData) {
     await requireStoreAdmin(storeId);
   } catch {
     throw new Error("Não autorizado");
+  }
+  if (!(await brotherBelongsToStore(storeId, brotherId))) {
+    throw new Error("Irmão não encontrado nesta loja");
   }
 
   const supabase = await createClient();
@@ -115,17 +135,24 @@ export async function deleteDependent(formData: FormData) {
   } catch {
     throw new Error("Não autorizado");
   }
+  if (!(await brotherBelongsToStore(storeId, brotherId))) {
+    throw new Error("Irmão não encontrado nesta loja");
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: removedDependent, error } = await supabase
     .from("dependents")
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .eq("brother_id", brotherId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("Erro ao excluir dependente:", error);
     throw new Error("Não foi possível excluir o dependente.");
   }
+  if (!removedDependent) throw new Error("Dependente não encontrado");
 
   if (storeId && brotherId) {
     revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
@@ -149,17 +176,24 @@ export async function editDependent(formData: FormData) {
   } catch {
     throw new Error("Não autorizado");
   }
+  if (!(await brotherBelongsToStore(storeId, brotherId))) {
+    throw new Error("Irmão não encontrado nesta loja");
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: updatedDependent, error } = await supabase
     .from("dependents")
     .update({ name, relationship, birthdate })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("brother_id", brotherId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("Erro ao editar dependente:", error);
     throw new Error("Não foi possível editar o dependente.");
   }
+  if (!updatedDependent) throw new Error("Dependente não encontrado");
 
   if (storeId && brotherId) {
     revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
@@ -178,16 +212,16 @@ export async function linkOwnUserToBrother(data: FormData) {
 
   if (!storeId || !brotherId) return { error: "Dados obrigatórios faltando" };
 
-  const { error } = await supabase
-    .from("brothers")
-    .update({ user_id: userData.user.id })
-    .eq("id", brotherId)
-    .eq("store_id", storeId);
+  const { data: linkedBrother, error } = await supabase.rpc(
+    "link_own_user_to_brother",
+    { p_store_id: storeId, p_brother_id: brotherId },
+  );
 
   if (error) {
     console.error("Erro ao vincular usuário:", error);
     return { error: "Falha ao vincular usuário. Verifique suas permissões." };
   }
+  if (!linkedBrother) return { error: "Este cadastro já está vinculado ou não está disponível." };
 
   revalidatePath(`/lojas/${storeId}/membros/${brotherId}`);
   revalidatePath(`/lojas/${storeId}`);

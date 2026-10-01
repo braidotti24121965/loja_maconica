@@ -101,22 +101,25 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
 
       <h3 style={{ marginBottom: 16 }}>Atalhos da Loja</h3>
       <div className="section-grid">
-        {isAdmin && (<Link href={`/lojas/${storeId}/sessoes`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        {/* Sessões — visível para todos os membros (leitura) */}
+        <Link href={`/lojas/${storeId}/sessoes`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><FileText size={20} /></div>
             <h3 style={{ margin: 0 }}>Sessões e Atas</h3>
           </div>
           <p className="subtle">Calendário de sessões, pautas e documentos anexos.</p>
-        </Link>)}
+        </Link>
 
-        {isAdmin && (<Link href={`/lojas/${storeId}/eventos`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+        {/* Eventos — visível para todos os membros (leitura) */}
+        <Link href={`/lojas/${storeId}/eventos`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><CalendarDays size={20} /></div>
             <h3 style={{ margin: 0 }}>Eventos e Galeria</h3>
           </div>
           <p className="subtle">Organize eventos da loja e compartilhe suas fotografias.</p>
-        </Link>)}
+        </Link>
         
+        {/* Membros — somente admin/secretary */}
         {isAdmin && (<Link href={`/lojas/${storeId}/membros`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div className="icon"><Users size={20} /></div>
