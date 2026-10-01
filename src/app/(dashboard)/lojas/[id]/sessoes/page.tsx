@@ -12,6 +12,8 @@ type SessionRow = {
   description: string | null;
 };
 
+export const revalidate = 0;
+
 export default async function SessoesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
   const supabase = await createClient();
@@ -74,10 +76,10 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
                 </div>
                 
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/ata`} className="button" style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
+                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/ata`} className="button" style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
                     <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
                   </Link>
-                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/frequencia`} className="button" style={{ background: "var(--brand)", color: "white", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
+                  <Link href={`/lojas/${storeId}/sessoes/${session.id}/frequencia`} className="button" style={{ background: "var(--green)", color: "white", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
                     <Users size={14} /> Frequência
                   </Link>
                 </div>
