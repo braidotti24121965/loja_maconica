@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Settings } from "lucide-react";
 
 export default async function FinanceiroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -41,11 +41,13 @@ export default async function FinanceiroPage({ params }: { params: Promise<{ id:
           <p className="subtle">Controle de saldos, contas a pagar, receber e mensalidades.</p>
         </div>
         <div style={{ display: "flex", gap: 12 }}>
-          <Link href={`/lojas/${storeId}/financeiro/configuracoes`} className="button" style={{ background: "transparent", color: "var(--text)", border: "1px solid var(--border)" }}>
+          <Link href={`/lojas/${storeId}/financeiro/configuracoes`} className="button" style={{ background: "#475569", color: "white", gap: 8 }}>
+            <Settings size={18} />
             Configurações
           </Link>
-          <Link href={`/lojas/${storeId}/financeiro/nova`} className="button">
-            + Novo Lançamento
+          <Link href={`/lojas/${storeId}/financeiro/nova`} className="button" style={{ gap: 8 }}>
+            <TrendingUp size={18} />
+            Novo Lançamento
           </Link>
         </div>
       </div>
