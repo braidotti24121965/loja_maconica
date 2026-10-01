@@ -11,7 +11,7 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
 
   if (!user) redirect("/login");
 
-  const [{ data: accounts }, { data: brothers }] = await Promise.all([
+  const [{ data: accounts }, { data: categories }, { data: brothers }] = await Promise.all([
     supabase.from("financial_accounts").select("id, name").eq("store_id", storeId),
     supabase.from("financial_categories").select("id, name, type").eq("store_id", storeId),
     supabase.from("brothers").select("id, full_name").eq("store_id", storeId)
@@ -23,7 +23,7 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
       <div className="card">
         <h3>Crie uma Conta Primeiro</h3>
         <p className="subtle">Você precisa de pelo menos uma conta (ex: Conta Corrente) para lançar transações.</p>
-        <Link href={`/lojas/${storeId}/financeiro`} className="button">Voltar</Link>
+        <Link href={`/lojas/${storeId}/financeiro/configuracoes`} className="button">Criar Conta Bancária</Link>
       </div>
     );
   }
@@ -64,6 +64,14 @@ export default async function NovaTransacaoPage({ params }: { params: Promise<{ 
           <label>Conta</label>
           <select name="account_id" required className="input">
             {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+          </select>
+        </div>
+
+        <div className="field">
+          <label>Categoria</label>
+          <select name="category_id" required className="input">
+            <option value="" disabled selected>Selecione uma categoria...</option>
+            {categories?.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
           </select>
         </div>
 
