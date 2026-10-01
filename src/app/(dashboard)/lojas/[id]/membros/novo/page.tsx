@@ -56,10 +56,10 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
-            <div className="field" style={{ flex: 1 }}>
+          <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+            <div className="field" style={{ flex: "1 1 200px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="office">Cargo Atual na Loja</label>
-              <select id="office" name="office" style={{ width: "100%", height: "42px", padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
+              <select id="office" name="office" style={{ width: "100%", height: "42px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
                 <option value="">Sem cargo (Membro)</option>
                 <option value="Venerável Mestre">Venerável Mestre</option>
                 <option value="1º Vigilante">1º Vigilante</option>
@@ -74,9 +74,14 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
               </select>
             </div>
 
-            <div className="field" style={{ flex: 1 }}>
+            <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="phone">Celular (Opcional)</label>
-              <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" />
+              <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" style={{ height: "42px" }} />
+            </div>
+
+            <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
+              <label htmlFor="birthdate">Data de Nasc.</label>
+              <input id="birthdate" name="birthdate" type="date" style={{ height: "42px" }} />
             </div>
           </div>
 

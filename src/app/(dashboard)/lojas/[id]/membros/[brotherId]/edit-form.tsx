@@ -6,7 +6,7 @@ import { Trash, Pencil, Link as LinkIcon, CheckCircle, Mail } from "lucide-react
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
+export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; birthdate?: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
   }, null);
@@ -94,10 +94,10 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
-          <div className="field" style={{ flex: 1 }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "flex-end" }}>
+          <div className="field" style={{ flex: "1 1 200px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="office">Cargo Atual na Loja</label>
-            <select id="office" name="office" defaultValue={brother.office || ""} style={{ width: "100%", height: "42px", padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
+            <select id="office" name="office" defaultValue={brother.office || ""} style={{ width: "100%", height: "42px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }}>
               <option value="">Sem cargo (Membro)</option>
               <option value="Venerável Mestre">Venerável Mestre</option>
               <option value="1º Vigilante">1º Vigilante</option>
@@ -112,9 +112,14 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
             </select>
           </div>
 
-          <div className="field" style={{ flex: 1 }}>
+          <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="phone">Celular (Opcional)</label>
-            <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" defaultValue={brother.phone || ""} />
+            <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" defaultValue={brother.phone || ""} style={{ height: "42px" }} />
+          </div>
+
+          <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
+            <label htmlFor="birthdate">Data de Nasc.</label>
+            <input id="birthdate" name="birthdate" type="date" defaultValue={brother.birthdate || ""} style={{ height: "42px" }} />
           </div>
         </div>
 
