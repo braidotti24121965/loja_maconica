@@ -130,3 +130,27 @@ a { color: inherit; text-decoration: none; }
   .confirm-dialog-actions { flex-direction: column-reverse; }
   .confirm-dialog-cancel, .confirm-dialog-confirm { width: 100%; }
 }
+
+@media print {
+  html, body, .shell, .main, .content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .no-print,
+  .sidebar,
+  .topbar,
+  header,
+  nav,
+  aside {
+    display: none !important;
+  }
+}

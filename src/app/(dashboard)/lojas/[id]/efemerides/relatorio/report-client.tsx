@@ -638,9 +638,17 @@ export function EphemeridesReportClient({
       {/* Estilos globais para impressão PDF */}
       <style jsx global>{`
         @media print {
-          body {
+          html, body, .shell, .main, .content {
             background: #ffffff !important;
             color: #000000 !important;
+            display: block !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            float: none !important;
           }
           .no-print,
           .sidebar,
@@ -651,15 +659,30 @@ export function EphemeridesReportClient({
             display: none !important;
           }
           .ephemeris-pdf-document {
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
+            display: block !important;
+            width: 100% !important;
             max-width: 100% !important;
             margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+          }
+          .ephemeris-pdf-document h1,
+          .ephemeris-pdf-document h2,
+          .ephemeris-pdf-document h3,
+          .ephemeris-pdf-document div,
+          .ephemeris-pdf-document p,
+          .ephemeris-pdf-document table {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
           }
           @page {
             size: A4 portrait;
-            margin: 15mm 15mm 15mm 15mm;
+            margin: 12mm 15mm 12mm 15mm;
           }
         }
       `}</style>
