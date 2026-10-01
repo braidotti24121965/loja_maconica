@@ -40,9 +40,14 @@ export default async function FinanceiroPage({ params }: { params: Promise<{ id:
           <h1 style={{ fontSize: 24, margin: "0 0 8px 0" }}>Tesouraria e Financeiro</h1>
           <p className="subtle">Controle de saldos, contas a pagar, receber e mensalidades.</p>
         </div>
-        <Link href={`/lojas/${storeId}/financeiro/nova`} className="button">
-          + Novo Lançamento
-        </Link>
+        <div style={{ display: "flex", gap: 12 }}>
+          <Link href={`/lojas/${storeId}/financeiro/configuracoes`} className="button" style={{ background: "transparent", color: "var(--text)", border: "1px solid var(--border)" }}>
+            Configurações
+          </Link>
+          <Link href={`/lojas/${storeId}/financeiro/nova`} className="button">
+            + Novo Lançamento
+          </Link>
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16, marginBottom: 32 }}>
