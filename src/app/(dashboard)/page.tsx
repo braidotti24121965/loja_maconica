@@ -11,7 +11,7 @@ export default async function Home() {
     { count: sessionsCount }
   ] = await Promise.all([
     supabase.from("stores").select("*", { count: "exact", head: true }).eq("active", true),
-    supabase.from("brothers").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("brothers").select("*", { count: "exact", head: true }),
     supabase.from("sessions").select("*", { count: "exact", head: true })
       .gte("date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
   ]);
