@@ -1,17 +1,27 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
-import { redirect } from "next/navigation";
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const requestedNext = searchParams.get("next");
+  const next = requestedNext?.startsWith("/invite/")
+    ? requestedNext
+    : "/";
+
+  const destination = request.nextUrl.clone();
+  destination.pathname = next;
+  destination.search = "";
+
   if (tokenHash && type) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) redirect(next);
+    if (!error) return NextResponse.redirect(destination);
   }
-  redirect("/login?erro=link-invalido");
+
+  destination.pathname = "/login";
+  destination.searchParams.set("erro", "link-invalido");
+  return NextResponse.redirect(destination);
 }

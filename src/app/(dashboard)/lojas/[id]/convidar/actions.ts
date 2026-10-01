@@ -16,14 +16,7 @@ function allowedInviteRoles(actorRole: string): readonly StoreRole[] {
 function getApplicationUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (configuredUrl) return configuredUrl;
-
-  const vercelUrl =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ??
-    process.env.VERCEL_URL?.trim();
-
-  return vercelUrl
-    ? `https://${vercelUrl}`
-    : "https://maconaria360.com.br";
+  return "https://maconaria360.com.br";
 }
 
 async function revokeFailedInvite(
