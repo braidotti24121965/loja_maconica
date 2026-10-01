@@ -139,7 +139,7 @@ BEGIN
 
   v_parts := pg_catalog.string_to_array(v_card.full_name, ' ');
   IF pg_catalog.array_length(v_parts, 1) > 1 THEN
-    v_short_name := v_parts[1] || ' ' || pg_catalog.substring(v_parts[pg_catalog.array_length(v_parts, 1)] from 1 for 1) || '.';
+    v_short_name := v_parts[1] || ' ' || pg_catalog.substring(v_parts[pg_catalog.array_length(v_parts, 1)], 1, 1) || '.';
   ELSE
     v_short_name := v_card.full_name;
   END IF;
