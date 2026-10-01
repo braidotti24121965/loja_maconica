@@ -304,50 +304,71 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
       {isAdmin && (
         <div className="card">
           <h3 style={{ fontSize: 16, marginBottom: 16 }}>Cadastrar Nova Efeméride da Loja</h3>
-          <form action={async (formData) => { "use server"; await createEphemeris(formData); }} className="form" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+          <form action={async (formData) => { "use server"; await createEphemeris(formData); }} className="form">
             <input type="hidden" name="store_id" value={storeId} />
 
-            <div className="field" style={{ gridColumn: "span 2" }}>
-              <label htmlFor="title">Título da Efeméride</label>
-              <input id="title" name="title" type="text" required placeholder="Ex: Aniversário de Fundação da Loja" />
+            {/* Linha 1: Título, Dia, Mês, Ano, Categoria */}
+            <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
+              <div className="field" style={{ flex: "2 1 200px", minWidth: 0, marginBottom: 0 }}>
+                <label htmlFor="title">Título da Efeméride</label>
+                <input id="title" name="title" type="text" required placeholder="Ex: Aniversário de Fundação da Loja" style={{ height: "44px" }} />
+              </div>
+
+              <div className="field" style={{ flex: "1 1 90px", minWidth: 0, marginBottom: 0 }}>
+                <label htmlFor="day">Dia (1-31)</label>
+                <input id="day" name="day" type="number" min={1} max={31} required placeholder="Ex: 14" style={{ height: "44px" }} />
+              </div>
+
+              <div className="field" style={{ flex: "1 1 120px", minWidth: 0, marginBottom: 0 }}>
+                <label htmlFor="month">Mês (1-12)</label>
+                <select id="month" name="month" required style={{ width: "100%", height: "44px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "8px", background: "#fff" }}>
+                  {MONTH_NAMES.map((name, idx) => (
+                    <option key={idx + 1} value={idx + 1}>{idx + 1} - {name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field" style={{ flex: "1 1 140px", minWidth: 0, marginBottom: 0 }}>
+                <label htmlFor="year">Ano (Opcional)</label>
+                <input id="year" name="year" type="number" placeholder="Ex: 1980" style={{ height: "44px" }} />
+              </div>
+
+              <div className="field" style={{ flex: "1.5 1 180px", minWidth: 0, marginBottom: 0 }}>
+                <label htmlFor="category">Categoria</label>
+                <select id="category" name="category" required defaultValue="store_anniversary" style={{ width: "100%", height: "44px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "8px", background: "#fff" }}>
+                  <option value="store_anniversary">Fundação / Aniversário da Loja</option>
+                  <option value="masonic_history">História Maçônica</option>
+                  <option value="commemorative">Comemorativa</option>
+                  <option value="other">Outra</option>
+                </select>
+              </div>
             </div>
 
-            <div className="field">
-              <label htmlFor="day">Dia (1-31)</label>
-              <input id="day" name="day" type="number" min={1} max={31} required placeholder="Ex: 14" />
-            </div>
+            {/* Linha 2: Descrição com Botão Salvar alinhado ao CONTEÚDO (caixa do textarea) */}
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div className="field" style={{ flex: 1, minWidth: "260px", marginBottom: 0 }}>
+                <label htmlFor="description">Descrição / História (Opcional)</label>
+                <textarea id="description" name="description" rows={1} placeholder="Breve resumo sobre esta data..." style={{ height: "44px", padding: "10px 12px", resize: "none" }} />
+              </div>
 
-            <div className="field">
-              <label htmlFor="month">Mês (1-12)</label>
-              <select id="month" name="month" required>
-                {MONTH_NAMES.map((name, idx) => (
-                  <option key={idx + 1} value={idx + 1}>{idx + 1} - {name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field">
-              <label htmlFor="year">Ano (Opcional se for recorrente)</label>
-              <input id="year" name="year" type="number" placeholder="Ex: 1980 (Deixe em branco para anual)" />
-            </div>
-
-            <div className="field">
-              <label htmlFor="category">Categoria</label>
-              <select id="category" name="category" required defaultValue="store_anniversary">
-                <option value="store_anniversary">Fundação / Aniversário da Loja</option>
-                <option value="masonic_history">História Maçônica</option>
-                <option value="commemorative">Comemorativa</option>
-                <option value="other">Outra</option>
-              </select>
-            </div>
-
-            <div className="field" style={{ gridColumn: "span 2" }}>
-              <label htmlFor="description">Descrição / História (Opcional)</label>
-              <textarea id="description" name="description" rows={2} placeholder="Breve resumo sobre esta data..." />
-            </div>
-
-            <div style={{ gridColumn: "span 2", marginTop: 8 }}>
-              <button type="submit" className="button">Salvar Efeméride</button>
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: "#0f766e",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  padding: "0 22px",
+                  height: "44px",
+                  borderRadius: 8,
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 6px rgba(15, 118, 110, 0.3)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Salvar Efeméride
+              </button>
             </div>
           </form>
         </div>
