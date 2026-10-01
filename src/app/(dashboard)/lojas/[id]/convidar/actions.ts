@@ -13,6 +13,19 @@ function allowedInviteRoles(actorRole: string): readonly StoreRole[] {
   return actorRole === "admin" ? STORE_ROLES : ["treasurer", "member", "viewer"];
 }
 
+function getApplicationUrl() {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configuredUrl) return configuredUrl;
+
+  const vercelUrl =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ??
+    process.env.VERCEL_URL?.trim();
+
+  return vercelUrl
+    ? `https://${vercelUrl}`
+    : "https://maconaria360.com.br";
+}
+
 async function revokeFailedInvite(
   supabase: Awaited<ReturnType<typeof createClient>>,
   inviteId: string,
@@ -88,15 +101,12 @@ export async function generateInvite(data: FormData) {
   }
 
   const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const appUrl = getApplicationUrl();
 
-  if (!secretKey || !appUrl) {
+  if (!secretKey) {
     await revokeFailedInvite(supabase, invite.id, storeId, userData.user.id);
-    console.error("[invites] Configuração ausente", {
-      hasSecretKey: Boolean(secretKey),
-      hasAppUrl: Boolean(appUrl),
-    });
-    return { error: "O envio de convites ainda não está configurado no servidor." };
+    console.error("[invites] SUPABASE_SECRET_KEY ausente no ambiente do servidor");
+    return { error: "A chave de envio de convites não está disponível neste ambiente." };
   }
 
   let redirectTo: string;
@@ -107,7 +117,7 @@ export async function generateInvite(data: FormData) {
     ).toString();
   } catch {
     await revokeFailedInvite(supabase, invite.id, storeId, userData.user.id);
-    console.error("[invites] NEXT_PUBLIC_APP_URL inválida");
+    console.error("[invites] URL pública inválida", { appUrl });
     return { error: "A URL pública do sistema está configurada incorretamente." };
   }
 
