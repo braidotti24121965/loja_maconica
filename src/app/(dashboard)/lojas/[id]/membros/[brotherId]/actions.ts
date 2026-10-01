@@ -24,6 +24,10 @@ export async function updateBrother(data: FormData) {
   const degree = data.get("degree") as string;
   const phone = data.get("phone") as string;
   const office = data.get("office") as string;
+  const birthdate = data.get("birthdate") ? String(data.get("birthdate")) : null;
+  const initiationDate = data.get("initiation_date") ? String(data.get("initiation_date")) : null;
+  const elevationDate = data.get("elevation_date") ? String(data.get("elevation_date")) : null;
+  const exaltationDate = data.get("exaltation_date") ? String(data.get("exaltation_date")) : null;
 
   if (!storeId || !brotherId || !fullName || !degree)
     return { error: "Dados obrigatórios faltando" };
@@ -43,6 +47,10 @@ export async function updateBrother(data: FormData) {
       degree,
       phone: phone || null,
       office: office || null,
+      birthdate: birthdate || null,
+      initiation_date: initiationDate || null,
+      elevation_date: elevationDate || null,
+      exaltation_date: exaltationDate || null,
     })
     .eq("id", brotherId)
     .eq("store_id", storeId)

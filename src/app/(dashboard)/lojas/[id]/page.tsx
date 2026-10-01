@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet, UserCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, CalendarDays, Settings, Users, FileText, Wallet, UserCircle, MessageSquare, Sparkles } from "lucide-react";
 
 export default async function LojaDashboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params;
@@ -119,6 +119,15 @@ export default async function LojaDashboardPage({ params }: { params: Promise<{ 
           <p className="subtle">Organize eventos da loja e compartilhe suas fotografias.</p>
         </Link>
         
+        {/* Efemérides — visível para todos os membros (leitura) */}
+        <Link href={`/lojas/${storeId}/efemerides`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div className="icon" style={{ background: "#fef3c7", color: "#d97706" }}><Sparkles size={20} /></div>
+            <h3 style={{ margin: 0 }}>Efemérides e Datas</h3>
+          </div>
+          <p className="subtle">Aniversariantes natalícios, datas maçônicas e comemorações.</p>
+        </Link>
+
         {/* Membros — somente admin/secretary */}
         {isAdmin && (<Link href={`/lojas/${storeId}/membros`} className="card" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
