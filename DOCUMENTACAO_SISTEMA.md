@@ -97,6 +97,11 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
   - Ocultação do menu "Loja" para membros comuns sem privilégios administrativos.
   - Auto-vinculação de Ficha de Obreiro via RPC `get_or_link_my_brother` para eliminar a mensagem de membro não vinculado.
   - Cadastro de Familiares/Dependentes diretamente no portal **"Meu Espaço"** de cada irmão.
+  - **Gestão e Regras de Edição/Exclusão de Sessões (`/lojas/[id]/sessoes`)**:
+    - Restrito estritamente a cargos de gestão (`admin` e `secretary`).
+    - **Edição**: Permitida apenas para **sessões futuras** (`data >= data_atual`).
+    - **Exclusão**: Permitida apenas para **sessões futuras** e que **NÃO possuam registros de frequência associados** (`session_attendances.count == 0`).
+    - Exclusão protegida por validação no servidor e diálogo de confirmação visual (`ConfirmDialog`).
   - **Prancha de Efemérides da Sessão (Ferramenta do Chanceler - `/lojas/[id]/efemerides/relatorio`)**:
     - Cálculo automático do período da sessão (da data da reunião até 1 dia antes da próxima sessão).
     - Pré-visualização do PDF na tela formatado como boletim oficial maçônico (cabeçalho da A.R.L.S., 4 seções organizadas e campo para assinatura do Ir. Chanceler).
