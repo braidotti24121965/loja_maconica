@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseEnv } from '@/lib/supabase/env'
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -43,9 +44,19 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
+  let url, publishableKey;
+  try {
+    const env = getSupabaseEnv();
+    url = env.url;
+    publishableKey = env.publishableKey;
+  } catch (err) {
+    console.error("Erro no middleware (env):", err);
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    publishableKey,
     {
       cookies: {
         getAll() {
@@ -64,17 +75,25 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
+  } catch (err) {
+    console.error("Erro no middleware (getUser):", err);
+  }
+
   if (!user) return NextResponse.redirect(new URL('/login', request.url));
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from('store_memberships')
     .select('role')
     .eq('store_id', storeId)
     .eq('user_id', user.id)
     .single();
 
-  if (!membership) {
+  if (membershipError || !membership) {
+    console.error("Erro no middleware (membership):", membershipError);
     return NextResponse.redirect(new URL('/lojas', request.url));
   }
 
