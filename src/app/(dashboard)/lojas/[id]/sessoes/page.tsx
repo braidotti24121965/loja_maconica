@@ -75,7 +75,10 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
                 
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <Link href={`/lojas/${storeId}/efemerides/relatorio?sessionId=${session.id}`} className="button" style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
+                    <Calendar size={14} /> Efemérides
+                  </Link>
                   <Link href={`/lojas/${storeId}/sessoes/${session.id}/ata`} className="button" style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13 }}>
                     <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
                   </Link>

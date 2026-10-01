@@ -92,10 +92,16 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
   - Formulário de Edição com atalho direto **"Enviar Convite"** apontando para o e-mail do irmão.
 - **Fluxo de Recuperação de Senha**:
   - Páginas `/esqueci-senha` (solicitação por e-mail) e `/redefinir-senha` (redefinição de senha com validação de token OTP).
-- **Ajustes Finais de Usabilidade & Layout**:
+- **Ajustes Finais de Usabilidade, Navegação e Chanceler**:
   - Exibição do Nome Completo do Usuário e Perfil/Papel na barra superior (`topbar`) ao lado das iniciais.
-  - Alinhamento de campos no formulário (Linha 1: *Nome Completo* + *CIM*, Linha 2: *E-mail* + *Grau*).
-  - Padronização dos graus oficiais: `Aprendiz Maçom`, `Companheiro Maçom`, `Mestre Maçom` e `Mestre Instalado`, com migração transacional no banco de dados.
+  - Ocultação do menu "Loja" para membros comuns sem privilégios administrativos.
+  - Auto-vinculação de Ficha de Obreiro via RPC `get_or_link_my_brother` para eliminar a mensagem de membro não vinculado.
+  - Cadastro de Familiares/Dependentes diretamente no portal **"Meu Espaço"** de cada irmão.
+  - **Prancha de Efemérides da Sessão (Ferramenta do Chanceler - `/lojas/[id]/efemerides/relatorio`)**:
+    - Cálculo automático do período da sessão (da data da reunião até 1 dia antes da próxima sessão).
+    - Pré-visualização do PDF na tela formatado como boletim oficial maçônico (cabeçalho da A.R.L.S., 4 seções organizadas e campo para assinatura do Ir. Chanceler).
+    - Impressão / Salvar em PDF otimizado para A4 via CSS `@media print`.
+    - Envio do relatório por e-mail via leitor padrão (`mailto`) ou para os irmãos cadastrados.
 
 ---
 

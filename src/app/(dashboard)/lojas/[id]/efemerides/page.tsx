@@ -83,7 +83,7 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
         <ArrowLeft size={16} /> Voltar para a Loja
       </Link>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 24, marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
             <Calendar color="var(--brand)" size={28} /> Efemérides e Datas Maçônicas
@@ -91,17 +91,27 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           <p className="subtle">Calendário de comemorações, aniversariantes natalícios e efemérides da loja.</p>
         </div>
 
-        {(birthdays.length > 0 || dependentBirthdays.length > 0) && (
-          <a
-            href={`https://api.whatsapp.com/send?text=${whatsappText}`}
-            target="_blank"
-            rel="noopener noreferrer"
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <Link
+            href={`/lojas/${storeId}/efemerides/relatorio`}
             className="button"
-            style={{ background: "#25D366", color: "#fff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none" }}
+            style={{ background: "var(--brand)", color: "#fff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none" }}
           >
-            <MessageSquare size={16} /> Mensagem para WhatsApp
-          </a>
-        )}
+            <Calendar size={16} /> Relatório PDF (Chanceler)
+          </Link>
+
+          {(birthdays.length > 0 || dependentBirthdays.length > 0) && (
+            <a
+              href={`https://api.whatsapp.com/send?text=${whatsappText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="button"
+              style={{ background: "#25D366", color: "#fff", display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none" }}
+            >
+              <MessageSquare size={16} /> Mensagem para WhatsApp
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Grid de Seções */}
