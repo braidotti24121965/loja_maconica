@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Cake, Award, Sparkles, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, Cake, Award, Sparkles, MessageSquare, Heart } from "lucide-react";
 import { createEphemeris, deleteEphemeris } from "./actions";
 
 interface EphemerisItem {
@@ -54,6 +54,7 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
   
   // Categorize
   const birthdays = allItems.filter((i: EphemerisItem) => i.item_type === "birthday");
+  const dependentBirthdays = allItems.filter((i: EphemerisItem) => i.item_type === "dependent_birthday");
   const masonicAnniversaries = allItems.filter((i: EphemerisItem) => ["initiation", "elevation", "exaltation"].includes(i.item_type));
   const ephemerides = allItems.filter((i: EphemerisItem) => i.item_type === "ephemeris");
 
@@ -62,7 +63,19 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
     .map((b: EphemerisItem) => `🎉 Ir. ${b.brother_name} (${String(b.day).padStart(2, "0")}/${String(b.month).padStart(2, "0")})`)
     .join("%0A");
 
-  const whatsappText = `✨ *ANIVERSARIANTES DO MÊS - A.R.L.S.* ✨%0A%0A${whatsappBirthdaysText || "Nenhum aniversariante no mês."}%0A%0ADesejamos a todos os Irmãos muita saúde, paz e fraternidade! 🤝🏛️`;
+  const whatsappDependentsText = dependentBirthdays
+    .map((d: EphemerisItem) => `🌺 ${d.brother_name} (${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")})`)
+    .join("%0A");
+
+  const whatsappSections: string[] = [];
+  if (birthdays.length > 0) {
+    whatsappSections.push(`🏛️ *IRMÃOS ANIVERSARIANTES DO MÊS*%0A${whatsappBirthdaysText}`);
+  }
+  if (dependentBirthdays.length > 0) {
+    whatsappSections.push(`🌺 *DEPENDENTES & FAMILIARES ANIVERSARIANTES*%0A${whatsappDependentsText}`);
+  }
+
+  const whatsappText = `✨ *ANIVERSARIANTES DO MÊS - A.R.L.S.* ✨%0A%0A${whatsappSections.join("%0A%0A") || "Nenhum aniversariante no mês."}%0A%0ADesejamos a todos muita saúde, paz e fraternidade! 🤝🏛️`;
 
   return (
     <div>
@@ -78,7 +91,7 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           <p className="subtle">Calendário de comemorações, aniversariantes natalícios e efemérides da loja.</p>
         </div>
 
-        {birthdays.length > 0 && (
+        {(birthdays.length > 0 || dependentBirthdays.length > 0) && (
           <a
             href={`https://api.whatsapp.com/send?text=${whatsappText}`}
             target="_blank"
@@ -92,15 +105,15 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
       </div>
 
       {/* Grid de Seções */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24, marginBottom: 32 }}>
         
-        {/* Aniversariantes Natalícios */}
+        {/* Aniversariantes Natalícios dos Irmãos */}
         <div className="card">
           <h3 style={{ fontSize: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 8, color: "var(--brand)" }}>
-            <Cake size={18} /> Aniversariantes Natalícios
+            <Cake size={18} /> Aniversariantes Irmãos
           </h3>
           {birthdays.length === 0 ? (
-            <p className="subtle" style={{ fontSize: 14 }}>Nenhum aniversário cadastrado nesta loja.</p>
+            <p className="subtle" style={{ fontSize: 14 }}>Nenhum aniversário de irmão neste período.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {birthdays.map((b: EphemerisItem) => {
@@ -121,13 +134,40 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           )}
         </div>
 
+        {/* Aniversariantes Dependentes e Familiares */}
+        <div className="card">
+          <h3 style={{ fontSize: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 8, color: "var(--brand)" }}>
+            <Heart size={18} /> Aniversariantes Familiares
+          </h3>
+          {dependentBirthdays.length === 0 ? (
+            <p className="subtle" style={{ fontSize: 14 }}>Nenhum aniversário de familiar neste período.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {dependentBirthdays.map((d: EphemerisItem) => {
+                const isToday = d.day === currentDay && d.month === currentMonth;
+                return (
+                  <div key={d.item_id + d.title} style={{ padding: 12, borderRadius: 8, background: isToday ? "#fdf2f8" : "var(--page)", border: isToday ? "1px solid #f472b6" : "1px solid var(--border)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <strong>{d.brother_name}</strong>
+                      <span className="badge" style={{ background: isToday ? "#ec4899" : undefined, color: isToday ? "#fff" : undefined }}>
+                        {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")} {d.year ? `(${d.year})` : ""} {isToday && "🎂 HOJE!"}
+                      </span>
+                    </div>
+                    <p className="subtle" style={{ margin: "4px 0 0 0", fontSize: 12 }}>{d.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Aniversários Maçônicos */}
         <div className="card">
           <h3 style={{ fontSize: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 8, color: "var(--brand)" }}>
             <Award size={18} /> Datas Maçônicas dos Irmãos
           </h3>
           {masonicAnniversaries.length === 0 ? (
-            <p className="subtle" style={{ fontSize: 14 }}>Nenhuma data de iniciação/elevação/exaltação cadastrada.</p>
+            <p className="subtle" style={{ fontSize: 14 }}>Nenhuma data maçônica neste período.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {masonicAnniversaries.map((m: EphemerisItem) => (

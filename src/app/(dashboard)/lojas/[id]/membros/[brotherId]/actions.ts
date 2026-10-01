@@ -121,7 +121,7 @@ export async function addDependent(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("dependents")
-    .insert({ brother_id: brotherId, name, relationship, birthdate });
+    .insert({ brother_id: brotherId, store_id: storeId, name, relationship, birthdate });
 
   if (error) {
     console.error("Erro ao adicionar dependente:", error);
