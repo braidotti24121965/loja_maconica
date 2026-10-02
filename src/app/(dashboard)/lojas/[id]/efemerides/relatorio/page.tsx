@@ -40,11 +40,15 @@ export default async function EfemeridesRelatorioPage({
   if (!store) redirect("/lojas");
 
   // Fetch registered sessions
-  const { data: sessionsData } = await supabase
+  const { data: rawSessionsData, error: sessionsErr } = await supabase
     .from("sessions")
-    .select("id, title, date, session_type")
+    .select("id, date, session_type, description")
     .eq("store_id", storeId)
     .order("date", { ascending: true });
+
+  if (sessionsErr) {
+    console.error("Erro ao buscar sessões para relatório de efemérides:", sessionsErr);
+  }
 
   // Fetch brothers for email sending
   const { data: brothersData } = await supabase
@@ -68,7 +72,13 @@ export default async function EfemeridesRelatorioPage({
   };
 
   const ephemeridesList: EphemerisItem[] = (ephemeridesData as EphemerisItem[]) || [];
-  const sessionsList: SessionOption[] = (sessionsData as SessionOption[]) || [];
+  const sessionsList: SessionOption[] = (rawSessionsData || []).map((s) => ({
+    id: s.id,
+    date: s.date,
+    session_type: s.session_type,
+    description: s.description || null,
+    title: s.session_type || s.description || "Sessão",
+  }));
   const brothersList: BrotherEmail[] = (brothersData as BrotherEmail[]) || [];
 
   return (
