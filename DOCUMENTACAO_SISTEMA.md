@@ -103,6 +103,13 @@ O sistema possui 5 papéis principais atribuídos na tabela `store_memberships`:
   - Integração total com a RPC `get_upcoming_ephemerides` para exibir aniversários natalícios e datas maçônicas de irmãos no relatório e no painel.
 - **Escopo Dinâmico de Efemérides**:
   - O painel principal de efemérides (`/lojas/[id]/efemerides`) filtra automaticamente comemorações do **mês vigente**, estendendo a exibição até o dia da próxima sessão caso ela ocorra no mês subsequente.
+- **Gestão Integrada de Sessões & Prancha de Efemérides (Chanceler)**:
+  - **Ordenação Cronológica Crescente**: Listagem de sessões em `/lojas/[id]/sessoes` ordenada por data em sentido ascendente (`ascending: true`).
+  - **Indicadores Visuais de Anexos**: Exibição de contadores em tempo real na linha da sessão (`Galeria de Fotos (N)` e status da ata `Ata Anexada ✓` / `Anexar Ata (Sem Ata)`).
+  - **Alinhamento Fluido de Ações**: Layout compacto em linha única com `gap: 16px` e container de `1000px`.
+  - **Cálculo Automático de Intervalo de Efemérides**: Ao acessar a Prancha de Efemérides a partir de uma sessão (`?sessionId=...&from=sessoes`), a página carrega a sessão vinculada, preenche a **Data da Sessão (Início)** e calcula automaticamente a data **Até 1 dia antes da Próxima Sessão** (data da próxima sessão menos 1 dia ou +13 dias). Permite alteração manual pelo administrador e retorno direto para Sessões e Atas ao fechar (`from=sessoes`).
+- **Formatação de Badges de Efemérides e Jubileus**:
+  - Exibição de comemorações natalícias, familiares e evoluções maçônicas (Iniciação, Elevação, Exaltação) com badges coloridos (dia, mês e anos celebrados), evitando qualquer sobreposição visual de texto.
 
 ---
 
