@@ -53,7 +53,7 @@ export function SessoesListClient({
   };
 
   return (
-    <div style={{ maxWidth: 850, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1150, margin: "0 auto" }}>
       <Link
         href={`/lojas/${storeId}`}
         style={{
@@ -104,21 +104,22 @@ export function SessoesListClient({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    padding: "20px 24px",
+                    padding: "16px 20px",
                     borderBottom: index < sessions.length - 1 ? "1px solid var(--border)" : "none",
+                    gap: 12,
                     flexWrap: "wrap",
-                    gap: 16,
                     background: isFuture ? "#f8fafc" : "transparent",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, flex: "1 1 300px" }}>
+                  {/* Esquerda: Ícone + Título + Badge + Data */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                     <div
                       className="icon"
                       style={{
                         background: isFuture ? "var(--brand)" : "var(--green-soft)",
                         color: isFuture ? "#ffffff" : "var(--green-dark)",
-                        width: 48,
-                        height: 48,
+                        width: 42,
+                        height: 42,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -126,36 +127,34 @@ export function SessoesListClient({
                         flexShrink: 0,
                       }}
                     >
-                      <Calendar size={24} />
+                      <Calendar size={22} />
                     </div>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                        <h4 style={{ margin: 0, fontSize: 16 }}>{session.session_type}</h4>
+                        <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>{session.session_type}</h4>
                         {isFuture ? (
-                          <span className="badge" style={{ background: "var(--brand)", color: "#fff", fontSize: 11 }}>
+                          <span className="badge" style={{ background: "var(--brand)", color: "#fff", fontSize: 11, whiteSpace: "nowrap" }}>
                             Próxima / Agendada
                           </span>
                         ) : (
-                          <span className="badge" style={{ background: "var(--page)", color: "var(--subtle)", fontSize: 11 }}>
+                          <span className="badge" style={{ background: "var(--page)", color: "var(--subtle)", fontSize: 11, whiteSpace: "nowrap" }}>
                             Realizada
                           </span>
                         )}
                       </div>
-                      <div className="subtle" style={{ fontSize: 13, marginTop: 4 }}>
+                      <div className="subtle" style={{ fontSize: 12, marginTop: 2, whiteSpace: "nowrap" }}>
                         {format(new Date(`${session.date}T12:00:00`), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        {session.description ? ` • ${session.description}` : ""}
                       </div>
-                      {session.description && (
-                        <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "var(--subtle)" }}>{session.description}</p>
-                      )}
                     </div>
                   </div>
 
-                  {/* Ações e Botões */}
+                  {/* Direita: Todos os Botões na mesma linha */}
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                     <Link
                       href={`/lojas/${storeId}/efemerides/relatorio?sessionId=${session.id}`}
                       className="button"
-                      style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                      style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}
                     >
                       <Calendar size={14} /> Efemérides
                     </Link>
@@ -172,6 +171,7 @@ export function SessoesListClient({
                         padding: "6px 12px",
                         fontSize: 13,
                         textDecoration: "none",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       <FileText size={14} color={session.has_ata ? "#0f766e" : undefined} />
@@ -194,6 +194,7 @@ export function SessoesListClient({
                         padding: "6px 12px",
                         fontSize: 13,
                         textDecoration: "none",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       <Camera size={14} color={session.photos_count > 0 ? "#1d4ed8" : undefined} />
@@ -203,7 +204,7 @@ export function SessoesListClient({
                     <Link
                       href={`/lojas/${storeId}/sessoes/${session.id}/frequencia`}
                       className="button"
-                      style={{ background: "var(--green)", color: "white", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                      style={{ background: "var(--green)", color: "white", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}
                     >
                       <Users size={14} /> Frequência {hasAttendances && `(${session.attendances_count})`}
                     </Link>
