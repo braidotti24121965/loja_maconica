@@ -236,14 +236,15 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {masonicAnniversaries.map((m: EphemerisItem) => {
+                const isToday = m.day === currentDay && m.month === currentMonth;
                 const masonicYears = m.year ? currentYear - m.year : null;
                 const milestoneLabel = masonicYears !== null ? `${masonicYears} ${masonicYears === 1 ? "ano" : "anos"}` : "";
                 return (
-                  <div key={m.item_id + m.item_type} style={{ padding: 12, borderRadius: 8, background: "var(--page)", border: "1px solid var(--border)" }}>
+                  <div key={m.item_id + m.item_type} style={{ padding: 12, borderRadius: 8, background: isToday ? "#eff6ff" : "var(--page)", border: isToday ? "1px solid #60a5fa" : "1px solid var(--border)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <strong>{m.title}</strong>
-                      <span className="badge">
-                        {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")} {milestoneLabel ? `(${milestoneLabel})` : ""}
+                      <span className="badge" style={{ background: isToday ? "#2563eb" : undefined, color: isToday ? "#fff" : undefined }}>
+                        {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")} {milestoneLabel ? `(${milestoneLabel})` : ""} {isToday && "🏛️ HOJE!"}
                       </span>
                     </div>
                     <p className="subtle" style={{ margin: "4px 0 0 0", fontSize: 12 }}>
@@ -271,16 +272,17 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
             {ephemerides.map((e: EphemerisItem) => {
+              const isToday = e.day === currentDay && e.month === currentMonth;
               const ephemYears = e.year ? currentYear - e.year : null;
               return (
-                <div key={e.item_id} style={{ padding: 16, borderRadius: 8, background: e.is_global ? "#f0f9ff" : "var(--page)", border: e.is_global ? "1px solid #7dd3fc" : "1px solid var(--border)" }}>
+                <div key={e.item_id} style={{ padding: 16, borderRadius: 8, background: isToday ? "#fffbeb" : e.is_global ? "#f0f9ff" : "var(--page)", border: isToday ? "1px solid #f59e0b" : e.is_global ? "1px solid #7dd3fc" : "1px solid var(--border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <div>
                       <strong style={{ fontSize: 15 }}>{e.title}</strong>
                       {e.is_global && <span className="badge" style={{ marginLeft: 8, background: "#0284c7", color: "#fff" }}>SaaS Geral</span>}
                     </div>
-                    <span className="badge">
-                      {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")} {ephemYears !== null ? `(${ephemYears} anos)` : ""}
+                    <span className="badge" style={{ background: isToday ? "#d97706" : undefined, color: isToday ? "#fff" : undefined }}>
+                      {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")} {ephemYears !== null ? `(${ephemYears} anos)` : ""} {isToday && "🌟 HOJE!"}
                     </span>
                   </div>
                   {e.description && <p className="subtle" style={{ fontSize: 13, margin: 0 }}>{e.description}</p>}
