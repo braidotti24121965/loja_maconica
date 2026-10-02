@@ -70,6 +70,37 @@ function isDateInRange(day: number, month: number, startDateStr: string, endDate
   return false;
 }
 
+function addDaysToStr(dateStr: string, days: number): string {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-").map(Number);
+  if (parts.length !== 3) return dateStr;
+  const date = new Date(parts[0], parts[1] - 1, parts[2] + days);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function computeDatesForSession(sessionId: string, sessions: SessionOption[]) {
+  if (!sessionId) return null;
+  const sortedSessions = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
+  const idx = sortedSessions.findIndex((s) => s.id === sessionId);
+  if (idx === -1) return null;
+
+  const startDate = sortedSessions[idx].date;
+  let endDate: string;
+
+  if (idx < sortedSessions.length - 1) {
+    // 1 day before the next session
+    endDate = addDaysToStr(sortedSessions[idx + 1].date, -1);
+  } else {
+    // +13 days (quinzenal interval minus 1 day)
+    endDate = addDaysToStr(startDate, 13);
+  }
+
+  return { startDate, endDate };
+}
+
 export function EphemeridesReportClient({
   store,
   items,
@@ -85,15 +116,25 @@ export function EphemeridesReportClient({
   initialSessionId?: string;
   fromSessoes?: boolean;
 }) {
-  // Set default initial dates based on selected session or today
-  const defaultStartDate = new Date().toISOString().split("T")[0];
-  const defaultEndDateObj = new Date();
-  defaultEndDateObj.setDate(defaultEndDateObj.getDate() + 13);
-  const defaultEndDate = defaultEndDateObj.toISOString().split("T")[0];
-
   const [selectedSessionId, setSelectedSessionId] = useState<string>(initialSessionId || "");
-  const [startDate, setStartDate] = useState<string>(defaultStartDate);
-  const [endDate, setEndDate] = useState<string>(defaultEndDate);
+
+  const [startDate, setStartDate] = useState<string>(() => {
+    if (initialSessionId) {
+      const computed = computeDatesForSession(initialSessionId, sessions);
+      if (computed) return computed.startDate;
+    }
+    return new Date().toISOString().split("T")[0];
+  });
+
+  const [endDate, setEndDate] = useState<string>(() => {
+    if (initialSessionId) {
+      const computed = computeDatesForSession(initialSessionId, sessions);
+      if (computed) return computed.endDate;
+    }
+    const todayStr = new Date().toISOString().split("T")[0];
+    return addDaysToStr(todayStr, 13);
+  });
+
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState<string>("");
   const [emailSentSuccess, setEmailSentSuccess] = useState(false);
@@ -103,33 +144,17 @@ export function EphemeridesReportClient({
     setSelectedSessionId(sessionId);
     if (!sessionId) return;
 
-    const sortedSessions = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
-    const idx = sortedSessions.findIndex((s) => s.id === sessionId);
-
-    if (idx !== -1) {
-      const currSessionDate = sortedSessions[idx].date;
-      setStartDate(currSessionDate);
-
-      // Next session date minus 1 day, or +13 days if no next session
-      if (idx < sortedSessions.length - 1) {
-        const nextDate = new Date(sortedSessions[idx + 1].date);
-        nextDate.setDate(nextDate.getDate() - 1);
-        setEndDate(nextDate.toISOString().split("T")[0]);
-      } else {
-        const currDate = new Date(currSessionDate);
-        currDate.setDate(currDate.getDate() + 13);
-        setEndDate(currDate.toISOString().split("T")[0]);
-      }
+    const computed = computeDatesForSession(sessionId, sessions);
+    if (computed) {
+      setStartDate(computed.startDate);
+      setEndDate(computed.endDate);
     }
   };
 
   // Set quick ranges
   const setQuickRange = (days: number) => {
-    const sDateObj = startDate ? new Date(startDate) : new Date();
-    const eDateObj = new Date(sDateObj);
-    eDateObj.setDate(eDateObj.getDate() + (days - 1));
-    setStartDate(sDateObj.toISOString().split("T")[0]);
-    setEndDate(eDateObj.toISOString().split("T")[0]);
+    if (!startDate) return;
+    setEndDate(addDaysToStr(startDate, days - 1));
   };
 
   // Filter items in date range
