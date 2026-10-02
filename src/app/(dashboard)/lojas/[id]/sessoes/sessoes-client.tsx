@@ -53,7 +53,7 @@ export function SessoesListClient({
   };
 
   return (
-    <div style={{ maxWidth: 1150, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1000, margin: "0 auto" }}>
       <Link
         href={`/lojas/${storeId}`}
         style={{
@@ -102,17 +102,17 @@ export function SessoesListClient({
                   key={session.id}
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
+                    justifyContent: "flex-start",
                     alignItems: "center",
                     padding: "16px 20px",
                     borderBottom: index < sessions.length - 1 ? "1px solid var(--border)" : "none",
-                    gap: 12,
+                    gap: 16,
                     flexWrap: "wrap",
                     background: isFuture ? "#f8fafc" : "transparent",
                   }}
                 >
-                  {/* Esquerda: Ícone + Título + Badge + Data */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  {/* Esquerda: Ícone + Título + Data (largura fixa para alinhamento perfeito) */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 220px", minWidth: 0 }}>
                     <div
                       className="icon"
                       style={{
