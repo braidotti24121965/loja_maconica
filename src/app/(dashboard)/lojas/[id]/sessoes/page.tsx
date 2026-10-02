@@ -27,7 +27,7 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
     .from("sessions")
     .select("id, date, session_type, description")
     .eq("store_id", storeId)
-    .order("date", { ascending: false });
+    .order("date", { ascending: true });
 
   if (sessionsError) {
     console.error("Erro ao carregar sessões:", sessionsError);
