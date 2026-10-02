@@ -184,9 +184,9 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
                 const age = b.year ? currentYear - b.year : null;
                 return (
                   <div key={b.item_id + b.title} style={{ padding: 12, borderRadius: 8, background: isToday ? "#ecfdf5" : "var(--page)", border: isToday ? "1px solid #34d399" : "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <strong>{b.brother_name}</strong>
-                      <span className="badge" style={{ background: isToday ? "#10b981" : undefined, color: isToday ? "#fff" : undefined }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                      <strong style={{ flex: "1 1 140px", minWidth: 0, wordBreak: "break-word" }}>{b.brother_name}</strong>
+                      <span className="badge" style={{ whiteSpace: "nowrap", flexShrink: 0, background: isToday ? "#10b981" : undefined, color: isToday ? "#fff" : undefined }}>
                         {String(b.day).padStart(2, "0")}/{String(b.month).padStart(2, "0")} {age !== null ? `(${age} anos)` : ""} {isToday && "🎂 HOJE!"}
                       </span>
                     </div>
@@ -212,9 +212,9 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
                 const age = d.year ? currentYear - d.year : null;
                 return (
                   <div key={d.item_id + d.title} style={{ padding: 12, borderRadius: 8, background: isToday ? "#fdf2f8" : "var(--page)", border: isToday ? "1px solid #f472b6" : "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <strong>{d.brother_name}</strong>
-                      <span className="badge" style={{ background: isToday ? "#ec4899" : undefined, color: isToday ? "#fff" : undefined }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                      <strong style={{ flex: "1 1 150px", minWidth: 0, wordBreak: "break-word" }}>{d.brother_name}</strong>
+                      <span className="badge" style={{ whiteSpace: "nowrap", flexShrink: 0, background: isToday ? "#ec4899" : undefined, color: isToday ? "#fff" : undefined }}>
                         {String(d.day).padStart(2, "0")}/{String(d.month).padStart(2, "0")} {age !== null ? `(${age} anos)` : ""} {isToday && "🎂 HOJE!"}
                       </span>
                     </div>
@@ -241,9 +241,9 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
                 const milestoneLabel = masonicYears !== null ? `${masonicYears} ${masonicYears === 1 ? "ano" : "anos"}` : "";
                 return (
                   <div key={m.item_id + m.item_type} style={{ padding: 12, borderRadius: 8, background: isToday ? "#eff6ff" : "var(--page)", border: isToday ? "1px solid #60a5fa" : "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <strong>{m.title}</strong>
-                      <span className="badge" style={{ background: isToday ? "#2563eb" : undefined, color: isToday ? "#fff" : undefined }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                      <strong style={{ flex: "1 1 160px", minWidth: 0, wordBreak: "break-word" }}>{m.title}</strong>
+                      <span className="badge" style={{ whiteSpace: "nowrap", flexShrink: 0, background: isToday ? "#2563eb" : undefined, color: isToday ? "#fff" : undefined }}>
                         {String(m.day).padStart(2, "0")}/{String(m.month).padStart(2, "0")} {milestoneLabel ? `(${milestoneLabel})` : ""} {isToday && "🏛️ HOJE!"}
                       </span>
                     </div>
@@ -276,12 +276,12 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
               const ephemYears = e.year ? currentYear - e.year : null;
               return (
                 <div key={e.item_id} style={{ padding: 16, borderRadius: 8, background: isToday ? "#fffbeb" : e.is_global ? "#f0f9ff" : "var(--page)", border: isToday ? "1px solid #f59e0b" : e.is_global ? "1px solid #7dd3fc" : "1px solid var(--border)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                    <div>
-                      <strong style={{ fontSize: 15 }}>{e.title}</strong>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+                    <div style={{ flex: "1 1 180px", minWidth: 0 }}>
+                      <strong style={{ fontSize: 15, wordBreak: "break-word" }}>{e.title}</strong>
                       {e.is_global && <span className="badge" style={{ marginLeft: 8, background: "#0284c7", color: "#fff" }}>SaaS Geral</span>}
                     </div>
-                    <span className="badge" style={{ background: isToday ? "#d97706" : undefined, color: isToday ? "#fff" : undefined }}>
+                    <span className="badge" style={{ whiteSpace: "nowrap", flexShrink: 0, background: isToday ? "#d97706" : undefined, color: isToday ? "#fff" : undefined }}>
                       {String(e.day).padStart(2, "0")}/{String(e.month).padStart(2, "0")} {ephemYears !== null ? `(${ephemYears} anos)` : ""} {isToday && "🌟 HOJE!"}
                     </span>
                   </div>
