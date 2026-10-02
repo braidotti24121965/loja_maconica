@@ -22,10 +22,18 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
   if (!membership) redirect("/lojas");
   const isAdmin = ["admin", "secretary"].includes(membership.role);
 
-  // Fetch sessions with attendance count
+  // Fetch sessions with attendance count, documents (Ata) and photo counts
   const { data: sessionsData } = await supabase
     .from("sessions")
-    .select("id, date, session_type, description, session_attendances(count)")
+    .select(`
+      id,
+      date,
+      session_type,
+      description,
+      session_attendances(count),
+      documents(id),
+      session_photos(count)
+    `)
     .eq("store_id", storeId)
     .order("date", { ascending: false });
 
@@ -41,11 +49,19 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
     session_type: string;
     description: string | null;
     session_attendances: { count: number }[] | null;
+    documents: { id: string }[] | null;
+    session_photos: { count: number }[] | null;
   };
 
   const mappedSessions: SessionData[] = ((sessionsData as unknown as SessionQueryResult[]) || []).map((s) => {
     const attendancesCount = Array.isArray(s.session_attendances)
       ? Number(s.session_attendances[0]?.count || 0)
+      : 0;
+
+    const hasAta = Array.isArray(s.documents) && s.documents.length > 0;
+
+    const photosCount = Array.isArray(s.session_photos)
+      ? Number(s.session_photos[0]?.count || 0)
       : 0;
 
     return {
@@ -54,6 +70,8 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
       session_type: s.session_type,
       description: s.description || null,
       attendances_count: attendancesCount,
+      has_ata: hasAta,
+      photos_count: photosCount,
     };
   });
 

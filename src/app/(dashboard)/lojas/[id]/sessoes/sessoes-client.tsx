@@ -14,6 +14,8 @@ export interface SessionData {
   session_type: string;
   description: string | null;
   attendances_count: number;
+  has_ata: boolean;
+  photos_count: number;
 }
 
 export function SessoesListClient({
@@ -161,17 +163,41 @@ export function SessoesListClient({
                     <Link
                       href={`/lojas/${storeId}/sessoes/${session.id}/ata`}
                       className="button"
-                      style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                      style={{
+                        background: session.has_ata ? "#f0fdf4" : "transparent",
+                        color: session.has_ata ? "#0f766e" : "var(--navy)",
+                        border: session.has_ata ? "1px solid #0f766e" : "1px solid var(--navy)",
+                        fontWeight: session.has_ata ? 600 : 400,
+                        gap: 6,
+                        padding: "6px 12px",
+                        fontSize: 13,
+                        textDecoration: "none",
+                      }}
                     >
-                      <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
+                      <FileText size={14} color={session.has_ata ? "#0f766e" : undefined} />
+                      {session.has_ata
+                        ? "Ata Anexada ✓"
+                        : isAdmin
+                          ? "Anexar Ata (Sem Ata)"
+                          : "Ver Ata (Sem Ata)"}
                     </Link>
 
                     <Link
                       href={`/lojas/${storeId}/sessoes/${session.id}/fotos`}
                       className="button"
-                      style={{ background: "transparent", color: "var(--teal-dark, #0f766e)", border: "1px solid #0f766e", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                      style={{
+                        background: session.photos_count > 0 ? "#eff6ff" : "transparent",
+                        color: session.photos_count > 0 ? "#1d4ed8" : "var(--teal-dark, #0f766e)",
+                        border: session.photos_count > 0 ? "1px solid #3b82f6" : "1px solid #0f766e",
+                        fontWeight: session.photos_count > 0 ? 600 : 400,
+                        gap: 6,
+                        padding: "6px 12px",
+                        fontSize: 13,
+                        textDecoration: "none",
+                      }}
                     >
-                      <Camera size={14} /> Galeria de Fotos
+                      <Camera size={14} color={session.photos_count > 0 ? "#1d4ed8" : undefined} />
+                      Galeria de Fotos ({session.photos_count})
                     </Link>
 
                     <Link
