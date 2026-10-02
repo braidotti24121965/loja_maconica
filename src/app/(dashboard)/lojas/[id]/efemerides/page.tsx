@@ -19,8 +19,17 @@ interface EphemerisItem {
   is_global: boolean;
 }
 
-export default async function EfemeridesPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EfemeridesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const { id: storeId } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const fromSessoes = sParams.from === "sessoes";
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -121,8 +130,8 @@ export default async function EfemeridesPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <Link href={`/lojas/${storeId}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
-        <ArrowLeft size={16} /> Voltar para a Loja
+      <Link href={fromSessoes ? `/lojas/${storeId}/sessoes` : `/lojas/${storeId}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, fontSize: 14, color: "var(--subtle)", textDecoration: "none" }}>
+        <ArrowLeft size={16} /> {fromSessoes ? "Voltar para Sessões e Atas" : "Voltar para a Loja"}
       </Link>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>

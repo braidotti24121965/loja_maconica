@@ -76,12 +76,14 @@ export function EphemeridesReportClient({
   sessions,
   brotherEmails,
   initialSessionId,
+  fromSessoes,
 }: {
   store: StoreInfo;
   items: EphemerisItem[];
   sessions: SessionOption[];
   brotherEmails: BrotherEmail[];
   initialSessionId?: string;
+  fromSessoes?: boolean;
 }) {
   // Set default initial dates based on selected session or today
   const defaultStartDate = new Date().toISOString().split("T")[0];
@@ -205,7 +207,7 @@ export function EphemeridesReportClient({
       {/* Controles do Relatório (Ocultos na Impressão) */}
       <div className="no-print" style={{ marginBottom: 24 }}>
         <Link
-          href={`/lojas/${store.id}/efemerides`}
+          href={fromSessoes ? `/lojas/${store.id}/sessoes` : `/lojas/${store.id}/efemerides`}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -216,7 +218,7 @@ export function EphemeridesReportClient({
             textDecoration: "none",
           }}
         >
-          <ArrowLeft size={16} /> Voltar para Efemérides
+          <ArrowLeft size={16} /> {fromSessoes ? "Voltar para Sessões e Atas" : "Voltar para Efemérides"}
         </Link>
 
         <div

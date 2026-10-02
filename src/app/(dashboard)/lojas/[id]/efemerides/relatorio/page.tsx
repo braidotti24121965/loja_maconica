@@ -14,6 +14,7 @@ export default async function EfemeridesRelatorioPage({
   const { id: storeId } = await params;
   const sParams = await searchParams;
   const initialSessionId = typeof sParams.sessionId === "string" ? sParams.sessionId : undefined;
+  const fromSessoes = sParams.from === "sessoes";
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -77,6 +78,7 @@ export default async function EfemeridesRelatorioPage({
       sessions={sessionsList}
       brotherEmails={brothersList}
       initialSessionId={initialSessionId}
+      fromSessoes={fromSessoes}
     />
   );
 }

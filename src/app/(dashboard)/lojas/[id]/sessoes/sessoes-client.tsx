@@ -130,17 +130,8 @@ export function SessoesListClient({
                       <Calendar size={22} />
                     </div>
                     <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>{session.session_type}</h4>
-                        {isFuture ? (
-                          <span className="badge" style={{ background: "var(--brand)", color: "#fff", fontSize: 11, whiteSpace: "nowrap" }}>
-                            Próxima / Agendada
-                          </span>
-                        ) : (
-                          <span className="badge" style={{ background: "var(--page)", color: "var(--subtle)", fontSize: 11, whiteSpace: "nowrap" }}>
-                            Realizada
-                          </span>
-                        )}
                       </div>
                       <div className="subtle" style={{ fontSize: 12, marginTop: 2, whiteSpace: "nowrap" }}>
                         {format(new Date(`${session.date}T12:00:00`), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
@@ -152,7 +143,7 @@ export function SessoesListClient({
                   {/* Direita: Todos os Botões na mesma linha */}
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                     <Link
-                      href={`/lojas/${storeId}/efemerides/relatorio?sessionId=${session.id}`}
+                      href={`/lojas/${storeId}/efemerides/relatorio?sessionId=${session.id}&from=sessoes`}
                       className="button"
                       style={{ background: "transparent", color: "var(--brand)", border: "1px solid var(--brand)", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}
                     >
