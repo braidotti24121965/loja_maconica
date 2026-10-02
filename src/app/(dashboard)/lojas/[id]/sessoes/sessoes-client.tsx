@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Calendar, FileText, Plus, Users, Pencil, Trash, X } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Plus, Users, Pencil, Trash, X, Camera } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -164,6 +164,14 @@ export function SessoesListClient({
                       style={{ background: "transparent", color: "var(--navy)", border: "1px solid var(--navy)", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
                     >
                       <FileText size={14} /> {isAdmin ? "Anexar Ata" : "Ver Ata"}
+                    </Link>
+
+                    <Link
+                      href={`/lojas/${storeId}/sessoes/${session.id}/fotos`}
+                      className="button"
+                      style={{ background: "transparent", color: "var(--teal-dark, #0f766e)", border: "1px solid #0f766e", gap: 6, padding: "6px 12px", fontSize: 13, textDecoration: "none" }}
+                    >
+                      <Camera size={14} /> Galeria de Fotos
                     </Link>
 
                     <Link

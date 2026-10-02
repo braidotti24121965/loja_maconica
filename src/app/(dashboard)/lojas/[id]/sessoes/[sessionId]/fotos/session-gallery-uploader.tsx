@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { uploadPhoto } from "../actions";
+import { uploadSessionPhoto } from "./actions";
 import { Upload, Loader2, Sparkles } from "lucide-react";
 import { compressImage } from "@/lib/utils/image-compression";
 
-export function GalleryUploader({ storeId, eventId }: { storeId: string; eventId: string }) {
+export function SessionGalleryUploader({ storeId, sessionId }: { storeId: string; sessionId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -19,21 +19,20 @@ export function GalleryUploader({ storeId, eventId }: { storeId: string; eventId
     setIsCompressing(true);
 
     try {
-      // Compacta a imagem no navegador antes de enviar ao servidor
       const compressedFile = await compressImage(rawFile);
       setIsCompressing(false);
 
       const formData = new FormData();
       formData.append("store_id", storeId);
-      formData.append("event_id", eventId);
+      formData.append("session_id", sessionId);
       formData.append("file", compressedFile);
 
       startTransition(async () => {
-        const res = await uploadPhoto(formData);
+        const res = await uploadSessionPhoto(formData);
         if (res?.error) {
           setErrorMessage(res.error);
         } else {
-          setSuccessMessage("Foto otimizada e adicionada à galeria!");
+          setSuccessMessage("Foto otimizada e adicionada à sessão!");
           if (fileInputRef.current) fileInputRef.current.value = "";
         }
       });
@@ -71,7 +70,7 @@ export function GalleryUploader({ storeId, eventId }: { storeId: string; eventId
           width: "100%",
           border: "2px dashed var(--border)",
           borderRadius: 8,
-          padding: 32,
+          padding: 28,
           textAlign: "center",
           cursor: isBusy ? "wait" : "pointer",
           background: dragging ? "var(--green-soft)" : "rgba(0,0,0,0.02)",
@@ -83,7 +82,7 @@ export function GalleryUploader({ storeId, eventId }: { storeId: string; eventId
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
             <Loader2 className="animate-spin" size={32} color="var(--brand)" />
             <h4 style={{ margin: 0 }}>
-              {isCompressing ? "Compactando e otimizando imagem..." : "Enviando para a galeria..."}
+              {isCompressing ? "Compactando e otimizando imagem..." : "Enviando para a galeria da sessão..."}
             </h4>
             <p className="subtle" style={{ fontSize: 13, margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
               <Sparkles size={14} color="#0f766e" /> Reduzindo tamanho sem perder qualidade...
@@ -92,7 +91,7 @@ export function GalleryUploader({ storeId, eventId }: { storeId: string; eventId
         ) : (
           <>
             <Upload size={32} color="var(--subtle)" style={{ marginBottom: 12 }} />
-            <h4 style={{ marginBottom: 4 }}>Adicionar Foto do Evento</h4>
+            <h4 style={{ marginBottom: 4 }}>Adicionar Foto da Sessão</h4>
             <p className="subtle" style={{ fontSize: 13 }}>
               Clique ou arraste imagens (JPEG, PNG, WEBP). As fotos são <strong>compactadas automaticamente</strong>.
             </p>
