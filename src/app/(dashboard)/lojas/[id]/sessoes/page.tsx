@@ -22,20 +22,65 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
   if (!membership) redirect("/lojas");
   const isAdmin = ["admin", "secretary"].includes(membership.role);
 
-  // Fetch sessions with attendance count, documents (Ata) and photo counts
-  const { data: sessionsData } = await supabase
+  // Fetch sessions
+  const { data: rawSessions, error: sessionsError } = await supabase
     .from("sessions")
-    .select(`
-      id,
-      date,
-      session_type,
-      description,
-      session_attendances(count),
-      documents(id),
-      session_photos(count)
-    `)
+    .select("id, date, session_type, description")
     .eq("store_id", storeId)
     .order("date", { ascending: false });
+
+  if (sessionsError) {
+    console.error("Erro ao carregar sessões:", sessionsError);
+  }
+
+  const sessions = rawSessions || [];
+  const sessionIds = sessions.map((s) => s.id);
+
+  // Fetch associated metadata (attendances, documents/atas, and photos) in parallel
+  const [attendancesRes, docsRes, photosRes] = await Promise.all([
+    sessionIds.length > 0
+      ? supabase
+          .from("session_attendances")
+          .select("session_id")
+          .in("session_id", sessionIds)
+      : Promise.resolve({ data: [] }),
+    sessionIds.length > 0
+      ? supabase
+          .from("documents")
+          .select("session_id")
+          .in("session_id", sessionIds)
+      : Promise.resolve({ data: [] }),
+    sessionIds.length > 0
+      ? supabase
+          .from("session_photos")
+          .select("session_id")
+          .in("session_id", sessionIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  // Aggregate attendance counts
+  const attendanceCountsMap = new Map<string, number>();
+  attendancesRes.data?.forEach((item) => {
+    if (item.session_id) {
+      attendanceCountsMap.set(item.session_id, (attendanceCountsMap.get(item.session_id) || 0) + 1);
+    }
+  });
+
+  // Aggregate ata presence
+  const ataSet = new Set<string>();
+  docsRes.data?.forEach((item) => {
+    if (item.session_id) {
+      ataSet.add(item.session_id);
+    }
+  });
+
+  // Aggregate photo counts
+  const photoCountsMap = new Map<string, number>();
+  photosRes.data?.forEach((item) => {
+    if (item.session_id) {
+      photoCountsMap.set(item.session_id, (photoCountsMap.get(item.session_id) || 0) + 1);
+    }
+  });
 
   const today = new Date();
   const year = today.getFullYear();
@@ -43,37 +88,15 @@ export default async function SessoesPage({ params }: { params: Promise<{ id: st
   const day = String(today.getDate()).padStart(2, "0");
   const todayStr = `${year}-${month}-${day}`;
 
-  type SessionQueryResult = {
-    id: string;
-    date: string;
-    session_type: string;
-    description: string | null;
-    session_attendances: { count: number }[] | null;
-    documents: { id: string }[] | null;
-    session_photos: { count: number }[] | null;
-  };
-
-  const mappedSessions: SessionData[] = ((sessionsData as unknown as SessionQueryResult[]) || []).map((s) => {
-    const attendancesCount = Array.isArray(s.session_attendances)
-      ? Number(s.session_attendances[0]?.count || 0)
-      : 0;
-
-    const hasAta = Array.isArray(s.documents) && s.documents.length > 0;
-
-    const photosCount = Array.isArray(s.session_photos)
-      ? Number(s.session_photos[0]?.count || 0)
-      : 0;
-
-    return {
-      id: s.id,
-      date: s.date,
-      session_type: s.session_type,
-      description: s.description || null,
-      attendances_count: attendancesCount,
-      has_ata: hasAta,
-      photos_count: photosCount,
-    };
-  });
+  const mappedSessions: SessionData[] = sessions.map((s) => ({
+    id: s.id,
+    date: s.date,
+    session_type: s.session_type,
+    description: s.description || null,
+    attendances_count: attendanceCountsMap.get(s.id) || 0,
+    has_ata: ataSet.has(s.id),
+    photos_count: photoCountsMap.get(s.id) || 0,
+  }));
 
   return (
     <SessoesListClient
