@@ -37,6 +37,26 @@ export async function createEphemeris(data: FormData) {
   }
 
   const supabase = await createClient();
+
+  let existingQuery = supabase
+    .from("ephemerides")
+    .select("id")
+    .eq("store_id", storeId)
+    .ilike("title", title)
+    .eq("day", day)
+    .eq("month", month);
+
+  if (year !== null) {
+    existingQuery = existingQuery.eq("year", year);
+  } else {
+    existingQuery = existingQuery.is("year", null);
+  }
+
+  const { data: existing } = await existingQuery.maybeSingle();
+  if (existing) {
+    return { error: "Já existe uma efeméride com este título e data para esta loja." };
+  }
+
   const { error } = await supabase.from("ephemerides").insert({
     store_id: storeId,
     title,
