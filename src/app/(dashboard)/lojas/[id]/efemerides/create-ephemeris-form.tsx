@@ -3,11 +3,6 @@
 import { useState, useRef } from "react";
 import { createEphemeris } from "./actions";
 
-const MONTH_NAMES = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
-
 export function CreateEphemerisForm({ storeId }: { storeId: string }) {
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,48 +40,31 @@ export function CreateEphemerisForm({ storeId }: { storeId: string }) {
       <form ref={formRef} onSubmit={handleSubmit} className="form">
         <input type="hidden" name="store_id" value={storeId} />
 
-        {/* Linha 1: Título, Dia, Mês, Ano, Categoria */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div className="field" style={{ flex: "2 1 200px", minWidth: 0, marginBottom: 0 }}>
+        {/* Linha Única: Título, Data, Categoria, Descrição e Botão Salvar à direita */}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div className="field" style={{ flex: "2 1 180px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="title">Título da Efeméride</label>
-            <input id="title" name="title" type="text" required placeholder="Ex: Aniversário de Fundação da Loja" style={{ height: "44px" }} />
-          </div>
-
-          <div className="field" style={{ flex: "1 1 90px", minWidth: 0, marginBottom: 0 }}>
-            <label htmlFor="day">Dia (1-31)</label>
-            <input id="day" name="day" type="number" min={1} max={31} required placeholder="Ex: 14" style={{ height: "44px" }} />
-          </div>
-
-          <div className="field" style={{ flex: "1 1 120px", minWidth: 0, marginBottom: 0 }}>
-            <label htmlFor="month">Mês (1-12)</label>
-            <select id="month" name="month" required style={{ width: "100%", height: "44px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "8px", background: "#fff" }}>
-              {MONTH_NAMES.map((name, idx) => (
-                <option key={idx + 1} value={idx + 1}>{idx + 1} - {name}</option>
-              ))}
-            </select>
+            <input id="title" name="title" type="text" required placeholder="Ex: Aniversário de Fundação" style={{ height: "44px" }} />
           </div>
 
           <div className="field" style={{ flex: "1 1 140px", minWidth: 0, marginBottom: 0 }}>
-            <label htmlFor="year">Ano (Opcional)</label>
-            <input id="year" name="year" type="number" placeholder="Ex: 1980" style={{ height: "44px" }} />
+            <label htmlFor="date">Data da Efeméride</label>
+            <input id="date" name="date" type="date" required style={{ height: "44px" }} />
           </div>
 
-          <div className="field" style={{ flex: "1.5 1 180px", minWidth: 0, marginBottom: 0 }}>
+          <div className="field" style={{ flex: "1.5 1 160px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="category">Categoria</label>
             <select id="category" name="category" required defaultValue="store_anniversary" style={{ width: "100%", height: "44px", padding: "0 10px", border: "1px solid var(--border)", borderRadius: "8px", background: "#fff" }}>
-              <option value="store_anniversary">Fundação / Aniversário da Loja</option>
+              <option value="store_anniversary">Fundação / Aniversário</option>
               <option value="masonic_history">História Maçônica</option>
               <option value="commemorative">Comemorativa</option>
               <option value="other">Outra</option>
             </select>
           </div>
-        </div>
 
-        {/* Linha 2: Descrição com Botão Salvar alinhado ao CONTEÚDO (caixa do textarea) */}
-        <div style={{ display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
-          <div className="field" style={{ flex: 1, minWidth: "260px", marginBottom: 0 }}>
+          <div className="field" style={{ flex: "2 1 200px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="description">Descrição / História (Opcional)</label>
-            <textarea id="description" name="description" rows={1} placeholder="Breve resumo sobre esta data..." style={{ height: "44px", padding: "10px 12px", resize: "none" }} />
+            <input id="description" name="description" type="text" placeholder="Breve resumo sobre esta data..." style={{ height: "44px" }} />
           </div>
 
           <button

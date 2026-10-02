@@ -11,19 +11,28 @@ export async function createEphemeris(data: FormData) {
   const storeId = String(data.get("store_id") ?? "");
   const title = String(data.get("title") ?? "").trim();
   const description = String(data.get("description") ?? "").trim();
-  const day = Number(data.get("day"));
-  const month = Number(data.get("month"));
-  const yearStr = data.get("year") ? String(data.get("year")) : null;
   const category = String(data.get("category") ?? "other");
+
+  let day = Number(data.get("day"));
+  let month = Number(data.get("month"));
+  let year: number | null = data.get("year") ? Number(data.get("year")) : null;
+
+  const dateStr = data.get("date") ? String(data.get("date")).trim() : null;
+  if (dateStr && dateStr.includes("-")) {
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      year = Number(parts[0]);
+      month = Number(parts[1]);
+      day = Number(parts[2]);
+    }
+  }
 
   if (!UUID_PATTERN.test(storeId)) return { error: "Dados inválidos." };
   if (!title || title.length < 2 || title.length > 150) return { error: "Título inválido." };
   if (isNaN(day) || day < 1 || day > 31 || isNaN(month) || month < 1 || month > 12) {
-    return { error: "Dia ou mês inválido." };
+    return { error: "Data inválida." };
   }
   if (!CATEGORIES.has(category)) return { error: "Categoria inválida." };
-
-  const year = yearStr ? Number(yearStr) : null;
   if (year !== null && (isNaN(year) || year < 1700 || year > 2100)) {
     return { error: "Ano inválido." };
   }
@@ -84,19 +93,28 @@ export async function updateEphemeris(data: FormData) {
   const ephemerisId = String(data.get("ephemeris_id") ?? "");
   const title = String(data.get("title") ?? "").trim();
   const description = String(data.get("description") ?? "").trim();
-  const day = Number(data.get("day"));
-  const month = Number(data.get("month"));
-  const yearStr = data.get("year") ? String(data.get("year")) : null;
   const category = String(data.get("category") ?? "other");
+
+  let day = Number(data.get("day"));
+  let month = Number(data.get("month"));
+  let year: number | null = data.get("year") ? Number(data.get("year")) : null;
+
+  const dateStr = data.get("date") ? String(data.get("date")).trim() : null;
+  if (dateStr && dateStr.includes("-")) {
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      year = Number(parts[0]);
+      month = Number(parts[1]);
+      day = Number(parts[2]);
+    }
+  }
 
   if (!UUID_PATTERN.test(storeId) || !UUID_PATTERN.test(ephemerisId)) return { error: "Dados inválidos." };
   if (!title || title.length < 2 || title.length > 150) return { error: "Título inválido." };
   if (isNaN(day) || day < 1 || day > 31 || isNaN(month) || month < 1 || month > 12) {
-    return { error: "Dia ou mês inválido." };
+    return { error: "Data inválida." };
   }
   if (!CATEGORIES.has(category)) return { error: "Categoria inválida." };
-
-  const year = yearStr ? Number(yearStr) : null;
   if (year !== null && (isNaN(year) || year < 1700 || year > 2100)) {
     return { error: "Ano inválido." };
   }

@@ -15,11 +15,6 @@ export interface EphemerisItemData {
   category: string;
 }
 
-const MONTH_NAMES = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
-
 export function EphemerisActions({
   storeId,
   ephemeris,
@@ -170,22 +165,15 @@ export function EphemerisActions({
               </div>
 
               <div className="field" style={{ marginBottom: 0 }}>
-                <label htmlFor="edit_day">Dia (1-31)</label>
-                <input id="edit_day" name="day" type="number" min={1} max={31} required defaultValue={ephemeris.day} style={{ height: 38 }} />
-              </div>
-
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label htmlFor="edit_month">Mês (1-12)</label>
-                <select id="edit_month" name="month" required defaultValue={ephemeris.month} style={{ width: "100%", height: 38, padding: "0 10px", borderRadius: 6, border: "1px solid var(--border)", background: "#fff" }}>
-                  {MONTH_NAMES.map((name, idx) => (
-                    <option key={idx + 1} value={idx + 1}>{idx + 1} - {name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label htmlFor="edit_year">Ano (Opcional se for recorrente)</label>
-                <input id="edit_year" name="year" type="number" defaultValue={ephemeris.year || ""} placeholder="Ex: 1980 (em branco se anual)" style={{ height: 38 }} />
+                <label htmlFor="edit_date">Data da Efeméride</label>
+                <input
+                  id="edit_date"
+                  name="date"
+                  type="date"
+                  required
+                  defaultValue={`${ephemeris.year || new Date().getFullYear()}-${String(ephemeris.month).padStart(2, "0")}-${String(ephemeris.day).padStart(2, "0")}`}
+                  style={{ height: 38 }}
+                />
               </div>
 
               <div className="field" style={{ marginBottom: 0 }}>
