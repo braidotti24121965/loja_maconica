@@ -122,7 +122,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ textAlign: "right", lineHeight: 1.25 }}>
               <strong style={{ display: "block", fontSize: 14, color: "var(--navy)", fontWeight: 600 }}>
-                {profileName}
+                {isPlatformAdmin ? "Gestão de Lojas Maçônicas" : profileName}
               </strong>
               <span className="subtle" style={{ fontSize: 12 }}>
                 {activeRoleLabel}
