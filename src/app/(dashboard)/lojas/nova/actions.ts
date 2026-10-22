@@ -29,7 +29,13 @@ export async function createStore(data: FormData) {
 
   if (!tenant_id || tenant_id === "new") {
     // Cria um novo tenant para esta loja
-    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+    const baseSlug = name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const slug = baseSlug + "-" + Math.floor(Math.random() * 1000);
     const { data: newTenantId, error: tenantErr } = await supabase.rpc("create_tenant", {
       new_name: name,
       new_slug: slug,
