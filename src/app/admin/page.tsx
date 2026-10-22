@@ -44,7 +44,11 @@ export default async function AdminDashboard() {
           <tbody>
             {safeStores.map((store: Record<string, string | number>) => (
               <tr key={store.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                <td style={{ padding: "16px 24px", fontWeight: 500, color: "#0f172a" }}>{store.name}</td>
+                <td style={{ padding: "16px 24px", fontWeight: 500 }}>
+                  <a href={`/lojas/${store.id}`} style={{ color: "#0f766e", textDecoration: "none", fontWeight: 700 }}>
+                    {store.name}
+                  </a>
+                </td>
                 <td style={{ padding: "16px 24px", color: "#475569" }}>{store.tenant_name}</td>
                 <td style={{ padding: "16px 24px", color: "#64748b" }}>{new Date(store.created_at).toLocaleDateString("pt-BR")}</td>
               </tr>
