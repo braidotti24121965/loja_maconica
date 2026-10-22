@@ -21,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let profileName = "Usuário";
   let userStores: { id: string; name: string; role?: string }[] = [];
   let activeStoreId = await getActiveStore();
+  let isPlatformAdmin = false;
   
   if (hasSupabaseEnv()) {
     const supabase = await createClient();
@@ -28,6 +29,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     
     if (data.user) {
       email = data.user.email ?? "usuário";
+
+      const { data: platformAdmin } = await supabase.rpc("is_platform_admin");
+      isPlatformAdmin = platformAdmin === true;
       
       const { data: profile } = await supabase
         .from("profiles")
@@ -65,7 +69,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const activeStore = userStores.find((store) => store.id === activeStoreId)
     ?? (userStores.length === 1 ? userStores[0] : null);
 
-  const activeRoleLabel = activeStore?.role ? (ROLE_LABELS[activeStore.role] || activeStore.role) : "Usuário";
+  const activeRoleLabel = isPlatformAdmin
+    ? "Administrador da Plataforma"
+    : activeStore?.role ? (ROLE_LABELS[activeStore.role] || activeStore.role) : "Usuário";
 
   const nameParts = profileName.trim().split(/\s+/);
   const initials = nameParts.length > 1
@@ -102,13 +108,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <main className="main">
         <header className="topbar">
           <div>
-            {activeStore && (
+            {(isPlatformAdmin || activeStore) && (
               <>
                 <p style={{ margin: 0, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.6 }}>
-                  Loja ativa
+                  {isPlatformAdmin ? "Administração" : "Loja ativa"}
                 </p>
                 <strong style={{ display: "block", marginTop: 3, color: "var(--navy)" }}>
-                  {activeStore.name}
+                  {isPlatformAdmin ? "Gestão de Lojas Maçônicas" : activeStore?.name}
                 </strong>
               </>
             )}

@@ -30,16 +30,16 @@ export async function createStore(data: FormData) {
   if (!tenant_id || tenant_id === "new") {
     // Cria um novo tenant para esta loja
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
-    const { data: newTenant, error: tenantErr } = await supabase
-      .from("tenants")
-      .insert({ name: name, slug })
-      .select("id")
-      .single();
-    
-    if (tenantErr || !newTenant) {
+    const { data: newTenantId, error: tenantErr } = await supabase.rpc("create_tenant", {
+      new_name: name,
+      new_slug: slug,
+    });
+
+    if (tenantErr || !newTenantId) {
+      console.error("Erro ao criar Tenant:", tenantErr);
       return { error: "Erro ao criar Tenant." };
     }
-    tenant_id = newTenant.id;
+    tenant_id = newTenantId;
   }
 
   // 1. Create the store
