@@ -56,3 +56,17 @@ npx supabase db push # Aplicação de migrações no banco remoto
 - **Fail-Closed:** Server Actions protegidas por `requireStoreAdmin` / `requireStoreMember`.
 - **Privacidade de Menores & Familiares:** Sobrenomes e anos de nascimento de dependentes são ocultados para membros comuns na RPC `get_upcoming_ephemerides`.
 - **Dados Confidenciais:** O arquivo `lista_obreiros_salto_moutonnee.csv` permanece fora do repositório (mantido no `.gitignore`).
+
+---
+
+## ☁️ Backup semanal do sistema
+
+O fluxo `.github/workflows/weekly-project-backup.yml` roda aos **domingos às 04:30 (horário de São Paulo)**. Ele cria uma cópia criptografada de todos os arquivos versionados do sistema: código, telas, migrations, configuração de publicação e documentação. Senhas e chaves privadas não entram na cópia. As últimas 12 semanas são mantidas na pasta de backup do Google Drive.
+
+Antes da primeira execução, cadastre estes segredos em **Settings → Secrets and variables → Actions** no repositório:
+
+| Segredo | Conteúdo |
+| --- | --- |
+| `RCLONE_CONFIG_GDRIVE` | Configuração completa de um remoto `gdrive` do rclone, autenticado na conta de backup. |
+| `BACKUP_ENCRYPTION_PASSPHRASE` | Senha longa, exclusiva e guardada em local seguro; será necessária para restaurar uma cópia. |
+| `GOOGLE_DRIVE_FOLDER_ID` | `1DPF-1_cgH4Rt_Up7DadZHVVPyKkffZMz` |
