@@ -111,8 +111,8 @@ export function SessoesListClient({
                     background: isFuture ? "#f8fafc" : "transparent",
                   }}
                 >
-                  {/* Esquerda: Ícone + Título + Data (largura fixa para alinhamento perfeito) */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 220px", minWidth: 0 }}>
+                  {/* Conteúdo da sessão: ocupa apenas o espaço disponível, sem invadir as ações. */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "1 1 320px", minWidth: 0 }}>
                     <div
                       className="icon"
                       style={{
@@ -129,19 +129,19 @@ export function SessoesListClient({
                     >
                       <Calendar size={22} />
                     </div>
-                    <div>
+                    <div style={{ minWidth: 0, overflow: "hidden" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>{session.session_type}</h4>
                       </div>
-                      <div className="subtle" style={{ fontSize: 12, marginTop: 2, whiteSpace: "nowrap" }}>
+                      <div className="subtle" style={{ fontSize: 12, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {format(new Date(`${session.date}T12:00:00`), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                         {session.description ? ` • ${session.description}` : ""}
                       </div>
                     </div>
                   </div>
 
-                  {/* Direita: Todos os Botões na mesma linha */}
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  {/* Ações: agrupadas separadamente e quebram de linha quando necessário. */}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap", flex: "0 1 auto" }}>
                     <Link
                       href={`/lojas/${storeId}/efemerides/relatorio?sessionId=${session.id}&from=sessoes`}
                       className="button"
