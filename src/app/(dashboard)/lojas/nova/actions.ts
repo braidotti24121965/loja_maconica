@@ -13,63 +13,85 @@ export async function createStore(data: FormData) {
   }
 
   const { data: isAdmin } = await supabase.rpc("is_platform_admin");
+
   if (!isAdmin) {
-    return { error: "Apenas o admin da plataforma pode criar lojas." };
+    return {
+      error: "Apenas o admin da plataforma pode criar lojas.",
+    };
   }
 
-  const name = data.get("name") as string;
-  const number = data.get("number") as string;
-  const city = data.get("city") as string;
-  const state = data.get("state") as string;
-  let tenant_id = data.get("tenant_id") as string;
+  const name = String(data.get("name") ?? "").trim();
+  const number = String(data.get("number") ?? "").trim();
+  const city = String(data.get("city") ?? "").trim();
+  const state = String(data.get("state") ?? "").trim();
+  let tenantId = String(data.get("tenant_id") ?? "").trim();
 
   if (!name) {
     return { error: "Nome é obrigatório." };
   }
 
-  if (!tenant_id || tenant_id === "new") {
-    // Cria um novo tenant para esta loja
+  if (!tenantId || tenantId === "new") {
     const baseSlug = name
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
-    const slug = baseSlug + "-" + Math.floor(Math.random() * 1000);
-    const { data: newTenantId, error: tenantErr } = await supabase.rpc("create_tenant", {
-      new_name: name,
-      new_slug: slug,
-    });
 
-    if (tenantErr || !newTenantId) {
-      console.error("Erro ao criar Tenant:", tenantErr);
+    const slug = `${baseSlug}-${Math.floor(Math.random() * 1000)}`;
+
+    const { data: newTenantId, error: tenantError } =
+      await supabase.rpc("create_tenant", {
+        new_name: name,
+        new_slug: slug,
+      });
+
+    if (tenantError || !newTenantId) {
+      console.error("Erro ao criar Tenant:", tenantError);
       return { error: "Erro ao criar Tenant." };
     }
-    tenant_id = newTenantId;
+
+    tenantId = newTenantId;
   }
 
-  // 1. Create the store
-  const { data: store, error } = await supabase
+  const { data: store, error: storeError } = await supabase
     .from("stores")
     .insert({
-      tenant_id,
+      tenant_id: tenantId,
       name,
       number,
       city,
       state: state ? state.toUpperCase() : null,
-      active: true
+      active: true,
     })
     .select("id")
     .single();
 
-  if (error || !store) {
-    console.error("Erro ao criar loja:", error);
-    return { error: "Erro ao criar loja. O nome pode já existir nesta organização." };
+  if (storeError || !store) {
+    console.error("Erro ao criar loja:", storeError);
+    return {
+      error: "Erro ao criar loja. O nome pode já existir nesta organização.",
+    };
   }
 
-  // Não inserimos o platform admin no store_memberships
-  // O SaaS Owner provisiona a loja e envia o primeiro convite interno ou adiciona o owner via banco.
-  // Em uma fase futura, a tela de admin terá uma forma de gerar um convite master para o Tenant.
+  const { error: membershipError } = await supabase.rpc(
+    "provision_store_admin",
+    {
+      p_store_id: store.id,
+      p_user_id: userData.user.id,
+    }
+  );
+
+  if (membershipError) {
+    console.error(
+      "Erro ao vincular administrador à loja:",
+      membershipError
+    );
+
+    return {
+      error: "Loja criada, mas não foi possível vincular o administrador.",
+    };
+  }
 
   revalidatePath("/admin");
   redirect("/admin");
