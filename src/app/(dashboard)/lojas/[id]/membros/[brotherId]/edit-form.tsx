@@ -258,3 +258,13 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <div className="field" style={{ flex: 1, marginBottom: 0 }}>
+            <input name="birthdate" type="date" placeholder="Nascimento" defaultValue={editingDep?.birthdate || ""} style={{ height: 38 }} key={editingDep?.id || "new-date"} />
+          </div>
+          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>
+            {editingDep ? "Salvar" : "Adicionar"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
