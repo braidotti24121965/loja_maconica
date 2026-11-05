@@ -76,7 +76,7 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
 
             <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="phone">Celular (Opcional)</label>
-              <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" style={{ height: "42px" }} />
+              <input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} placeholder="11999999999" title="Digite somente 10 ou 11 números." onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} style={{ height: "42px" }} />
             </div>
 
             <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
