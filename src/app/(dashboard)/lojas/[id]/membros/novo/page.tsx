@@ -2,6 +2,14 @@
 
 import { useActionState, use } from "react";
 import { createBrother } from "./actions";
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  const localLength = digits.length === 10 ? 4 : 5;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 2 + localLength)}-${digits.slice(2 + localLength)}`;
+}
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -76,7 +84,7 @@ export default function NovoMembroPage({ params }: { params: Promise<{ id: strin
 
             <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
               <label htmlFor="phone">Celular (Opcional)</label>
-              <input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} placeholder="11999999999" title="Digite somente 10 ou 11 números." onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} style={{ height: "42px" }} />
+            <input id="phone" name="phone" type="tel" inputMode="numeric" maxLength={15} placeholder="(11) 99999-9999" title="Digite um celular válido." onInput={(event) => { event.currentTarget.value = formatPhone(event.currentTarget.value); }} style={{ height: "42px" }} />
             </div>
 
             <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
