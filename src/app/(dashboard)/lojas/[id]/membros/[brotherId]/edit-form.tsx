@@ -6,6 +6,14 @@ import { Trash, Pencil, Link as LinkIcon, CheckCircle, Mail } from "lucide-react
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  const localLength = digits.length === 10 ? 4 : 5;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 2 + localLength)}-${digits.slice(2 + localLength)}`;
+}
+
 export function EditBrotherForm({ storeId, brother }: { storeId: string, brother: { id: string; full_name: string; email?: string | null; cim: string | null; degree: string; office: string | null; phone: string | null; birthdate?: string | null; initiation_date?: string | null; elevation_date?: string | null; exaltation_date?: string | null; user_id?: string | null; dependents?: { id: string; name: string; relationship: string; birthdate: string | null; }[] } }) {
   const [state, action, pending] = useActionState(async (_state: { error?: string; success?: string } | null | undefined, data: FormData) => {
     return await updateBrother(data);
@@ -115,7 +123,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
 
           <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="phone">Celular (Opcional)</label>
-            <input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} placeholder="11999999999" title="Digite somente 10 ou 11 números." defaultValue={(brother.phone || "").replace(/\D/g, "").slice(0, 11)} onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} style={{ height: "42px" }} />
+            <input id="phone" name="phone" type="tel" inputMode="numeric" maxLength={15} placeholder="(11) 99999-9999" title="Digite um celular válido." defaultValue={formatPhone(brother.phone || "")} onInput={(event) => { event.currentTarget.value = formatPhone(event.currentTarget.value); }} style={{ height: "42px" }} />
           </div>
 
           <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
@@ -210,61 +218,3 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         open={Boolean(dependentToDelete)}
         onClose={() => setDependentToDelete(null)}
         title="Remover familiar?"
-        description={`${dependentToDelete?.name ?? "Este familiar"} será removido da ficha do Irmão. Esta ação não poderá ser desfeita.`}
-        confirmLabel="Remover familiar"
-        formId={deleteDependentFormId}
-      />
-
-      <form 
-        action={async (formData) => {
-          if (editingDep) {
-            await editDependent(formData);
-            setEditingDep(null);
-          } else {
-            await addDependent(formData);
-          }
-        }} 
-        className="form" 
-        style={{ background: editingDep ? "#fffbe6" : "var(--background-alt)", padding: 16, borderRadius: 6, border: "1px solid var(--border)" }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h4 style={{ margin: 0, fontSize: 14 }}>{editingDep ? "Editar Familiar" : "Adicionar Familiar"}</h4>
-          {editingDep && (
-            <button type="button" onClick={() => setEditingDep(null)} className="subtle" style={{ background: "none", border: "none", textDecoration: "underline", cursor: "pointer", fontSize: 13 }}>
-              Cancelar Edição
-            </button>
-          )}
-        </div>
-        
-        {editingDep && <input type="hidden" name="id" value={editingDep.id} />}
-        <input type="hidden" name="brother_id" value={brother.id} />
-        <input type="hidden" name="store_id" value={storeId} />
-        
-        <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "flex-start" }}>
-          <div className="field" style={{ flex: 2, marginBottom: 0 }}>
-            <input name="name" type="text" required placeholder="Nome do familiar" defaultValue={editingDep?.name || ""} style={{ height: 38 }} key={editingDep?.id || "new-name"} />
-          </div>
-          <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-            <select name="relationship" required defaultValue={editingDep?.relationship || "Esposa"} style={{ width: "100%", height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }} key={editingDep?.id || "new-rel"}>
-              <option value="Esposa">Esposa</option>
-              <option value="Filho(a)">Filho(a)</option>
-              <option value="Pai">Pai</option>
-              <option value="Mãe">Mãe</option>
-              <option value="Enteado(a)">Enteado(a)</option>
-              <option value="Sogro(a)">Sogro(a)</option>
-              <option value="Outro">Outro</option>
-            </select>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-            <input name="birthdate" type="date" placeholder="Nascimento" defaultValue={editingDep?.birthdate || ""} style={{ height: 38 }} key={editingDep?.id || "new-date"} />
-          </div>
-          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>
-            {editingDep ? "Salvar" : "Adicionar"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
