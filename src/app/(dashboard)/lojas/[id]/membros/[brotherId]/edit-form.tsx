@@ -115,7 +115,7 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
 
           <div className="field" style={{ flex: "0 0 140px", minWidth: 0, marginBottom: 0 }}>
             <label htmlFor="phone">Celular (Opcional)</label>
-            <input id="phone" name="phone" type="text" placeholder="(DD) 99999-9999" defaultValue={brother.phone || ""} style={{ height: "42px" }} />
+            <input id="phone" name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10,11}" maxLength={11} placeholder="11999999999" title="Digite somente 10 ou 11 números." defaultValue={(brother.phone || "").replace(/\D/g, "").slice(0, 11)} onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} style={{ height: "42px" }} />
           </div>
 
           <div className="field" style={{ flex: "0 0 150px", minWidth: 0, marginBottom: 0 }}>
@@ -258,13 +258,3 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <div className="field" style={{ flex: 1, marginBottom: 0 }}>
-            <input name="birthdate" type="date" placeholder="Nascimento" defaultValue={editingDep?.birthdate || ""} style={{ height: 38 }} key={editingDep?.id || "new-date"} />
-          </div>
-          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>
-            {editingDep ? "Salvar" : "Adicionar"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
