@@ -218,3 +218,61 @@ export function EditBrotherForm({ storeId, brother }: { storeId: string, brother
         open={Boolean(dependentToDelete)}
         onClose={() => setDependentToDelete(null)}
         title="Remover familiar?"
+        description={`${dependentToDelete?.name ?? "Este familiar"} será removido da ficha do Irmão. Esta ação não poderá ser desfeita.`}
+        confirmLabel="Remover familiar"
+        formId={deleteDependentFormId}
+      />
+
+      <form 
+        action={async (formData) => {
+          if (editingDep) {
+            await editDependent(formData);
+            setEditingDep(null);
+          } else {
+            await addDependent(formData);
+          }
+        }} 
+        className="form" 
+        style={{ background: editingDep ? "#fffbe6" : "var(--background-alt)", padding: 16, borderRadius: 6, border: "1px solid var(--border)" }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h4 style={{ margin: 0, fontSize: 14 }}>{editingDep ? "Editar Familiar" : "Adicionar Familiar"}</h4>
+          {editingDep && (
+            <button type="button" onClick={() => setEditingDep(null)} className="subtle" style={{ background: "none", border: "none", textDecoration: "underline", cursor: "pointer", fontSize: 13 }}>
+              Cancelar Edição
+            </button>
+          )}
+        </div>
+        
+        {editingDep && <input type="hidden" name="id" value={editingDep.id} />}
+        <input type="hidden" name="brother_id" value={brother.id} />
+        <input type="hidden" name="store_id" value={storeId} />
+        
+        <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "flex-start" }}>
+          <div className="field" style={{ flex: 2, marginBottom: 0 }}>
+            <input name="name" type="text" required placeholder="Nome do familiar" defaultValue={editingDep?.name || ""} style={{ height: 38 }} key={editingDep?.id || "new-name"} />
+          </div>
+          <div className="field" style={{ flex: 1, marginBottom: 0 }}>
+            <select name="relationship" required defaultValue={editingDep?.relationship || "Esposa"} style={{ width: "100%", height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "6px", fontFamily: "inherit", backgroundColor: "#fff" }} key={editingDep?.id || "new-rel"}>
+              <option value="Esposa">Esposa</option>
+              <option value="Filho(a)">Filho(a)</option>
+              <option value="Pai">Pai</option>
+              <option value="Mãe">Mãe</option>
+              <option value="Enteado(a)">Enteado(a)</option>
+              <option value="Sogro(a)">Sogro(a)</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div className="field" style={{ flex: 1, marginBottom: 0 }}>
+            <input name="birthdate" type="date" placeholder="Nascimento" defaultValue={editingDep?.birthdate || ""} style={{ height: 38 }} key={editingDep?.id || "new-date"} />
+          </div>
+          <button className="button" type="submit" style={{ height: 38, padding: "0 16px" }}>
+            {editingDep ? "Salvar" : "Adicionar"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
