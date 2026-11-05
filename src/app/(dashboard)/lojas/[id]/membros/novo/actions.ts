@@ -11,7 +11,8 @@ export async function createBrother(data: FormData) {
   const email = data.get("email") ? String(data.get("email")).trim() : null;
   const cim = data.get("cim") as string;
   const degree = data.get("degree") as string;
-  const phone = data.get("phone") as string;
+  const rawPhone = data.get("phone") ? String(data.get("phone")) : "";
+  const phone = rawPhone.replace(/\D/g, "");
   const office = data.get("office") as string;
   const birthdate = data.get("birthdate") ? String(data.get("birthdate")) : null;
   const initiationDate = data.get("initiation_date") ? String(data.get("initiation_date")) : null;
@@ -19,6 +20,7 @@ export async function createBrother(data: FormData) {
   const exaltationDate = data.get("exaltation_date") ? String(data.get("exaltation_date")) : null;
 
   if (!storeId || !fullName || !degree) return { error: "Dados obrigatórios faltando" };
+  if (phone && !/^\d{10,11}$/.test(phone)) return { error: "Celular inválido. Informe somente 10 ou 11 números." };
 
   let userId: string;
   try {
