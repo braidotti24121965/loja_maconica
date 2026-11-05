@@ -47,7 +47,7 @@ npx tsc --noEmit     # Checagem estática de tipos TypeScript
 npm run build        # Build de produção do Next.js
 npx supabase db push # Aplicação de migrações no banco remoto
 ```
-Atualização do sistema
+Atualização do sistema de novo
 ---
 
 ## 🔒 Segurança e Privacidade
